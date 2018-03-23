@@ -16,20 +16,25 @@ namespace ConsoleApplication1
 
 layout (location = 0) in vec3 aPos;
 
+out vec4 vertexColor;
+
 void main()
 {
     gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    vertexColor = vec4(aPos.xzy, 1.0);
 }
 ";
         string fragmentShaderSource =
             @"
 #version 330 core
 
+in vec4 vertexColor;
 out vec4 FragColor;
+uniform vec4 ourColor;
 
 void main()
 {
-    FragColor = vec4(1.0, 0.5, 0.1, 1.0);
+    FragColor = ourColor + vertexColor;
 }
 ";
         string fragmentShaderSource2 =
@@ -135,6 +140,7 @@ void main()
             GL.LinkProgram(shaderProgram2);
             buildInfo = GL.GetProgramInfoLog(shaderProgram2);
 
+
             // initialize buffers
             VBO1 = GL.GenBuffer();
             VBO2 = GL.GenBuffer();
@@ -172,11 +178,20 @@ void main()
             GL.BindVertexArray(VAO1);
             GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
 
+
             GL.UseProgram(shaderProgram2);
+            // setting uniform
+            double time = (double)DateTime.Now.ToBinary();
+            double value = Math.Sin(time) / 2.0 + 0.5;
+            int uniformLocation = GL.GetUniformLocation(shaderProgram2, "ourColor");
+            GL.Uniform4(uniformLocation, 0.0f, value, 0.0f, 1.0f);
+
+
             GL.BindVertexArray(VAO2);
             GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
 
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line); 
+
+            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
             SwapBuffers();
         }
