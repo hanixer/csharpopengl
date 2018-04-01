@@ -7,6 +7,7 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK;
 using Utilities;
 using System.Drawing;
+using GlmNet;
 
 namespace Project2_Shaders
 {
@@ -38,6 +39,7 @@ namespace Project2_Shaders
         int EBO;
         int texture1;
         int texture2;
+        DateTime startTime = DateTime.Now;
 
         Shader shader;
 
@@ -46,6 +48,7 @@ namespace Project2_Shaders
             RenderFrame += OnRenderFrame;
             Load += OnLoad;
             Closing += OnClosing;
+            Height = Width;
         }
 
         private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -82,7 +85,7 @@ namespace Project2_Shaders
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
             GL.BindVertexArray(0);
-
+            
             // prepare texture
             texture1 = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, texture1);
@@ -112,7 +115,11 @@ namespace Project2_Shaders
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             // drawing code
+
             shader.Use();
+            mat4 m4 = glm.rotate(glm.radians((float)(startTime - DateTime.Now).TotalSeconds * 16.0f), new vec3(0.0f, 0.0f, 1.0f));
+            //m4 = glm.translate(m4, new vec3(0.5f, 0.0f, 0.0f));
+            GL.UniformMatrix4(GL.GetUniformLocation(shader.ID, "transform"), 1, false, m4.to_array());
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, texture1);

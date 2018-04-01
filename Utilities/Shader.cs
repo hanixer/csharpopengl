@@ -64,7 +64,7 @@ namespace Utilities
         {
             GL.Uniform1(GL.GetUniformLocation(ID, name), value ? 1 : 0);
         }
-        public void setInt(string name, int value)
+        public void Set(string name, int value)
         {
             GL.Uniform1(GL.GetUniformLocation(ID, name), value);
         }

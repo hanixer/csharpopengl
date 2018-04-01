@@ -38,6 +38,7 @@ namespace Project2_Shaders
         int EBO;
         int texture1;
         int texture2;
+        float mixRate  = 0.2f;
 
         Shader shader;
 
@@ -46,6 +47,24 @@ namespace Project2_Shaders
             RenderFrame += OnRenderFrame;
             Load += OnLoad;
             Closing += OnClosing;
+            MouseDown += OnMouseDown;
+        }
+
+        private void OnMouseDown(object sender, OpenTK.Input.MouseButtonEventArgs e)
+        {
+            float diff = 0.1f;
+            switch (e.Button)
+            {
+                case OpenTK.Input.MouseButton.Left:
+                    mixRate += diff;
+                    break;
+                case OpenTK.Input.MouseButton.Right:
+                    mixRate -= diff;
+                    break;
+            }
+
+            mixRate = Math.Max(0.1f, mixRate);
+            mixRate = Math.Min(0.9f, mixRate);
         }
 
         private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -62,7 +81,7 @@ namespace Project2_Shaders
             VBO1 = GL.GenBuffer();
             VAO1 = GL.GenVertexArray();
             EBO = GL.GenBuffer();
-
+            
             GL.BindVertexArray(VAO1);
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO1);
@@ -87,9 +106,9 @@ namespace Project2_Shaders
             texture1 = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, texture1);
 
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)All.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
             //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)All.Linear);
 
             Images.LoadTexture("../../Textures/container.jpg", texture1);
@@ -99,6 +118,8 @@ namespace Project2_Shaders
             GL.BindTexture(TextureTarget.Texture2D, texture2);
             Images.LoadTexture("../../Textures/cloud.jpg", texture2);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.MirroredRepeat);
+            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
             // set texture variables
             shader.Use();
@@ -113,6 +134,7 @@ namespace Project2_Shaders
 
             // drawing code
             shader.Use();
+            shader.Set("mixRate", mixRate);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, texture1);
