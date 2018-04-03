@@ -95,11 +95,12 @@ namespace Utilities
                     TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             }
         }
-        public static void LoadTexture(string filename, int textureId)
+        public static void LoadTexture(string filename, int textureId, bool flipY = true)
         {
             using (var bitmap = new Bitmap(filename))
             {
-                bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                if (flipY)
+                    bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
                 int width = bitmap.Width;
                 int height = bitmap.Height;
