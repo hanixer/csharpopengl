@@ -72,5 +72,10 @@ namespace Utilities
         {
             GL.Uniform1(GL.GetUniformLocation(ID, name), value);
         }
+
+        public void Set(string v, GlmNet.mat4 m4)
+        {
+            GL.UniformMatrix4(GL.GetUniformLocation(ID, v), 1, false, m4.to_array());
+        }
     }
 }
