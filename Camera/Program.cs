@@ -203,6 +203,7 @@ namespace Project2_Shaders
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             shader.Use();
+            shader.Set("uniformColor", new vec3(1.0f)); // Reset box color
 
             float dt = (float)(DateTime.Now - startTime).TotalMilliseconds;
             // set coordinates
@@ -241,6 +242,21 @@ namespace Project2_Shaders
             shader.Set("model", mat4.identity());
             GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length / 5);
 
+            for (int j = 0; j < 5; ++j)
+            {
+                shader.Set("model",
+                    glm.scale(
+                        glm.translate(mat4.identity(), new vec3(0.25f * j, 0.0f * 0.25f * j, +2.0f)),
+                        new vec3(1.0f / 16.0f)));
+                shader.Set("uniformColor", new vec3(1.0f, 0.0f, 0.0f));
+                GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length / 5);
+                shader.Set("model",
+                    glm.scale(
+                        glm.translate(mat4.identity(), new vec3(0.25f * -j, 0.0f * 0.25f * j, +2.0f)),
+                        new vec3(1.0f / 16.0f)));
+                shader.Set("uniformColor", new vec3(1.0f, 0.0f, 0.0f));
+                GL.DrawArrays(PrimitiveType.Triangles, 0, vertices.Length / 5);
+            }
             SwapBuffers();
         }
 

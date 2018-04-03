@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GlmNet;
 using OpenTK.Graphics.OpenGL4;
 
 namespace Utilities
@@ -76,6 +77,11 @@ namespace Utilities
         public void Set(string v, GlmNet.mat4 m4)
         {
             GL.UniformMatrix4(GL.GetUniformLocation(ID, v), 1, false, m4.to_array());
+        }
+
+        public void Set(string v, vec3 vec3)
+        {
+            GL.Uniform3(GL.GetUniformLocation(ID, v), vec3.x, vec3.y, vec3.z);
         }
     }
 }

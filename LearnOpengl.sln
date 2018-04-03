@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Transofrmations1", "Transof
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coordinates", "Coordinates\Coordinates.csproj", "{B0B3EF1D-B9DC-4B55-BED0-32D3FBAF4778}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Camera", "Camera\Camera.csproj", "{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{B0B3EF1D-B9DC-4B55-BED0-32D3FBAF4778}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0B3EF1D-B9DC-4B55-BED0-32D3FBAF4778}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0B3EF1D-B9DC-4B55-BED0-32D3FBAF4778}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
