@@ -23,6 +23,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coordinates", "Coordinates\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Camera", "Camera\Camera.csproj", "{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication2", "ConsoleApplication2\ConsoleApplication2.csproj", "{55F6676D-F82B-42FB-8B33-4271F7BD36C4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApplication1", "WindowsFormsApplication1\WindowsFormsApplication1.csproj", "{38BFC8F6-505C-425E-BB9A-DEC35210F946}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +73,14 @@ Global
 		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55F6676D-F82B-42FB-8B33-4271F7BD36C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55F6676D-F82B-42FB-8B33-4271F7BD36C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55F6676D-F82B-42FB-8B33-4271F7BD36C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55F6676D-F82B-42FB-8B33-4271F7BD36C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38BFC8F6-505C-425E-BB9A-DEC35210F946}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38BFC8F6-505C-425E-BB9A-DEC35210F946}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38BFC8F6-505C-425E-BB9A-DEC35210F946}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38BFC8F6-505C-425E-BB9A-DEC35210F946}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

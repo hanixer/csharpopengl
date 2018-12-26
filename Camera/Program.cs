@@ -9,9 +9,9 @@ using Utilities;
 using System.Drawing;
 using GlmNet;
 
-namespace Project2_Shaders
+namespace Camera
 {
-    class Program : OpenTK.GameWindow
+    class Program : GameWindow
     {
         float[] vertices = {
     -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
@@ -80,11 +80,14 @@ namespace Project2_Shaders
         int texture1;
         int texture2;
         DateTime startTime = DateTime.Now;
-        float cameraZ = -3.0f;
-        float cameraX = 0.0f;
-        float cameraY = 0.0f;
         float fov = 45.0f;
-
+        vec3 cameraPos = new vec3(0.0f, 0.0f, 3.0f);
+        vec3 cameraFront = new vec3(0.0f, 0.0f, -1.0f);
+        vec3 cameraUp = new vec3(0.0f, 1.0f, 0.0f);
+        float cameraSpeed = 0.05f;
+        float yaw = 0.0f;
+        float pitch = 0.0f;
+        bool isFirstMove = true;
         Shader shader;
 
         Program()
@@ -95,49 +98,65 @@ namespace Project2_Shaders
             KeyPress += OnKeyPress;
             KeyUp += OnKeyUp;
             Height = Width;
+            UpdateFrame += OnUpdateFrame;
+            MouseMove += OnMouseMove;
+            //CursorVisible = false;
+            FocusedChanged += OnFocusedChanged;
+            
+        }
+
+        private void OnFocusedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void OnMouseMove(object sender, OpenTK.Input.MouseMoveEventArgs e)
+        {
+            if (isFirstMove)
+            {
+                isFirstMove = false;
+                return;
+            }
+            //throw new NotImplementedException();
+            //yaw += e.XDelta;
+            //pitch += e.YDelta;
+
+            Console.WriteLine("{0}, {1}", cameraFront.x, e.XDelta);
+
+            cameraFront.x += e.XDelta * 0.01f / 2 / 2;
+
+            
+        }
+
+        private void OnUpdateFrame(object sender, FrameEventArgs e)
+        {
+            var state = OpenTK.Input.Keyboard.GetState();
+
+            if (state.IsKeyDown(OpenTK.Input.Key.W))
+            {
+                cameraPos += cameraSpeed * cameraFront;
+            }
+            if (state.IsKeyDown(OpenTK.Input.Key.S))
+            {
+                cameraPos -= cameraSpeed * cameraFront;
+            }
+            if (state.IsKeyDown(OpenTK.Input.Key.A))
+            {
+                cameraPos -= glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
+            }
+            if (state.IsKeyDown(OpenTK.Input.Key.D))
+            {
+                cameraPos += glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
+            }
+
         }
 
         private void OnKeyUp(object sender, OpenTK.Input.KeyboardKeyEventArgs e)
         {
-            float diff = 1.0f;
-            if (e.Key == OpenTK.Input.Key.S)
-            {
-                cameraZ -= diff;
-            }
-            else if (e.Key == OpenTK.Input.Key.W)
-            {
-                cameraZ += diff;
-            }
-            else if (e.Key == OpenTK.Input.Key.A)
-            {
-                cameraX += diff;
-            }
-            else if (e.Key == OpenTK.Input.Key.D)
-            {
-                cameraX -= diff;
-            }
-            else if (e.Key == OpenTK.Input.Key.Q)
-            {
-                cameraY += diff;
-            }
-            else if (e.Key == OpenTK.Input.Key.E)
-            {
-                cameraY -= diff;
-            }
-            else if (e.Key == OpenTK.Input.Key.KeypadPlus)
-            {
-                fov += 10.0f;
-            }
-            else if (e.Key == OpenTK.Input.Key.KeypadMinus)
-            {
-                fov -= 10.0f;
-            }
-            Console.WriteLine("camera = {0}, fov = {1}", cameraZ, fov);
         }
 
         private void OnKeyPress(object sender, KeyPressEventArgs e)
         {
-
         }
 
         private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -206,15 +225,15 @@ namespace Project2_Shaders
             shader.Set("uniformColor", new vec3(1.0f)); // Reset box color
 
             float dt = (float)(DateTime.Now - startTime).TotalMilliseconds;
-            // set coordinates
-            mat4 model = glm.rotate(glm.radians(dt / 8.0f), new vec3(1.0f, 1.0f, 1.0f));
-            shader.Set("model", model);
 
-            mat4 view = glm.translate(mat4.identity(), new vec3(cameraX, cameraY, cameraZ));
+            mat4 view = glm.lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
             shader.Set("view", view);
 
-            mat4 projection = glm.perspective(glm.radians(fov), Width / Height, 0.1f, 100.0f);
-            shader.Set("projection", projection);
+            if (Height != 0)
+            {
+                mat4 projection = glm.perspective(glm.radians(fov), Width / Height, 0.1f, 100.0f);
+                shader.Set("projection", projection);
+            }
 
             // draw
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -230,7 +249,7 @@ namespace Project2_Shaders
             foreach (var pos in cubePositions)
             {
                 i++;
-                model = glm.translate(mat4.identity(), pos);
+                mat4 model = glm.translate(mat4.identity(), pos);
 
                 if (i == 1 || i == 3)
                     model = glm.rotate(model, i * glm.radians(dt / 8.0f), new vec3(1.0f, 0.5f, 0.0f));
