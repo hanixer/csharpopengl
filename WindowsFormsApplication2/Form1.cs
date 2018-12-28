@@ -57,10 +57,9 @@ namespace WindowsFormsApplication1
             triangle = new Shape(points, new vec3(0.25f, 0.35f, 0.15f));
             point = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 0.0f, 0.0f));
             pointQ = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 0.0f, 0.0f));
-            points = new List<vec2>();
-            points.Add(a);
-            points.Add(b);
+            pointR = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 1.0f, 0.67f));
             lineCQ = new LineShape(a, b, new vec3(0.25f, 0.35f, 0.65f));
+            UpdateShapes();
         }
 
         private void GlControl_OnPaintEvent(object sender, PaintEventArgs e)
@@ -68,8 +67,9 @@ namespace WindowsFormsApplication1
             GL.ClearColor(0.0f, 0.2f, 0.2f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             triangle.Draw();
-            pointQ.Draw();
             lineCQ.Draw();
+            pointQ.Draw();
+            pointR.Draw();
 
             glControl.SwapBuffers();
         }
@@ -81,11 +81,26 @@ namespace WindowsFormsApplication1
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            float t = (float)trackBar1.Value / 100;
-            q = (1 - t) * a + t * b;
-            pointQ.Set(q);
-            lineCQ.Set(c, q);
+            UpdateShapes();
             glControl.Invalidate();
+        }
+
+        private void trackBar2_Scroll(object sender, EventArgs e)
+        {
+            UpdateShapes();
+            glControl.Invalidate();
+        }
+
+        private void UpdateShapes()
+        {
+            float t = (float)trackBar1.Value / 100;
+            float s = (float)trackBar2.Value / 100;
+            q = (1 - t) * a + t * b;
+            r = (1 - s) * q + s * c;
+            pointQ.Set(q);
+            pointR.Set(r);
+            lineCQ.Set(c, q);
+
         }
     }
 }
