@@ -28,6 +28,7 @@ namespace WindowsFormsApplication1
         vec2 c = new vec2(0.0f, 0.5f);
         vec2 r;
         vec2 q;
+        LineShape lineCQ;
 
         public Form1()
         {
@@ -47,6 +48,8 @@ namespace WindowsFormsApplication1
         private void GlControl_OnLoadEvent(object sender, EventArgs e)
         {
             GL.Enable(EnableCap.ProgramPointSize);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.LineWidth(3.0f);
             var points = new List<vec2>();
             points.Add(a);
             points.Add(b);
@@ -54,6 +57,10 @@ namespace WindowsFormsApplication1
             triangle = new Shape(points, new vec3(0.25f, 0.35f, 0.15f));
             point = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 0.0f, 0.0f));
             pointQ = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 0.0f, 0.0f));
+            points = new List<vec2>();
+            points.Add(a);
+            points.Add(b);
+            lineCQ = new LineShape(a, b, new vec3(0.25f, 0.35f, 0.65f));
         }
 
         private void GlControl_OnPaintEvent(object sender, PaintEventArgs e)
@@ -62,6 +69,7 @@ namespace WindowsFormsApplication1
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             triangle.Draw();
             pointQ.Draw();
+            lineCQ.Draw();
 
             glControl.SwapBuffers();
         }
@@ -76,6 +84,7 @@ namespace WindowsFormsApplication1
             float t = (float)trackBar1.Value / 100;
             q = (1 - t) * a + t * b;
             pointQ.Set(q);
+            lineCQ.Set(c, q);
             glControl.Invalidate();
         }
     }
