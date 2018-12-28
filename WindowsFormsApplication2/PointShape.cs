@@ -15,5 +15,10 @@ namespace WindowsFormsApplication1
         {
             primitiveType = PrimitiveType.Points;
         }
+
+        public void Set(vec2 point)
+        {
+            Points = new List<vec2>(new vec2[] { point });
+        }
     }
 }

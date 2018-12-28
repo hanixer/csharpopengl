@@ -12,6 +12,24 @@ namespace WindowsFormsApplication1
     class Shape
     {
         public List<vec2> points;
+        public List<vec2> Points
+        {
+            get
+            {
+                return points;
+            }
+            set
+            {
+                points = value;
+                vertices = new float[points.Count * 3];
+                for (int i = 0; i < points.Count; ++i)
+                {
+                    vertices[i * 3] = points[i].x;
+                    vertices[i * 3 + 1] = points[i].y;
+                }
+
+            }
+        }
         int vao;
         int vbo;
         vec3 color;
@@ -21,9 +39,8 @@ namespace WindowsFormsApplication1
 
         public Shape(List<vec2> points, vec3 color)
         {
-            this.points = points;
             this.color = color;
-            vertices = new float[points.Count * 3];
+            Points = points;
 
             shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
             shader.Use();
@@ -42,11 +59,6 @@ namespace WindowsFormsApplication1
 
         public virtual void Draw()
         {
-            for (int i = 0; i < points.Count; ++i)
-            {
-                vertices[i * 3] = points[i].x;
-                vertices[i * 3 + 1] = points[i].y;
-            }
 
             shader.Use();
             GL.BindVertexArray(vao);

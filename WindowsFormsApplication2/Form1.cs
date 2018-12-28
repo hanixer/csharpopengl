@@ -17,8 +17,17 @@ namespace WindowsFormsApplication1
     public partial class Form1 : Form
     {
         MyControl glControl;
-        Shape shape;
+        Shape triangle;
         PointShape point;
+        PointShape pointR;
+        PointShape pointQ;
+        float s;
+        float t;
+        vec2 a = new vec2(-0.5f, -0.25f);
+        vec2 b = new vec2(0.5f, -0.5f);
+        vec2 c = new vec2(0.0f, 0.5f);
+        vec2 r;
+        vec2 q;
 
         public Form1()
         {
@@ -39,26 +48,34 @@ namespace WindowsFormsApplication1
         {
             GL.Enable(EnableCap.ProgramPointSize);
             var points = new List<vec2>();
-            points.Add(new vec2(-0.5f, -0.25f));
-            points.Add(new vec2(0.5f, -0.5f));
-            points.Add(new vec2(0.0f, 0.5f));
-            shape = new Shape(points, new vec3(0.25f, 0.35f, 0.15f));
+            points.Add(a);
+            points.Add(b);
+            points.Add(c);
+            triangle = new Shape(points, new vec3(0.25f, 0.35f, 0.15f));
             point = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 0.0f, 0.0f));
+            pointQ = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 0.0f, 0.0f));
         }
 
         private void GlControl_OnPaintEvent(object sender, PaintEventArgs e)
         {
             GL.ClearColor(0.0f, 0.2f, 0.2f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            shape.Draw();
-            point.Draw();
-
+            triangle.Draw();
+            pointQ.Draw();
 
             glControl.SwapBuffers();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            glControl.Invalidate();
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            float t = (float)trackBar1.Value / 100;
+            q = (1 - t) * a + t * b;
+            pointQ.Set(q);
             glControl.Invalidate();
         }
     }
