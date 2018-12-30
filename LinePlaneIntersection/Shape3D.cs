@@ -8,7 +8,6 @@ namespace WindowsFormsApplication1
     class Rectangle3D : ShapeBase
     {
         public List<vec3> points;
-
         public List<vec3> Points
         {
             get
@@ -28,6 +27,8 @@ namespace WindowsFormsApplication1
             }
         }
 
+
+
         public Rectangle3D(List<vec3> points) : base(new vec3(1.0f))
         {
             Points = points;
@@ -35,30 +36,22 @@ namespace WindowsFormsApplication1
 
         public virtual void Draw()
         {
-            shader.Use();
+            Shaders.shader.Use();
+            Shaders.shader.Set("color", color);
+            Shaders.shader.Set("model", Model);
+            
             GL.BindVertexArray(vao);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float),
                 vertices, BufferUsageHint.StaticDraw);
             GL.DrawArrays(PrimitiveType.Quads, 0, points.Count);
-            shader.Set("color", new vec3(1.0f, 0.0f, 1.0f));
-
+            Shaders.shader.Set("color", new vec3(1.0f, 0.0f, 1.0f));
             GL.DrawArrays(PrimitiveType.LineLoop, 0, points.Count);
-            shader.Set("color", color);
         }
 
-        public void Rotate(float angle)
+        public void Translate(vec3 where)
         {
-            shader.Set("model", glm.rotate(angle, new vec3(0, 0, 1)));
-        }
-
-        public void Rotate(vec3 direction)
-        {
-            vec3 directionOld = new vec3(0, 0, 1);
-            float angle = (float)Math.Acos(glm.dot(glm.normalize(directionOld), glm.normalize(direction)));
-            vec3 axis = glm.cross(directionOld, direction);
-            shader.Use();
-            shader.Set("model", glm.rotate(angle, axis));
+            Shaders.shader.Set("model", glm.translate(mat4.identity(), where));
         }
     }
     class Line3D : ShapeBase
@@ -91,7 +84,9 @@ namespace WindowsFormsApplication1
 
         public virtual void Draw()
         {
-            shader.Use();
+            Shaders.shader.Use();
+            Shaders.shader.Set("color", color);
+            Shaders.shader.Set("model", Model);
             GL.BindVertexArray(vao);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float),
@@ -99,13 +94,5 @@ namespace WindowsFormsApplication1
             GL.DrawArrays(PrimitiveType.Lines, 0, points.Count);
         }
 
-        public void Rotate(vec3 direction)
-        {
-            vec3 directionOld = new vec3(0, 0, 1);
-            float angle = (float)Math.Acos(glm.dot(glm.normalize(directionOld), glm.normalize(direction)));
-            vec3 axis = glm.cross(directionOld, direction);
-            shader.Use();
-            shader.Set("model", glm.rotate(angle, axis));
-        }
     }
 }

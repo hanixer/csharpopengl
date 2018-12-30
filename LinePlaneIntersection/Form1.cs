@@ -18,7 +18,9 @@ namespace WindowsFormsApplication1
     {
         MyControl glControl;
         Rectangle3D plane;
+        Rectangle3D plane2;
         Line3D line;
+        Line3D ray;
         vec3 direction = new vec3(0, 0, 1);
 
         public Form1()
@@ -42,22 +44,47 @@ namespace WindowsFormsApplication1
             GL.Enable(EnableCap.LineSmooth);
             GL.LineWidth(3.0f);
 
+            Shaders.Init();
+
             plane = new Rectangle3D(new List<vec3> {
                 new vec3(-0.5f, -0.5f, 0.0f),
                 new vec3(-0.5f, 0.5f, 0.0f),
                 new vec3(0.5f, 0.5f, 0.0f),
                 new vec3(0.5f, -0.5f, 0.0f),
             });
+            plane2 = new Rectangle3D(new List<vec3> {
+                new vec3(-0.5f, -0.5f, -.0f),
+                new vec3(-0.5f, 0.5f, -.0f),
+                new vec3(0.5f, 0.5f, -.0f),
+                new vec3(0.5f, -0.5f, -.0f),
+            });
+            plane2.Color = new vec3(0.5f, 0.5f, 0.95f);
             line = new Line3D(new vec3(0, 0, 0), direction);
+            ray = new Line3D(new vec3(-0.5f, -0.5f, 0), new vec3(100, 100, 0));
+            ray.Color = new vec3(0.5f, 0.5f, 0.75f);
         }
 
         private void GlControl_OnPaintEvent(object sender, PaintEventArgs e)
         {
             GL.ClearColor(0.0f, 0.2f, 0.2f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            
+            if (Height != 0)
+            {
+                float fov = 45;
+                float near = 0.1f;
+                float far = 100;
 
+                mat4 projection = glm.perspective(glm.radians(fov), Width / Height, near, far);
+                projection = projection * glm.translate(mat4.identity(), new vec3(0, 0, -2));
+                projection = mat4.identity();
+                Shaders.shader.Set("projection", projection);
+            }
+
+            plane2.Draw();
             plane.Draw();
             line.Draw();
+            ray.Draw();
 
             glControl.SwapBuffers();
         }
@@ -66,16 +93,6 @@ namespace WindowsFormsApplication1
         {
 
 
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-            float angle;
-            if (float.TryParse(textBox1.Text, out angle))
-            {
-                plane.Rotate(angle);
-                glControl.Invalidate();
-            }
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)
@@ -103,8 +120,8 @@ namespace WindowsFormsApplication1
         {
             direction.z = trackBar3.Value / 100.0f;
             UpdateRotation();
+            plane2.Translate(new vec3(0, 0, direction.z));
             glControl.Invalidate();
-
         }
     }
 }

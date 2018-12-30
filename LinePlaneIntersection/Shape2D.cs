@@ -41,7 +41,9 @@ namespace WindowsFormsApplication1
 
         public virtual void Draw()
         {
-            shader.Use();
+            Shaders.shader.Use();
+            Shaders.shader.Set("color", color);
+            Shaders.shader.Set("model", Model);
             GL.BindVertexArray(vao);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float),
