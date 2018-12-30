@@ -54,6 +54,7 @@ namespace WindowsFormsApplication1
             Shaders.shader.Set("model", glm.translate(mat4.identity(), where));
         }
     }
+
     class Line3D : ShapeBase
     {
         public List<vec3> points;
@@ -93,6 +94,5 @@ namespace WindowsFormsApplication1
                 vertices, BufferUsageHint.StaticDraw);
             GL.DrawArrays(PrimitiveType.Lines, 0, points.Count);
         }
-
     }
 }
