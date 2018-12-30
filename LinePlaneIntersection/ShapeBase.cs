@@ -73,7 +73,7 @@ namespace WindowsFormsApplication1
 
         protected void UpdateModel()
         {
-            Model = glm.translate(mat4.identity(), position) * rotation;
+            Model = rotation;//* glm.translate(mat4.identity(), position);
         }
     }
 }

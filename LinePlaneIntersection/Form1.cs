@@ -24,6 +24,11 @@ namespace WindowsFormsApplication1
         Cube cube;
         vec3 direction = new vec3(0, 0, 1);
         float z;
+        vec3 cameraPos = new vec3(0.0f, 0.0f, 3.0f);
+        float cameraSpeed = 0.05f * 4;
+        vec3 cameraFront = new vec3(0.0f, 0.0f, -1.0f);
+        vec3 cameraUp = new vec3(0.0f, 1.0f, 0.0f);
+        Timer timer = new Timer();
 
         public Form1()
         {
@@ -37,8 +42,75 @@ namespace WindowsFormsApplication1
             glControl.Size = new Size(Width / 2, Height / 2);
             glControl.OnPaintEvent += GlControl_OnPaintEvent;
             glControl.OnLoadEvent += GlControl_OnLoadEvent;
-            Controls.Add(glControl);            
+            Controls.Add(glControl);
+
+            timer.Interval = 100;
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Space)
+            {
+                cameraPos.y += 0.1f;
+                glControl.Invalidate();
+            }
+            if (keyData == Keys.Z)
+            {
+                cameraPos.y -= 0.1f;
+                glControl.Invalidate();
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            var state = OpenTK.Input.Keyboard.GetState();
+
+            if (state.IsKeyDown(OpenTK.Input.Key.W))
+            {
+                cameraPos += cameraSpeed * cameraFront;
+                glControl.Invalidate();
+            }
+            if (state.IsKeyDown(OpenTK.Input.Key.S))
+            {
+                cameraPos -= cameraSpeed * cameraFront;
+                glControl.Invalidate();
+            }
+            if (state.IsKeyDown(OpenTK.Input.Key.A))
+            {
+                cameraPos -= glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
+                glControl.Invalidate();
+            }
+            if (state.IsKeyDown(OpenTK.Input.Key.D))
+            {
+                cameraPos += glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
+                glControl.Invalidate();
+            }
+        }
+
+        //private void Form1_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        //{
+        //    var state = OpenTK.Input.Keyboard.GetState();
+            
+        //    if (state.IsKeyDown(OpenTK.Input.Key.W))
+        //    {
+        //        cameraPos += cameraSpeed * cameraFront;
+        //    }
+        //    if (e.KeyChar == 's')
+        //    {
+        //        cameraPos -= cameraSpeed * cameraFront;
+        //    }
+        //    if (state.IsKeyDown(OpenTK.Input.Key.A))
+        //    {
+        //        cameraPos -= glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
+        //    }
+        //    if (state.IsKeyDown(OpenTK.Input.Key.D))
+        //    {
+        //        cameraPos += glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
+        //    }
+        //}
 
         private void GlControl_OnLoadEvent(object sender, EventArgs e)
         {
@@ -49,10 +121,10 @@ namespace WindowsFormsApplication1
             Shaders.Init();
 
             plane = new Rectangle3D(new List<vec3> {
-                new vec3(-0.25f, -0.25f, 0.0f),
-                new vec3(-0.25f, 0.25f, 0.0f),
-                new vec3(0.25f, 0.25f, 0.0f),
-                new vec3(0.25f, -0.25f, 0.0f),
+                new vec3(-0.5f, -0.5f, 0.0f),
+                new vec3(-0.5f, 0.5f, 0.0f),
+                new vec3(0.5f, 0.5f, 0.0f),
+                new vec3(0.5f, -0.5f, 0.0f),
             });
             plane2 = new Rectangle3D(new List<vec3> {
                 new vec3(-0.5f, -0.5f, -.0f),
@@ -79,15 +151,21 @@ namespace WindowsFormsApplication1
                 float far = 100;
 
                 mat4 projection = glm.perspective(glm.radians(fov), Width / Height, near, far);
-                mat4 lookAt = glm.lookAt(new vec3(0, 0, 10), new vec3(0, 0, 0), new vec3(0, 1, 0));
-                projection = projection * lookAt;
+                //projection = projection * lookAt;
                 //projection = projection * glm.translate(mat4.identity(), new vec3(0, 0, -2));
-                projection = mat4.identity();
+                //projection = mat4.identity();
                 Shaders.shader.Set("projection", projection);
+                mat4 view = glm.lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+                //view = mat4.identity();
+                Shaders.shader.Set("view", view);
 
-                //vec4 v;
-                //v = plane.Model * new vec4(-0.05f, -0.05f, 0.0f, 1);
-                //Console.WriteLine("1) " + v.x + " " + v.y + " " + v.z + " " + v.w);
+                vec4 p = new vec4(plane.Points[0], 1.0f);
+                vec4 v = p;
+                Console.WriteLine("0) " + v.x + " " + v.y + " " + v.z + " " + v.w);
+                v = plane.Model * p;
+                Console.WriteLine("1) " + v.x + " " + v.y + " " + v.z + " " + v.w);
+                v = view * plane.Model * p;
+                Console.WriteLine("2) " + v.x + " " + v.y + " " + v.z + " " + v.w);
                 //v = projection * plane.Model * new vec4(-0.05f, -0.05f, 0.0f, 1);
                 //Console.WriteLine("2) " + v.x + " " + v.y + " " + v.z + " " + v.w);
                 //v = projection * glm.translate(mat4.identity(), new vec3(0, 0, z)) * plane.Model * new vec4(-0.05f, -0.05f, 0.0f, 1);
@@ -95,10 +173,10 @@ namespace WindowsFormsApplication1
             }
 
             //plane2.Draw();
-            //plane.Draw();
-            //line.Draw();
+            plane.Draw();
+            line.Draw();
             //ray.Draw();
-            cube.Draw();
+            //cube.Draw();
 
             glControl.SwapBuffers();
         }
@@ -116,7 +194,6 @@ namespace WindowsFormsApplication1
 
         private void UpdateRotation()
         {
-            Console.WriteLine("{0},{1},{2}",direction.x, direction.y, direction.z);
             plane.Rotate(direction);
             line.Rotate(direction);
         }
