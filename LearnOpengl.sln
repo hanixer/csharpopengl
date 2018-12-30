@@ -3,15 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.csproj", "{8F95E4D7-84BC-45F5-8B4E-92D90EF0AF98}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project2_Shaders", "Project2_Shaders\Project2_Shaders.csproj", "{7CB47930-73AF-409C-ACE7-8991C80DD4E0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "Utilities\Utilities.csproj", "{70CB64C0-2E8E-4826-B64E-84863127F11C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Textures", "Textures\Textures.csproj", "{16DF18DA-4563-4B10-909E-09130DB7F4A0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Textures2", "Textures2\Textures2.csproj", "{44037B35-D9F5-4252-A4A0-C0FE265CB079}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Textures3", "Textures3\Textures3.csproj", "{F9E5548D-B8B5-482C-B014-A883229554A4}"
 EndProject
@@ -23,13 +15,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Coordinates", "Coordinates\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Camera", "Camera\Camera.csproj", "{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Drawings", "Drawings\Drawings.csproj", "{D5FB019D-24DE-4AC3-B28E-A73801356413}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication2", "ConsoleApplication2\ConsoleApplication2.csproj", "{55F6676D-F82B-42FB-8B33-4271F7BD36C4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApplication1", "WindowsFormsApplication1\WindowsFormsApplication1.csproj", "{38BFC8F6-505C-425E-BB9A-DEC35210F946}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApplication2", "WindowsFormsApplication2\WindowsFormsApplication2.csproj", "{54B98BCE-C1B3-4D85-A853-5F9A5CDF22DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TriangleWithSlider", "WindowsFormsApplication2\TriangleWithSlider.csproj", "{54B98BCE-C1B3-4D85-A853-5F9A5CDF22DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "010_LinePlaneIntersection", "LinePlaneIntersection\010_LinePlaneIntersection.csproj", "{DD3DA93A-24D1-4A20-809D-A8F470B60BEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,26 +27,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8F95E4D7-84BC-45F5-8B4E-92D90EF0AF98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8F95E4D7-84BC-45F5-8B4E-92D90EF0AF98}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8F95E4D7-84BC-45F5-8B4E-92D90EF0AF98}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8F95E4D7-84BC-45F5-8B4E-92D90EF0AF98}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7CB47930-73AF-409C-ACE7-8991C80DD4E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7CB47930-73AF-409C-ACE7-8991C80DD4E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7CB47930-73AF-409C-ACE7-8991C80DD4E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7CB47930-73AF-409C-ACE7-8991C80DD4E0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{70CB64C0-2E8E-4826-B64E-84863127F11C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{70CB64C0-2E8E-4826-B64E-84863127F11C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{70CB64C0-2E8E-4826-B64E-84863127F11C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{70CB64C0-2E8E-4826-B64E-84863127F11C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{16DF18DA-4563-4B10-909E-09130DB7F4A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{16DF18DA-4563-4B10-909E-09130DB7F4A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{16DF18DA-4563-4B10-909E-09130DB7F4A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{16DF18DA-4563-4B10-909E-09130DB7F4A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{44037B35-D9F5-4252-A4A0-C0FE265CB079}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{44037B35-D9F5-4252-A4A0-C0FE265CB079}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{44037B35-D9F5-4252-A4A0-C0FE265CB079}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{44037B35-D9F5-4252-A4A0-C0FE265CB079}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F9E5548D-B8B5-482C-B014-A883229554A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F9E5548D-B8B5-482C-B014-A883229554A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9E5548D-B8B5-482C-B014-A883229554A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -77,9 +51,6 @@ Global
 		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FDC20F8-A9A9-4E28-836B-2D8597A3598B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D5FB019D-24DE-4AC3-B28E-A73801356413}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D5FB019D-24DE-4AC3-B28E-A73801356413}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D5FB019D-24DE-4AC3-B28E-A73801356413}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38BFC8F6-505C-425E-BB9A-DEC35210F946}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{38BFC8F6-505C-425E-BB9A-DEC35210F946}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38BFC8F6-505C-425E-BB9A-DEC35210F946}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -88,6 +59,10 @@ Global
 		{54B98BCE-C1B3-4D85-A853-5F9A5CDF22DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54B98BCE-C1B3-4D85-A853-5F9A5CDF22DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54B98BCE-C1B3-4D85-A853-5F9A5CDF22DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD3DA93A-24D1-4A20-809D-A8F470B60BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD3DA93A-24D1-4A20-809D-A8F470B60BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD3DA93A-24D1-4A20-809D-A8F470B60BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD3DA93A-24D1-4A20-809D-A8F470B60BEF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

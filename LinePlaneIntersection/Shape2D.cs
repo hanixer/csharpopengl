@@ -9,9 +9,10 @@ using Utilities;
 
 namespace WindowsFormsApplication1
 {
-    class Shape
+    class Shape2D : ShapeBase
     {
         public List<vec2> points;
+
         public List<vec2> Points
         {
             get
@@ -30,36 +31,16 @@ namespace WindowsFormsApplication1
 
             }
         }
-        int vao;
-        int vbo;
-        vec3 color;
-        Shader shader;
+
         protected PrimitiveType primitiveType = PrimitiveType.Triangles;
-        float[] vertices;
 
-        public Shape(List<vec2> points, vec3 color)
+        public Shape2D(List<vec2> points, vec3 color) : base(color)
         {
-            this.color = color;
             Points = points;
-
-            shader = new Shader("Shaders/shader.vert", "Shaders/shader.frag");
-            shader.Use();
-            shader.Set("uniformColor", color);
-            Console.WriteLine(GL.GetError().ToString());
-
-            vbo = GL.GenBuffer();
-            vao = GL.GenVertexArray();
-            GL.BindVertexArray(vao);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(0);
-            //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-            //GL.BindVertexArray(0);
         }
 
         public virtual void Draw()
         {
-
             shader.Use();
             GL.BindVertexArray(vao);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);

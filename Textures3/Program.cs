@@ -129,6 +129,7 @@ namespace Project2_Shaders
 
         private void OnRenderFrame(object sender, FrameEventArgs e)
         {
+            Console.WriteLine(DateTime.Now);
             GL.ClearColor(0.0f, 0.2f, .2f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 

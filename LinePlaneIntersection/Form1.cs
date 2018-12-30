@@ -17,19 +17,9 @@ namespace WindowsFormsApplication1
     public partial class Form1 : Form
     {
         MyControl glControl;
-        Shape2D triangle;
-        PointShape point;
-        PointShape pointR;
-        PointShape pointQ;
-        Shape3D rectangle;
-        float s;
-        float t;
-        vec2 a = new vec2(-0.5f, -0.25f);
-        vec2 b = new vec2(0.5f, -0.5f);
-        vec2 c = new vec2(0.0f, 0.5f);
-        vec2 r;
-        vec2 q;
-        LineShape lineCQ;
+        Rectangle3D plane;
+        Line3D line;
+        vec3 direction = new vec3(0, 0, 1);
 
         public Form1()
         {
@@ -51,58 +41,70 @@ namespace WindowsFormsApplication1
             GL.Enable(EnableCap.ProgramPointSize);
             GL.Enable(EnableCap.LineSmooth);
             GL.LineWidth(3.0f);
-            var points = new List<vec2>();
-            points.Add(a);
-            points.Add(b);
-            points.Add(c);
-            triangle = new Shape2D(points, new vec3(0.25f, 0.35f, 0.15f));
-            point = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 0.0f, 0.0f));
-            pointQ = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 0.0f, 0.0f));
-            pointR = new PointShape(new vec2(0.0f, 0.0f), new vec3(1.0f, 1.0f, 0.67f));
-            lineCQ = new LineShape(a, b, new vec3(0.25f, 0.35f, 0.65f));
-            var points3 = new List<vec3>();
-            rectangle = new Shape3D(points3, new vec3(1.0f, 0.5f, 0.5f));
-            UpdateShapes();
+
+            plane = new Rectangle3D(new List<vec3> {
+                new vec3(-0.5f, -0.5f, 0.0f),
+                new vec3(-0.5f, 0.5f, 0.0f),
+                new vec3(0.5f, 0.5f, 0.0f),
+                new vec3(0.5f, -0.5f, 0.0f),
+            });
+            line = new Line3D(new vec3(0, 0, 0), direction);
         }
 
         private void GlControl_OnPaintEvent(object sender, PaintEventArgs e)
         {
             GL.ClearColor(0.0f, 0.2f, 0.2f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            triangle.Draw();
-            lineCQ.Draw();
-            pointQ.Draw();
-            pointR.Draw();
+
+            plane.Draw();
+            line.Draw();
 
             glControl.SwapBuffers();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void MakePlaneWithNorm(vec3 point, vec3 normal, Rectangle3D plane, Rectangle3D normShape)
         {
-            glControl.Invalidate();
+
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            float angle;
+            if (float.TryParse(textBox1.Text, out angle))
+            {
+                plane.Rotate(angle);
+                glControl.Invalidate();
+            }
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            UpdateShapes();
+            direction.x = trackBar1.Value / 100.0f;
+            UpdateRotation();
             glControl.Invalidate();
+        }
+
+        private void UpdateRotation()
+        {
+            Console.WriteLine("{0},{1},{2}",direction.x, direction.y, direction.z);
+            plane.Rotate(direction);
+            line.Rotate(direction);
         }
 
         private void trackBar2_Scroll(object sender, EventArgs e)
         {
-            UpdateShapes();
+            direction.y = trackBar2.Value / 100.0f;
+            UpdateRotation();
             glControl.Invalidate();
         }
 
-        private void UpdateShapes()
+        private void trackBar3_Scroll(object sender, EventArgs e)
         {
-            float t = (float)trackBar1.Value / 100;
-            float s = (float)trackBar2.Value / 100;
-            q = (1 - t) * a + t * b;
-            r = (1 - s) * q + s * c;
-            pointQ.Set(q);
-            pointR.Set(r);
-            lineCQ.Set(c, q);            
+            direction.z = trackBar3.Value / 100.0f;
+            UpdateRotation();
+            glControl.Invalidate();
+
         }
     }
 }
