@@ -24,11 +24,13 @@ namespace WindowsFormsApplication1
         Cube cube;
         vec3 direction = new vec3(0, 0, 1);
         float z;
-        vec3 cameraPos = new vec3(0.0f, 0.0f, 3.0f);
-        float cameraSpeed = 0.05f * 4;
-        vec3 cameraFront = new vec3(0.0f, 0.0f, -1.0f);
-        vec3 cameraUp = new vec3(0.0f, 1.0f, 0.0f);
-        Timer timer = new Timer();
+        bool isLeftMouseDown = false;
+        bool isRightMouseDown = false;
+        float mouseX;
+        float mouseY;
+        float cameraAngleX;
+        float cameraAngleY;
+        float cameraDistance = 3.0f;
 
         public Form1()
         {
@@ -42,75 +44,64 @@ namespace WindowsFormsApplication1
             glControl.Size = new Size(Width / 2, Height / 2);
             glControl.OnPaintEvent += GlControl_OnPaintEvent;
             glControl.OnLoadEvent += GlControl_OnLoadEvent;
+            glControl.MouseDown += GlControl_MouseDown;
+            glControl.MouseUp += GlControl_MouseUp;
+            glControl.MouseMove += GlControl_MouseMove;
             Controls.Add(glControl);
-
-            timer.Interval = 100;
-            timer.Tick += Timer_Tick;
-            timer.Start();
         }
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        private void GlControl_MouseUp(object sender, MouseEventArgs e)
         {
-            if (keyData == Keys.Space)
+            if (e.Button.HasFlag(MouseButtons.Left))
             {
-                cameraPos.y += 0.1f;
-                glControl.Invalidate();
+                isLeftMouseDown = false;
             }
-            if (keyData == Keys.Z)
+            if (e.Button.HasFlag(MouseButtons.Right))
             {
-                cameraPos.y -= 0.1f;
-                glControl.Invalidate();
+                isRightMouseDown = false;
             }
-            return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        private void GlControl_MouseMove(object sender, MouseEventArgs e)
         {
-            var state = OpenTK.Input.Keyboard.GetState();
+            if (!glControl.ClientRectangle.Contains(glControl.PointToClient(MousePosition)))
+            {
+                return;
+            }
 
-            if (state.IsKeyDown(OpenTK.Input.Key.W))
+            if (isLeftMouseDown)
             {
-                cameraPos += cameraSpeed * cameraFront;
+                cameraAngleY += (e.X - mouseX) / 100;
+                cameraAngleX += (e.Y - mouseY) / 100;
+                mouseX = e.X;
+                mouseY = e.Y;
+
                 glControl.Invalidate();
             }
-            if (state.IsKeyDown(OpenTK.Input.Key.S))
+            else if (isRightMouseDown)
             {
-                cameraPos -= cameraSpeed * cameraFront;
-                glControl.Invalidate();
-            }
-            if (state.IsKeyDown(OpenTK.Input.Key.A))
-            {
-                cameraPos -= glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
-                glControl.Invalidate();
-            }
-            if (state.IsKeyDown(OpenTK.Input.Key.D))
-            {
-                cameraPos += glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
+                cameraDistance += (e.Y - mouseY) / 50;
+
+                mouseX = e.X;
+                mouseY = e.Y;
+
                 glControl.Invalidate();
             }
         }
+        private void GlControl_MouseDown(object sender, MouseEventArgs e)
+        {
+            mouseX = e.X;
+            mouseY = e.Y;
 
-        //private void Form1_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
-        //{
-        //    var state = OpenTK.Input.Keyboard.GetState();
-            
-        //    if (state.IsKeyDown(OpenTK.Input.Key.W))
-        //    {
-        //        cameraPos += cameraSpeed * cameraFront;
-        //    }
-        //    if (e.KeyChar == 's')
-        //    {
-        //        cameraPos -= cameraSpeed * cameraFront;
-        //    }
-        //    if (state.IsKeyDown(OpenTK.Input.Key.A))
-        //    {
-        //        cameraPos -= glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
-        //    }
-        //    if (state.IsKeyDown(OpenTK.Input.Key.D))
-        //    {
-        //        cameraPos += glm.normalize(glm.cross(cameraFront, cameraUp)) * cameraSpeed;
-        //    }
-        //}
+            if (e.Button.HasFlag(MouseButtons.Left))
+            {
+                isLeftMouseDown = true;
+            }
+            if (e.Button.HasFlag(MouseButtons.Right))
+            {
+                isRightMouseDown = true;
+            }
+        }
 
         private void GlControl_OnLoadEvent(object sender, EventArgs e)
         {
@@ -151,38 +142,22 @@ namespace WindowsFormsApplication1
                 float far = 100;
 
                 mat4 projection = glm.perspective(glm.radians(fov), Width / Height, near, far);
-                //projection = projection * lookAt;
-                //projection = projection * glm.translate(mat4.identity(), new vec3(0, 0, -2));
-                //projection = mat4.identity();
                 Shaders.shader.Set("projection", projection);
-                mat4 view = glm.lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-                //view = mat4.identity();
-                Shaders.shader.Set("view", view);
 
-                vec4 p = new vec4(plane.Points[0], 1.0f);
-                vec4 v = p;
-                Console.WriteLine("0) " + v.x + " " + v.y + " " + v.z + " " + v.w);
-                v = plane.Model * p;
-                Console.WriteLine("1) " + v.x + " " + v.y + " " + v.z + " " + v.w);
-                v = view * plane.Model * p;
-                Console.WriteLine("2) " + v.x + " " + v.y + " " + v.z + " " + v.w);
-                //v = projection * plane.Model * new vec4(-0.05f, -0.05f, 0.0f, 1);
-                //Console.WriteLine("2) " + v.x + " " + v.y + " " + v.z + " " + v.w);
-                //v = projection * glm.translate(mat4.identity(), new vec3(0, 0, z)) * plane.Model * new vec4(-0.05f, -0.05f, 0.0f, 1);
-                //Console.WriteLine("3) " + v.x + " " + v.y + " " + v.z + " " + v.w);
+                mat4 view = mat4.identity();
+                view = glm.translate(view, new vec3(0, 0, -cameraDistance));
+                view = glm.rotate(view, cameraAngleX, new vec3(1, 0, 0));
+                view = glm.rotate(view, cameraAngleY, new vec3(0, 1, 0));
+                Shaders.shader.Set("view", view);
             }
 
             //plane2.Draw();
-            plane.Draw();
-            line.Draw();
+            //plane.Draw();
+            //line.Draw();
             //ray.Draw();
-            //cube.Draw();
+            cube.Draw();
 
             glControl.SwapBuffers();
-        }
-
-        private void MakePlaneWithNorm(vec3 point, vec3 normal, Rectangle3D plane, Rectangle3D normShape)
-        {
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)
