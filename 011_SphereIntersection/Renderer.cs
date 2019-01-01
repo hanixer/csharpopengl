@@ -12,12 +12,15 @@ namespace WindowsFormsApplication1
     {
         int vao;
         int vbo;
+        int ibo;
         float[] positions;
+        int[] indices;
 
         public void Init()
         {
             vao = GL.GenVertexArray();
             vbo = GL.GenBuffer();
+            ibo = GL.GenBuffer();
             GL.BindVertexArray(vao);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
             GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 0, 0);
@@ -91,6 +94,28 @@ namespace WindowsFormsApplication1
             Draw(color, PrimitiveType.LineLoop);
         }
 
+        public void DrawSphere(float radius, vec3 color, int count)
+        {
+            int sectorsCount = count * 2;
+            positions = GeneratePositions(radius, count, sectorsCount);
+            indices = GenerateIndices(positions, count, sectorsCount);
+
+            Shaders.shader.Set("color", color);
+            Shaders.shader.Set("model", mat4.identity());
+            GL.BindVertexArray(vao);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
+            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * positions.Length, positions, BufferUsageHint.StaticCopy);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * indices.Length, indices, BufferUsageHint.StaticCopy);
+            GL.DrawElements(BeginMode.Lines, indices.Length, DrawElementsType.UnsignedInt, 0);
+            Shaders.shader.Set("color", new vec3(0.5f));
+            GL.DrawElements(BeginMode.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
+
+            indices = new int[] { 0, positions.Length / 3 - 1 };
+            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * indices.Length, indices, BufferUsageHint.StaticCopy);
+            //GL.DrawElements(BeginMode.Points, indices.Length, DrawElementsType.UnsignedInt, 0);
+        }
+
         private void Draw(vec3 color, PrimitiveType primitiveType)
         {
             Shaders.shader.Set("color", color);
@@ -99,6 +124,62 @@ namespace WindowsFormsApplication1
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * positions.Length, positions, BufferUsageHint.StaticDraw);
             GL.DrawArrays(primitiveType, 0, positions.Length / 3);
+        }
+
+        public static float[] GeneratePositions(float radius, int stacksCount, int sectorsCount)
+        {
+            List<float> positions = new List<float>();
+            float stacksStep = (float)Math.PI / stacksCount;
+            float sectorsStep = (float)Math.PI * 2 / sectorsCount;
+            for (int i = 0; i <= stacksCount; ++i)
+            {
+                float stacksAngle = (float)Math.PI / 2 - i * stacksStep;
+                float y = radius * (float)Math.Sin(stacksAngle);
+                float xz = radius * (float)Math.Cos(stacksAngle);
+
+                for (int j = 0; j < sectorsCount; ++j)
+                {
+                    float sectorsAngle = j * sectorsStep;
+                    float x = xz * (float)Math.Sin(sectorsAngle);
+                    float z = xz * (float)Math.Cos(sectorsAngle);
+                    if (Math.Abs(x) < 0.0001)
+                    {
+                        x = 0;
+                    }
+                    if (Math.Abs(z) < 0.0001)
+                    {
+                        z = 0;
+                    }
+                    positions.Add(x);
+                    positions.Add(y);
+                    positions.Add(z);
+                }
+            }
+            Console.WriteLine(positions.Count);
+            return positions.ToArray();
+        }
+
+        static int[] GenerateIndices(float[] positions, int stacksCount, int sectorsCount)
+        {
+            List<int> result = new List<int>();
+            for (int stack = 0; stack < stacksCount; stack++)
+            {
+                for (int sector = 0; sector < sectorsCount; sector++)
+                {
+                    int a = stack * sectorsCount + sector;
+                    int b = (stack + 1) * sectorsCount + sector;
+                    int c = stack * sectorsCount + ((sector + 1) % sectorsCount);
+                    int d = (stack + 1) * sectorsCount + ((sector + 1) % sectorsCount);
+                    result.Add(a);
+                    result.Add(b);
+                    result.Add(c);
+                    result.Add(c);
+                    result.Add(b);
+                    result.Add(d);
+                }
+            }
+
+            return result.ToArray();
         }
     }
 }

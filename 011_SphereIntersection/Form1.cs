@@ -70,6 +70,8 @@ namespace WindowsFormsApplication1
             Shaders.Init();
             renderer.Init();
 
+            var result = Renderer.GeneratePositions(1, 4, 8);
+
             cube = new Cube();
             planeDirection = new vec3(1, 1, 1);
             UpdateRotation();
@@ -90,7 +92,7 @@ namespace WindowsFormsApplication1
             renderer.DrawLine(new vec3(0), new vec3(10, 0, 0), new vec3(1, 0, 0));
             renderer.DrawLine(new vec3(0), new vec3(0, 10, 0), new vec3(0, 1, 0));
             renderer.DrawLine(new vec3(0), new vec3(0, 0, 10), new vec3(0, 0, 1));
-            renderer.DrawCircle(new vec3(0), 5, new vec3(0));
+            renderer.DrawSphere(5, new vec3(0), 16);
 
             glControl.SwapBuffers();
         }
