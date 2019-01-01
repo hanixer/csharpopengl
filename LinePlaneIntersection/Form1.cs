@@ -17,6 +17,7 @@ namespace WindowsFormsApplication1
     public partial class Form1 : Form
     {
         MyControl glControl;
+        Renderer renderer = new Renderer();
         Rectangle3D plane;
         Rectangle3D plane2;
         Line3D line;
@@ -28,8 +29,8 @@ namespace WindowsFormsApplication1
         bool isRightMouseDown = false;
         float mouseX;
         float mouseY;
-        float cameraAngleX;
-        float cameraAngleY;
+        float cameraAngleX = 45.0f;
+        float cameraAngleY = -45.0f;
         float cameraDistance = 3.0f;
 
         public Form1()
@@ -48,6 +49,35 @@ namespace WindowsFormsApplication1
             glControl.MouseUp += GlControl_MouseUp;
             glControl.MouseMove += GlControl_MouseMove;
             Controls.Add(glControl);
+        }
+
+        private void GlControl_OnLoadEvent(object sender, EventArgs e)
+        {
+            GL.Enable(EnableCap.ProgramPointSize);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.DepthTest);
+            GL.LineWidth(3.0f);
+
+            Shaders.Init();
+            renderer.Init();
+
+            plane = new Rectangle3D(new List<vec3> {
+                new vec3(-0.5f, -0.5f, 0.0f),
+                new vec3(-0.5f, 0.5f, 0.0f),
+                new vec3(0.5f, 0.5f, 0.0f),
+                new vec3(0.5f, -0.5f, 0.0f),
+            });
+            plane2 = new Rectangle3D(new List<vec3> {
+                new vec3(-0.5f, -0.5f, -.0f),
+                new vec3(-0.5f, 0.5f, -.0f),
+                new vec3(0.5f, 0.5f, -.0f),
+                new vec3(0.5f, -0.5f, -.0f),
+            });
+            plane2.Color = new vec3(0.5f, 0.5f, 0.95f);
+            line = new Line3D(new vec3(0, 0, 0), direction);
+            ray = new Line3D(new vec3(-0.5f, -0.5f, 0), new vec3(100, 100, 0));
+            ray.Color = new vec3(0.5f, 0.5f, 0.75f);
+            cube = new Cube();
         }
 
         private void GlControl_MouseUp(object sender, MouseEventArgs e)
@@ -81,7 +111,6 @@ namespace WindowsFormsApplication1
             else if (isRightMouseDown)
             {
                 cameraDistance += (e.Y - mouseY) / 50;
-
                 mouseX = e.X;
                 mouseY = e.Y;
 
@@ -103,33 +132,6 @@ namespace WindowsFormsApplication1
             }
         }
 
-        private void GlControl_OnLoadEvent(object sender, EventArgs e)
-        {
-            GL.Enable(EnableCap.ProgramPointSize);
-            GL.Enable(EnableCap.LineSmooth);
-            GL.LineWidth(3.0f);
-
-            Shaders.Init();
-
-            plane = new Rectangle3D(new List<vec3> {
-                new vec3(-0.5f, -0.5f, 0.0f),
-                new vec3(-0.5f, 0.5f, 0.0f),
-                new vec3(0.5f, 0.5f, 0.0f),
-                new vec3(0.5f, -0.5f, 0.0f),
-            });
-            plane2 = new Rectangle3D(new List<vec3> {
-                new vec3(-0.5f, -0.5f, -.0f),
-                new vec3(-0.5f, 0.5f, -.0f),
-                new vec3(0.5f, 0.5f, -.0f),
-                new vec3(0.5f, -0.5f, -.0f),
-            });
-            plane2.Color = new vec3(0.5f, 0.5f, 0.95f);
-            line = new Line3D(new vec3(0, 0, 0), direction);
-            ray = new Line3D(new vec3(-0.5f, -0.5f, 0), new vec3(100, 100, 0));
-            ray.Color = new vec3(0.5f, 0.5f, 0.75f);
-            cube = new Cube();
-        }
-
         private void GlControl_OnPaintEvent(object sender, PaintEventArgs e)
         {
             GL.ClearColor(0.0f, 0.2f, 0.2f, 1.0f);
@@ -137,27 +139,40 @@ namespace WindowsFormsApplication1
             
             if (Height != 0)
             {
-                float fov = 45;
-                float near = 0.1f;
-                float far = 100;
-
-                mat4 projection = glm.perspective(glm.radians(fov), Width / Height, near, far);
-                Shaders.shader.Set("projection", projection);
-
-                mat4 view = mat4.identity();
-                view = glm.translate(view, new vec3(0, 0, -cameraDistance));
-                view = glm.rotate(view, cameraAngleX, new vec3(1, 0, 0));
-                view = glm.rotate(view, cameraAngleY, new vec3(0, 1, 0));
-                Shaders.shader.Set("view", view);
+                SetViewAndProjection();
             }
 
             //plane2.Draw();
-            //plane.Draw();
-            //line.Draw();
+            plane.Draw();
+            line.Draw();
             //ray.Draw();
-            cube.Draw();
+            //cube.Draw();
+            renderer.DrawLine(new vec3(0), new vec3(1, 0, 0), new vec3(1, 0, 0));
+            renderer.DrawLine(new vec3(0), new vec3(0, 1, 0), new vec3(0, 1, 0));
+            renderer.DrawLine(new vec3(0), new vec3(0, 0, 1), new vec3(0, 0, 1));
 
             glControl.SwapBuffers();
+        }
+
+        void DrawAxes()
+        {
+            
+        }
+
+        private void SetViewAndProjection()
+        {
+            float fov = 45;
+            float near = 0.1f;
+            float far = 100;
+
+            mat4 view = mat4.identity();
+            view = glm.translate(view, new vec3(0, 0, -cameraDistance));
+            view = glm.rotate(view, cameraAngleX, new vec3(1, 0, 0));
+            view = glm.rotate(view, cameraAngleY, new vec3(0, 1, 0));
+            Shaders.shader.Set("view", view);
+
+            mat4 projection = glm.perspective(glm.radians(fov), Width / Height, near, far);
+            Shaders.shader.Set("projection", projection);
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)
@@ -169,6 +184,7 @@ namespace WindowsFormsApplication1
 
         private void UpdateRotation()
         {
+            Console.WriteLine("{0}, {1}, {2}", direction.x, direction.y, direction.z);
             plane.Rotate(direction);
             line.Rotate(direction);
         }
