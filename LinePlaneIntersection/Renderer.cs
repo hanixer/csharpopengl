@@ -34,12 +34,54 @@ namespace WindowsFormsApplication1
                 end.x, end.y, end.z,
             };
 
+            Draw(color, PrimitiveType.Lines);
+        }
+
+        public void DrawPoint(vec3 point, vec3 color)
+        {
+            positions = new float[]
+            {
+                point.x, point.y, point.z,
+            };
+
+            Draw(color, PrimitiveType.Points);
+        }
+
+        public void DrawRectangle(vec3 position, vec2 size, vec3 direction, vec3 color)
+        {
+            positions = new float[]
+            {
+                -1, 1, 0,
+                -1, -1, 0,
+                1, -1, 0,
+                1, 1, 0,
+            };
+
+            direction = glm.normalize(direction);
+            vec3 directionOld = new vec3(0, 0, 1);
+            float angle = (float)Math.Acos(glm.dot(glm.normalize(directionOld), glm.normalize(direction)));
+            vec3 axis = glm.cross(directionOld, direction);
+            mat4 rotation = glm.rotate(angle, axis);
+            mat4 model = mat4.identity();
+            model = glm.scale(model, new vec3(size, 1));
+            model *= rotation;
+            model = glm.translate(model, position);
+            Shaders.shader.Set("color", color);
+            Shaders.shader.Set("model", model);
+            GL.BindVertexArray(vao);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * positions.Length, positions, BufferUsageHint.StaticDraw);
+            GL.DrawArrays(PrimitiveType.Quads, 0, positions.Length / 3);
+        }
+
+        private void Draw(vec3 color, PrimitiveType primitiveType)
+        {
             Shaders.shader.Set("color", color);
             Shaders.shader.Set("model", mat4.identity());
             GL.BindVertexArray(vao);
             GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * positions.Length, positions, BufferUsageHint.StaticDraw);
-            GL.DrawArrays(PrimitiveType.Lines, 0, 2);
+            GL.DrawArrays(primitiveType, 0, positions.Length / 3);
         }
     }
 }

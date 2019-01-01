@@ -18,12 +18,12 @@ namespace WindowsFormsApplication1
     {
         MyControl glControl;
         Renderer renderer = new Renderer();
-        Rectangle3D plane;
-        Rectangle3D plane2;
-        Line3D line;
-        Line3D ray;
         Cube cube;
-        vec3 direction = new vec3(0, 0, 1);
+        vec3 rayPoint = new vec3(0, 5, 5);
+        vec3 rayDirection;
+        vec3 planePoint = new vec3(0);
+        vec3 planeDirection = new vec3(0, 0, 1);
+        vec2 planeSize = new vec2(5, 5);
         float z;
         bool isLeftMouseDown = false;
         bool isRightMouseDown = false;
@@ -31,14 +31,13 @@ namespace WindowsFormsApplication1
         float mouseY;
         float cameraAngleX = 45.0f;
         float cameraAngleY = -45.0f;
-        float cameraDistance = 3.0f;
+        float cameraDistance = 25;
 
         public Form1()
         {
             InitializeComponent();
 
-            Width = 800;
-            Height = 600;
+            rayDirection = glm.normalize(new vec3(0) - rayPoint);
 
             glControl = new MyControl();
             glControl.Location = new Point(Width / 4, Height / 4);
@@ -48,10 +47,26 @@ namespace WindowsFormsApplication1
             glControl.MouseDown += GlControl_MouseDown;
             glControl.MouseUp += GlControl_MouseUp;
             glControl.MouseMove += GlControl_MouseMove;
+            LinkTrackBarWithLabel(trackBar1, planeDirXLabel);
+            LinkTrackBarWithLabel(trackBar2, planeDirYLabel);
+            LinkTrackBarWithLabel(trackBar3, planeDirZLabel);
+            LinkTrackBarWithLabel(rayDirXTrackBar, rayDirXLabel);
+            LinkTrackBarWithLabel(rayDirYTrackBar, rayDirYLabel);
+            LinkTrackBarWithLabel(rayDirZTrackBar, rayDirZLabel);
             Controls.Add(glControl);
         }
 
-        private void GlControl_OnLoadEvent(object sender, EventArgs e)
+        private void LinkTrackBarWithLabel(TrackBar trackBar, Label label)
+        {
+            trackBar.Scroll += (sender, e) =>
+            {
+                label.Text = ConvertTrackbarValue(trackBar.Value).ToString();
+            };
+        }
+
+        private float ConvertTrackbarValue(int value) => value / 10.0f;
+
+        private void Init()
         {
             GL.Enable(EnableCap.ProgramPointSize);
             GL.Enable(EnableCap.LineSmooth);
@@ -61,23 +76,45 @@ namespace WindowsFormsApplication1
             Shaders.Init();
             renderer.Init();
 
-            plane = new Rectangle3D(new List<vec3> {
-                new vec3(-0.5f, -0.5f, 0.0f),
-                new vec3(-0.5f, 0.5f, 0.0f),
-                new vec3(0.5f, 0.5f, 0.0f),
-                new vec3(0.5f, -0.5f, 0.0f),
-            });
-            plane2 = new Rectangle3D(new List<vec3> {
-                new vec3(-0.5f, -0.5f, -.0f),
-                new vec3(-0.5f, 0.5f, -.0f),
-                new vec3(0.5f, 0.5f, -.0f),
-                new vec3(0.5f, -0.5f, -.0f),
-            });
-            plane2.Color = new vec3(0.5f, 0.5f, 0.95f);
-            line = new Line3D(new vec3(0, 0, 0), direction);
-            ray = new Line3D(new vec3(-0.5f, -0.5f, 0), new vec3(100, 100, 0));
-            ray.Color = new vec3(0.5f, 0.5f, 0.75f);
             cube = new Cube();
+            planeDirection = new vec3(1, 1, 1);
+            UpdateRotation();
+        }
+
+        private void Draw()
+        {
+            GL.ClearColor(0.0f, 0.2f, 0.2f, 1.0f);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            var intersectionPoint = ComputeLinePlaneIntersectionPoint();           
+            
+
+            if (Height != 0)
+            {
+                SetViewAndProjection();
+            }
+
+            renderer.DrawLine(new vec3(0), new vec3(10, 0, 0), new vec3(1, 0, 0));
+            renderer.DrawLine(new vec3(0), new vec3(0, 10, 0), new vec3(0, 1, 0));
+            renderer.DrawLine(new vec3(0), new vec3(0, 0, 10), new vec3(0, 0, 1));
+            renderer.DrawRectangle(new vec3(0), planeSize, planeDirection, new vec3(0));
+            renderer.DrawLine(rayPoint, rayPoint + rayDirection * 2000, new vec3(0.3f, 0.4f, 0.5f));
+            renderer.DrawPoint(rayPoint, new vec3(1, 0, 0));
+            if (intersectionPoint.HasValue)
+            {
+                intersectionPointLabel.Text = String.Format("{0:0.00}, {1:0.00}, {2:0.00}", intersectionPoint.Value.x, intersectionPoint.Value.y, intersectionPoint.Value.z);
+                renderer.DrawPoint(intersectionPoint.Value, new vec3(0.5f, 0.4f, 0.3f));
+            }
+            else
+            {
+                intersectionPointLabel.Text = "No intersection";
+            }
+
+            glControl.SwapBuffers();
+        }
+
+        private void GlControl_OnLoadEvent(object sender, EventArgs e)
+        {
+            Init();
         }
 
         private void GlControl_MouseUp(object sender, MouseEventArgs e)
@@ -110,13 +147,14 @@ namespace WindowsFormsApplication1
             }
             else if (isRightMouseDown)
             {
-                cameraDistance += (e.Y - mouseY) / 50;
+                cameraDistance += (e.Y - mouseY) / 5;
                 mouseX = e.X;
                 mouseY = e.Y;
 
                 glControl.Invalidate();
             }
         }
+
         private void GlControl_MouseDown(object sender, MouseEventArgs e)
         {
             mouseX = e.X;
@@ -134,24 +172,20 @@ namespace WindowsFormsApplication1
 
         private void GlControl_OnPaintEvent(object sender, PaintEventArgs e)
         {
-            GL.ClearColor(0.0f, 0.2f, 0.2f, 1.0f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            
-            if (Height != 0)
-            {
-                SetViewAndProjection();
-            }
+            Draw();
+        }
 
-            //plane2.Draw();
-            plane.Draw();
-            line.Draw();
-            //ray.Draw();
-            //cube.Draw();
-            renderer.DrawLine(new vec3(0), new vec3(1, 0, 0), new vec3(1, 0, 0));
-            renderer.DrawLine(new vec3(0), new vec3(0, 1, 0), new vec3(0, 1, 0));
-            renderer.DrawLine(new vec3(0), new vec3(0, 0, 1), new vec3(0, 0, 1));
+        string Str(vec3 v) => String.Format("{0}, {1}, {2}", v.x, v.y, v.z);
 
-            glControl.SwapBuffers();
+        vec3? ComputeLinePlaneIntersectionPoint()
+        {
+            float t = glm.dot(planePoint - rayPoint, planeDirection) / glm.dot(rayDirection, planeDirection);
+            if (t >= 0)
+                return rayPoint + t * rayDirection;
+            else
+                return null;
+            //var result = rayPoint + z * glm.normalize(rayDirection);
+            //return result;
         }
 
         void DrawAxes()
@@ -175,38 +209,60 @@ namespace WindowsFormsApplication1
             Shaders.shader.Set("projection", projection);
         }
 
+        private void UpdateRotation()
+        {
+        }
+
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            direction.x = trackBar1.Value / 100.0f;
+            planeDirection.x = trackBar1.Value / 100.0f;
             UpdateRotation();
             glControl.Invalidate();
         }
 
-        private void UpdateRotation()
-        {
-            Console.WriteLine("{0}, {1}, {2}", direction.x, direction.y, direction.z);
-            plane.Rotate(direction);
-            line.Rotate(direction);
-        }
-
         private void trackBar2_Scroll(object sender, EventArgs e)
         {
-            direction.y = trackBar2.Value / 100.0f;
+            planeDirection.y = trackBar2.Value / 100.0f;
             UpdateRotation();
             glControl.Invalidate();
         }
 
         private void trackBar3_Scroll(object sender, EventArgs e)
         {
-            direction.z = trackBar3.Value / 100.0f;
+            planeDirection.z = trackBar3.Value / 100.0f;
             UpdateRotation();
-            plane2.Translate(new vec3(0, 0, direction.z));
             glControl.Invalidate();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            z += 0.1f;
+            glControl.Invalidate();
+        }
+
+        private void rayDirXTrackBar_Scroll(object sender, EventArgs e)
+        {
+            rayDirection.x = rayDirXTrackBar.Value / 10.0f;
+            glControl.Invalidate();
+        }
+
+        private void rayDirYTrackBar_Scroll(object sender, EventArgs e)
+        {
+            rayDirection.y = rayDirYTrackBar.Value / 10.0f;
+            glControl.Invalidate();
+        }
+
+        private void rayDirZTrackBar_Scroll(object sender, EventArgs e)
+        {
+            rayDirection.z = rayDirZTrackBar.Value / 10.0f;
+            glControl.Invalidate();
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            rayDirection = new vec3(0);
+            rayDirXTrackBar.Value = 0;
+            rayDirYTrackBar.Value = 0;
+            rayDirZTrackBar.Value = 0;
             glControl.Invalidate();
         }
     }
