@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "010_LinePlaneIntersection",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "011_SphereIntersection", "011_SphereIntersection\011_SphereIntersection.csproj", "{AFB591DA-F758-4BBC-AA26-26720333A2D5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "012_Cylinder", "012_Cylinder\012_Cylinder.csproj", "{ACAD109D-827F-4EB8-90BF-6DFA58044B01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{AFB591DA-F758-4BBC-AA26-26720333A2D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFB591DA-F758-4BBC-AA26-26720333A2D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFB591DA-F758-4BBC-AA26-26720333A2D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACAD109D-827F-4EB8-90BF-6DFA58044B01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACAD109D-827F-4EB8-90BF-6DFA58044B01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACAD109D-827F-4EB8-90BF-6DFA58044B01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACAD109D-827F-4EB8-90BF-6DFA58044B01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
