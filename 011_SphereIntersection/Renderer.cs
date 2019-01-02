@@ -107,13 +107,7 @@ namespace WindowsFormsApplication1
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ibo);
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * positions.Length, positions, BufferUsageHint.StaticCopy);
             GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * indices.Length, indices, BufferUsageHint.StaticCopy);
-            GL.DrawElements(BeginMode.Lines, indices.Length, DrawElementsType.UnsignedInt, 0);
-            Shaders.shader.Set("color", new vec3(0.5f));
             GL.DrawElements(BeginMode.Triangles, indices.Length, DrawElementsType.UnsignedInt, 0);
-
-            indices = new int[] { 0, positions.Length / 3 - 1 };
-            GL.BufferData(BufferTarget.ElementArrayBuffer, sizeof(int) * indices.Length, indices, BufferUsageHint.StaticCopy);
-            //GL.DrawElements(BeginMode.Points, indices.Length, DrawElementsType.UnsignedInt, 0);
         }
 
         private void Draw(vec3 color, PrimitiveType primitiveType)
@@ -155,7 +149,6 @@ namespace WindowsFormsApplication1
                     positions.Add(z);
                 }
             }
-            Console.WriteLine(positions.Count);
             return positions.ToArray();
         }
 

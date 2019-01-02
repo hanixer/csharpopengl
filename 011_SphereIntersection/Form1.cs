@@ -18,13 +18,10 @@ namespace WindowsFormsApplication1
     {
         MyControl glControl;
         Renderer renderer = new Renderer();
-        Cube cube;
-        vec3 rayPoint = new vec3(0, 5, 5);
+        vec3 rayPoint;
         vec3 rayDirection;
-        vec3 planePoint = new vec3(0);
-        vec3 planeDirection = new vec3(0, 0, 1);
-        vec2 planeSize = new vec2(5, 5);
-        float z;
+        float sphereRadius = 5.0f;
+        vec3 spherePosition = new vec3(0);
         bool isLeftMouseDown = false;
         bool isRightMouseDown = false;
         float mouseX;
@@ -37,7 +34,8 @@ namespace WindowsFormsApplication1
         {
             InitializeComponent();
 
-            rayDirection = glm.normalize(new vec3(0) - rayPoint);
+            rayPoint = new vec3(5, 4, 3);
+            rayDirection = new vec3(0) - rayPoint;
 
             glControl = new MyControl();
             glControl.Location = new Point(Width / 4, Height / 4);
@@ -47,6 +45,9 @@ namespace WindowsFormsApplication1
             glControl.MouseDown += GlControl_MouseDown;
             glControl.MouseUp += GlControl_MouseUp;
             glControl.MouseMove += GlControl_MouseMove;
+            trackBar1.ValueChanged += trackBar1_Scroll;
+            trackBar2.ValueChanged += trackBar2_Scroll;
+            trackBar3.ValueChanged += trackBar3_Scroll;
             Controls.Add(glControl);
         }
 
@@ -72,8 +73,6 @@ namespace WindowsFormsApplication1
 
             var result = Renderer.GeneratePositions(1, 4, 8);
 
-            cube = new Cube();
-            planeDirection = new vec3(1, 1, 1);
             UpdateRotation();
         }
 
@@ -81,7 +80,8 @@ namespace WindowsFormsApplication1
         {
             GL.ClearColor(0.0f, 0.2f, 0.2f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            var intersectionPoint = ComputeLinePlaneIntersectionPoint();           
+            var intersectionPoint = ComputeLinePlaneIntersectionPoint();
+            var intersection = ComputeIntersection();           
             
 
             if (Height != 0)
@@ -92,7 +92,27 @@ namespace WindowsFormsApplication1
             renderer.DrawLine(new vec3(0), new vec3(10, 0, 0), new vec3(1, 0, 0));
             renderer.DrawLine(new vec3(0), new vec3(0, 10, 0), new vec3(0, 1, 0));
             renderer.DrawLine(new vec3(0), new vec3(0, 0, 10), new vec3(0, 0, 1));
-            renderer.DrawSphere(5, new vec3(0), 16);
+            renderer.DrawSphere(sphereRadius, new vec3(0), 16);
+            renderer.DrawPoint(rayPoint, new vec3(0.5f, 0.5f, 0.0f));
+            renderer.DrawLine(rayPoint, rayPoint + rayDirection * 1000, new vec3(0.7f, 0.1f, 0.3f));
+
+            if (intersection == null)
+            {
+                intersectionLabel.Text = "No intersection";
+            }
+            else
+            {
+                renderer.DrawPoint(intersection.Item1, new vec3(0.5f, 0.5f, 0.8f));
+                if (intersection.Item2.HasValue)
+                {
+                    intersectionLabel.Text = String.Format("point 1 = ({0}); point 2 = ({1})", Str(intersection.Item1), Str(intersection.Item2.Value));
+                    renderer.DrawPoint(intersection.Item2.Value, new vec3(0.5f, 0.5f, 0.8f));
+                }
+                else
+                {
+                    intersectionLabel.Text = String.Format("point 1 = ({0});", Str(intersection.Item1));
+                }
+            }
 
             glControl.SwapBuffers();
         }
@@ -160,14 +180,42 @@ namespace WindowsFormsApplication1
             Draw();
         }
 
-        string Str(vec3 v) => String.Format("{0}, {1}, {2}", v.x, v.y, v.z);
+        string Str(vec3 v) => String.Format("{0:0.00}, {1:0.00}, {2:0.00}", v.x, v.y, v.z);
+
+        Tuple<vec3, vec3?> ComputeIntersection()
+        {
+            // (x - q)^2 = r^2
+            // (p - q + td) = r^2
+            // p - q = v
+            // t^2 * d^2 + t * 2dv + v * v - r^2 = 0
+            // - b +- sqrt(b^2 - 4ac) / 2a
+            vec3 v = rayPoint - spherePosition;
+            float a = glm.dot(rayDirection, rayDirection);
+            float b = 2 * glm.dot(rayDirection, v);
+            float c = glm.dot(v, v) - sphereRadius * sphereRadius;
+            float underRoot = b * b - 4 * a * c;
+
+            if (underRoot == 0)
+            {
+                float t = (float)(-b + Math.Sqrt(underRoot)) / (2 * a);
+                return new Tuple<vec3, vec3?>(ParameterToPoint(t), null);
+            }
+            else if (underRoot > 0)
+            {
+                float t1 = (float)(-b + Math.Sqrt(underRoot)) / (2 * a);
+                float t2 = (float)(-b - Math.Sqrt(underRoot)) / (2 * a);
+                return new Tuple<vec3, vec3?>(ParameterToPoint(t1), ParameterToPoint(t2));
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        vec3 ParameterToPoint(float t) => rayPoint + rayDirection * t;
 
         vec3? ComputeLinePlaneIntersectionPoint()
         {
-            float t = glm.dot(planePoint - rayPoint, planeDirection) / glm.dot(rayDirection, planeDirection);
-            if (t >= 0)
-                return rayPoint + t * rayDirection;
-            else
                 return null;
             //var result = rayPoint + z * glm.normalize(rayDirection);
             //return result;
@@ -200,6 +248,30 @@ namespace WindowsFormsApplication1
 
         private void button1_Click(object sender, EventArgs e)
         {
+            glControl.Invalidate();
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            float value = ConvertTrackbarValue(trackBar1.Value);
+            label1.Text = value.ToString();
+            rayDirection.x = value;
+            glControl.Invalidate();
+        }
+
+        private void trackBar2_Scroll(object sender, EventArgs e)
+        {
+            float value = ConvertTrackbarValue(trackBar2.Value);
+            label2.Text = value.ToString();
+            rayDirection.y = value;
+            glControl.Invalidate();
+        }
+
+        private void trackBar3_Scroll(object sender, EventArgs e)
+        {
+            float value = ConvertTrackbarValue(trackBar3.Value);
+            label3.Text = value.ToString();
+            rayDirection.z = value;
             glControl.Invalidate();
         }
     }
