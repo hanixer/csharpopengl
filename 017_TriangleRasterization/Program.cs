@@ -21,9 +21,6 @@ namespace _014_DrawTriangle
         static void Main()
         {
             Environment.CurrentDirectory = Environment.CurrentDirectory + "..\\..\\..\\";
-            int thing = Renderer.EdgeFunction(new vec2i(0, 0), 
-                new vec2i(100, 10), new vec2i(50, 50));
-            Console.WriteLine(thing);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());

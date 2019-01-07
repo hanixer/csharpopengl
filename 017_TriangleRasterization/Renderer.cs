@@ -107,12 +107,12 @@ namespace _014_DrawTriangle
             }
         }
 
-        static Tuple<vec2i, vec2i> GetBoundingBox(vec3i v0, vec3i v1, vec3i v2)
+        static Tuple<vec2, vec2> GetBoundingBox(vec3 v0, vec3 v1, vec3 v2)
         {
-            var xs = new List<int> { v0.x, v1.x, v2.x };
-            var ys = new List<int> { v0.y, v1.y, v2.y };
+            var xs = new List<float> { v0.x, v1.x, v2.x };
+            var ys = new List<float> { v0.y, v1.y, v2.y };
 
-            return new Tuple<vec2i, vec2i>(new vec2i(xs.Min(), ys.Min()), new vec2i(xs.Max(), ys.Max()));
+            return new Tuple<vec2, vec2>(new vec2(xs.Min(), ys.Min()), new vec2(xs.Max(), ys.Max()));
         }
 
         static Tuple<vec2i, vec2i> GetBoundingBox(vec2i v0, vec2i v1, vec2i v2)
@@ -123,22 +123,18 @@ namespace _014_DrawTriangle
             return new Tuple<vec2i, vec2i>(new vec2i(xs.Min(), ys.Min()), new vec2i(xs.Max(), ys.Max()));
         }
 
-        public static void Triangle(vec2i v0, vec2i v1, vec2i v2, Color color, Bitmap bitmap)
+        public static void Triangle(vec3 v0, vec3 v1, vec3 v2, Color color, Bitmap bitmap)
         {
             var boundingBox = GetBoundingBox(v0, v1, v2);
-            //Console.WriteLine("boundingBox = {0}, {1}", boundingBox.Item1, boundingBox.Item2);
-            //Console.WriteLine("v0 = {0}, v1 = {1}, v2 = {2}", v0, v1, v2);
 
-            //boundingBox = new Tuple<vec2i, vec2i>(new vec2i(0, 0), new vec2i(bitmap.Width, bitmap.Height));
-            for (int y = boundingBox.Item1.y; y < boundingBox.Item2.y; y++)
+            for (float y = boundingBox.Item1.y; y < boundingBox.Item2.y; y++)
             {
-                for (int x = boundingBox.Item1.x; x < boundingBox.Item2.x; x++)
+                for (float x = boundingBox.Item1.x; x < boundingBox.Item2.x; x++)
                 {
-                    vec2i point = new vec2i(x, y);
-                    int w0 = EdgeFunction(v0, v1, point);
-                    int w1 = EdgeFunction(v1, v2, point);
-                    int w2 = EdgeFunction(v2, v0, point);
-                    //Console.WriteLine("v0 = {3}, v1 = {4}, v2 = {5}, point = {6}, w0 = {0}, w1 = {1}, w2 = {2}", w0, w1, w2, v0, v1, v2, point);
+                    vec3 point = new vec3(x, y, 0);
+                    float w0 = EdgeFunction(v0, v1, point);
+                    float w1 = EdgeFunction(v1, v2, point);
+                    float w2 = EdgeFunction(v2, v0, point);
                     if (w0 >= 0 && w1 >= 0 && w2 >= 0)
                     {
                         SetPixel(x, y, color, bitmap);
@@ -147,7 +143,12 @@ namespace _014_DrawTriangle
             }
         }
 
-        public static int EdgeFunction(vec2i start, vec2i end, vec2i point) => (point.y - start.y) * (end.x - start.x) - (point.x - start.x) * (end.y - start.y);
+        public static float EdgeFunction(vec3 start, vec3 end, vec3 point) => (point.y - start.y) * (end.x - start.x) - (point.x - start.x) * (end.y - start.y);
+
+        private static void SetPixel(float x, float y, Color color, Bitmap bitmap)
+        {
+            SetPixel((int)x, (int)y, color, bitmap);
+        }
 
         private static void SetPixel(int x, int y, Color color, Bitmap bitmap)
         {
