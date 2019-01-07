@@ -22,6 +22,15 @@ namespace _014_DrawTriangle
         public Form1()
         {
             InitializeComponent();
+            ClearBitmap();
+            Width = w + 20;
+            Height = h + 30;
+
+            Paint += Form1_Paint;
+        }
+
+        private void ClearBitmap()
+        {
             for (int i = 0; i < w; i++)
             {
                 for (int j = 0; j < h; j++)
@@ -29,20 +38,11 @@ namespace _014_DrawTriangle
                     bitmap.SetPixel(i, j, Color.Black);
                 }
             }
-            Width = w + 20;
-            Height = h + 30;
-
-            Paint += Form1_Paint;
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            //Renderer.Triangle(new vec2i(10, 70), new vec2i(50, 160), new vec2i(70, 80), Color.Red, bitmap);
-            //Renderer.Triangle(new vec2i(180, 50), new vec2i(150, 1), new vec2i(70, 180), Color.White, bitmap);
-            //Renderer.Triangle(new vec2i(180, 150), new vec2i(120, 160), new vec2i(130, 180), Color.Green, bitmap);
-            //Renderer.Line(0, 0, 100, 100, Color.Gold, bitmap);
-            //Renderer.Line(100, 100, 50, 125, Color.Goldenrod, bitmap);
-
+            ClearBitmap();
             DrawModelNew();
             e.Graphics.DrawImage(bitmap, 0, 0);
         }
@@ -70,21 +70,39 @@ namespace _014_DrawTriangle
 
         private void DrawModelNew()
         {
+            vec3 lightDirection = new vec3(0, 0, -1);
+            int count = 0;
             for (int i = 0; i < model.Faces.Count; i++)
             {
+                var worldCoords = new vec3[3];
                 var screenCoords = new vec2i[3];
                 for (int j = 0; j < 3; j++)
                 {
                     int w = Form1.w - 1;
                     int h = Form1.h - 1;
                     vec3 v0 = model.GetVertex(i, j);
-                    screenCoords[j] = new vec2i(Convert(w, v0.x), Convert(h, v0.y));
+                    if (Math.Abs(v0.x) <= 1 && Math.Abs(v0.y) <= 1)
+                    {
+                        worldCoords[j] = v0;
+                        screenCoords[j] = new vec2i(Convert(w, v0.x), Convert(h, v0.y));
+                    }
                 }
 
+                vec3 norm = glm.normalize(glm.cross(worldCoords[2] - worldCoords[0], worldCoords[1] - worldCoords[0]));
 
-
-                Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], Color.FromArgb(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255)), bitmap);
+                float intensity = glm.dot(norm, lightDirection);
+                //intensity = 1;
+                if (intensity > 0)
+                {
+                    var value = (int)(intensity * 255);
+                    count++;
+                    var color = Color.FromArgb(value, value, value);
+                    //color = Color.Bisque;
+                    //color = Color.FromArgb(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255));
+                    Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], color, bitmap);
+                }
             }
+            Console.WriteLine(count);
         }
 
         private static int Convert(int w, float r)
@@ -100,45 +118,6 @@ namespace _014_DrawTriangle
         static float Interpolate(vec3 v, float w0, float w1, float w2)
         {
             return v.x * w0 + v.y * w1 + v.z * w2;
-        }
-
-        private void Actionf()
-        {
-            vec2 v0 = new vec2(0, 0);
-            vec2 v1 = new vec2(400, 400);
-            vec2 v2 = new vec2(400, 0);
-            vec3 c0 = new vec3(0.5f, 0, 0);
-            vec3 c1 = new vec3(0, 0.5f, 0);
-            vec3 c2 = new vec3(0, 0, .5f);
-
-            float area = edgeFunction(v0, v1, v2);
-
-            for (int y = 0; y < h; y++)
-            {
-                for (int x = 0; x < w; x++)
-                {
-                    vec2 p = new vec2(x + 0.5f, y + 0.5f);
-                    float w0 = edgeFunction(v1, v2, p);
-                    float w1 = edgeFunction(v2, v0, p);
-                    float w2 = edgeFunction(v0, v1, p);
-                    if (w0 >= 0 && w1 >= 0 && w2 >= 0)
-                    {
-                        w0 /= area;
-                        w1 /= area;
-                        w2 /= area;
-                        int r = (int)(Interpolate(c0, w0, w1, w2) * 255);
-                        int g = (int)(Interpolate(c1, w0, w1, w2) * 255);
-                        int b = (int)(Interpolate(c2, w0, w1, w2) * 255);
-                        Color color = Color.FromArgb(r, g, b);
-                        bitmap.SetPixel(x, y, color);
-                    }
-                    else
-                    {
-                        Color color = Color.FromArgb(0, 0, 0);
-                        bitmap.SetPixel(x, y, color);
-                    }
-                }
-            }
         }
     }
 }

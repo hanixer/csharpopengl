@@ -97,11 +97,6 @@ namespace _014_DrawTriangle
             var xs = new List<int> { v0.x, v1.x, v2.x };
             var ys = new List<int> { v0.y, v1.y, v2.y };
 
-            int minX = int.MaxValue;
-            int maxX = int.MinValue;
-            int minY = int.MaxValue;
-            int maxY = int.MinValue;
-
             return new Tuple<vec2i, vec2i>(new vec2i(xs.Min(), ys.Min()), new vec2i(xs.Max(), ys.Max()));
         }
 
@@ -137,7 +132,7 @@ namespace _014_DrawTriangle
             }
         }
 
-        static int EdgeFunction(vec2i start, vec2i end, vec2i point) => (point.x - start.x) * (end.y - start.y) - (point.y - start.y) * (end.x - start.x);
+        public static int EdgeFunction(vec2i start, vec2i end, vec2i point) => (point.y - start.y) * (end.x - start.x) - (point.x - start.x) * (end.y - start.y);
 
         private static void SetPixel(int x, int y, Color color, Bitmap bitmap)
         {

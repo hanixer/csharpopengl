@@ -31,11 +31,22 @@ namespace Utilities
                 }
                 else if (line.StartsWith("f ") && tokens.Length == 4)
                 {
-                        int[] faces = new int[3];
-                        faces[0] = TakeInt(tokens[1]);
-                        faces[1] = TakeInt(tokens[2]);
-                        faces[2] = TakeInt(tokens[3]);
-                        model.faces.Add(faces);
+                    int[] faces = new int[3];
+                    faces[0] = TakeInt(tokens[1]);
+                    faces[1] = TakeInt(tokens[2]);
+                    faces[2] = TakeInt(tokens[3]);
+                    model.faces.Add(faces);
+                }
+                else if (line.StartsWith("f ") && tokens.Length == 5)
+                {
+                    int[] faces = new int[4];
+                    int a = TakeInt(tokens[1]);
+                    int b = TakeInt(tokens[2]);
+                    int c = TakeInt(tokens[3]);
+                    int d = TakeInt(tokens[4]);
+
+                    model.faces.Add(new int[] { a, b, c });
+                    model.faces.Add(new int[] { b, c, d });
                 }
             }
 
