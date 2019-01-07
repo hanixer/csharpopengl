@@ -42,12 +42,6 @@ namespace _014_DrawTriangle
 
         public static void Line(int x0, int y0, int x1, int y1, Color color, Bitmap bitmap)
         {
-            //for (float t = 0.0f; t < 1.0f; t += 0.01f)
-            //{
-            //    int x = (int)(x0 + t * (x1 - x0));
-            //    int y = (int)(y0 + t * (y1 - y0));
-            //    bitmap.SetPixel(x, y, color);
-            //}
             bool steep = false;
 
             if (Math.Abs(x1 - x0) < Math.Abs(y1 - y0))
@@ -80,16 +74,37 @@ namespace _014_DrawTriangle
                     SetPixel(x, y, color, bitmap);
                 }
             }
-            //for (int x = x0; x <= x1; x++)
-            //{
-            //    for (int y = y0; y <= y1; y++)
-            //    {
+        }
 
-            //    }
-            //    float t = (float)(x - x0) / (x1 - x0);
-            //    int y = (int)(y0 + t * (y1 - y0));
-            //    bitmap.SetPixel(x, y, color);
-            //}
+        public static void Line(vec2i p0, vec2i p1, Color color, Bitmap bitmap)
+        {
+            Line(p0.x, p0.y, p1.x, p1.y, color, bitmap);
+        }
+
+        public static void LineWithBuffer(vec2i p0, vec2i p1, Color color, Bitmap bitmap, int[] buffer)
+        {
+            if (p0.x > p1.x)
+            {
+                vec2i temp = p0;
+                p0 = p1;
+                p1 = temp;
+            }
+
+            for (int x = p0.x; x <= p1.x; x++)
+            {
+                float t = (float)(x - p0.x) / (p1.x - p0.x);
+                int y = (int)(p0.y + t * (p1.y - p0.y));
+                int previousX = buffer[x];
+
+                if (buffer[x] < y)
+                {
+                    buffer[x] = y;
+                    for (int yy = 0; yy < bitmap.Height; yy++)
+                    {
+                        SetPixel(x, yy, color, bitmap);
+                    }                    
+                }
+            }
         }
 
         static Tuple<vec2i, vec2i> GetBoundingBox(vec3i v0, vec3i v1, vec3i v2)
@@ -136,8 +151,8 @@ namespace _014_DrawTriangle
 
         private static void SetPixel(int x, int y, Color color, Bitmap bitmap)
         {
-            bitmap.SetPixel(x, bitmap.Height - y - 1, color);
-            //bitmap.SetPixel(x, y, color);
+            //bitmap.SetPixel(x, bitmap.Height - y - 1, color);
+            bitmap.SetPixel(x, y, color);
         }
     }
 }

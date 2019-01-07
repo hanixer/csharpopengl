@@ -14,17 +14,34 @@ namespace _014_DrawTriangle
 {
     public partial class Form1 : Form
     {
-        static int w = 500;
-        static int h = 500;
-        Bitmap bitmap = new Bitmap(w, h);
+        static int w = 800;
+        static int h = 600;
+        Bitmap mainImage = new Bitmap(w, h);
+        Bitmap lineImage = new Bitmap(w, 16);
         Model model = Model.FromFile("head.obj");
+        vec2i p1 = new vec2i(20, 34);
+        vec2i p2 = new vec2i(744, 400);
+        vec2i p3 = new vec2i(120, 434);
+        vec2i p4 = new vec2i(444, 400);
+        vec2i p5 = new vec2i(330, 463);
+        vec2i p6 = new vec2i(594, 200);
+        int[] ybuffer = new int[w];
 
         public Form1()
         {
             InitializeComponent();
             ClearBitmap();
             Width = w + 20;
-            Height = h + 30;
+            Height = h + 30 + lineImage.Height * 4;
+
+            for (int i = 0; i < ybuffer.Length; i++)
+            {
+                ybuffer[i] = int.MinValue;
+                for (int j = 0; j < lineImage.Height; j++)
+                {
+                    lineImage.SetPixel(i, j, Color.Black);
+                }
+            }
 
             Paint += Form1_Paint;
         }
@@ -35,7 +52,7 @@ namespace _014_DrawTriangle
             {
                 for (int j = 0; j < h; j++)
                 {
-                    bitmap.SetPixel(i, j, Color.Black);
+                    mainImage.SetPixel(i, j, Color.Black);
                 }
             }
         }
@@ -43,27 +60,20 @@ namespace _014_DrawTriangle
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             ClearBitmap();
-            DrawModelNew();
-            e.Graphics.DrawImage(bitmap, 0, 0);
-        }
 
-        private void DrawModelOld()
-        {
-            for (int i = 0; i < model.Faces.Count; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    int w = Form1.w - 1;
-                    int h = Form1.h - 1;
-                    vec3 v0 = model.GetVertex(i, j);
-                    vec3 v1 = model.GetVertex(i, (j + 1) % 3);
-                    int x0 = Convert(w, v0.x);
-                    int y0 = Convert(h, v0.y);
-                    int x1 = (int)((v1.x + 1.0f) * w / 2);
-                    int y1 = (int)((v1.y + 1.0f) * h / 2);
-                    Renderer.Line(x0, y0, x1, y1, Color.White, bitmap);
-                }
-            }
+            Renderer.Line(p1, p2, Color.Red, mainImage);
+            Renderer.Line(p3, p4, Color.Green, mainImage);
+            Renderer.Line(p5, p6, Color.Blue, mainImage);
+
+            Renderer.LineWithBuffer(p1, p2, Color.Red, lineImage, ybuffer);
+            Renderer.LineWithBuffer(p3, p4, Color.Green, lineImage, ybuffer);
+            Renderer.LineWithBuffer(p5, p6, Color.Blue, lineImage, ybuffer);
+
+
+            mainImage.RotateFlip(RotateFlipType.RotateNoneFlipY);
+
+            e.Graphics.DrawImage(mainImage, 0, 0);
+            e.Graphics.DrawImage(lineImage, 0, mainImage.Height + 20);
         }
 
         static Random random = new Random();
@@ -99,7 +109,7 @@ namespace _014_DrawTriangle
                     var color = Color.FromArgb(value, value, value);
                     //color = Color.Bisque;
                     //color = Color.FromArgb(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255));
-                    Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], color, bitmap);
+                    Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], color, mainImage);
                 }
             }
             Console.WriteLine(count);
