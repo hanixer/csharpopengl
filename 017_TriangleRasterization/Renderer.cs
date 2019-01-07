@@ -123,21 +123,35 @@ namespace _014_DrawTriangle
             return new Tuple<vec2i, vec2i>(new vec2i(xs.Min(), ys.Min()), new vec2i(xs.Max(), ys.Max()));
         }
 
-        public static void Triangle(vec3 v0, vec3 v1, vec3 v2, Color color, Bitmap bitmap)
+        public static void Triangle(vec3 v0, vec3 v1, vec3 v2, Color color, Bitmap bitmap, float[,] zbuffer)
         {
             var boundingBox = GetBoundingBox(v0, v1, v2);
+            float area = EdgeFunction(v0, v1, v2);
 
-            for (float y = boundingBox.Item1.y; y < boundingBox.Item2.y; y++)
+            for (int y = (int)boundingBox.Item1.y; y < boundingBox.Item2.y; y++)
             {
-                for (float x = boundingBox.Item1.x; x < boundingBox.Item2.x; x++)
+                for (int x = (int)boundingBox.Item1.x; x < boundingBox.Item2.x; x++)
                 {
                     vec3 point = new vec3(x, y, 0);
-                    float w0 = EdgeFunction(v0, v1, point);
-                    float w1 = EdgeFunction(v1, v2, point);
-                    float w2 = EdgeFunction(v2, v0, point);
+                    float w0 = EdgeFunction(v1, v2, point);
+                    float w1 = EdgeFunction(v2, v0, point);
+                    float w2 = EdgeFunction(v0, v1, point);
                     if (w0 >= 0 && w1 >= 0 && w2 >= 0)
                     {
-                        SetPixel(x, y, color, bitmap);
+                        w0 /= area;
+                        w1 /= area;
+                        w2 /= area;
+                        float z = w0 * v0.z + w1 * v1.z + w2 * v2.z;
+
+                        if (zbuffer[x, y] < z)
+                        {
+                            zbuffer[x, y] = z;
+                            SetPixel(x, y, color, bitmap);
+                        }
+                        else
+                        {
+                            z--;
+                        }
                     }
                 }
             }

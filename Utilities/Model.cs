@@ -46,7 +46,7 @@ namespace Utilities
                     int d = TakeInt(tokens[4]);
 
                     model.faces.Add(new int[] { a, b, c });
-                    model.faces.Add(new int[] { b, c, d });
+                    model.faces.Add(new int[] { c, d, a });
                 }
             }
 

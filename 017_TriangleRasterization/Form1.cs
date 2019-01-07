@@ -14,26 +14,52 @@ namespace _014_DrawTriangle
 {
     public partial class Form1 : Form
     {
-        static int w = 800;
-        static int h = 600;
+        static int w = 400;
+        static int h = 400;
         Bitmap mainImage = new Bitmap(w, h);
         Model model = Model.FromFile("head.obj");
-        vec2i p1 = new vec2i(20, 34);
-        vec2i p2 = new vec2i(744, 400);
-        vec2i p3 = new vec2i(120, 434);
-        vec2i p4 = new vec2i(444, 400);
-        vec2i p5 = new vec2i(330, 463);
-        vec2i p6 = new vec2i(594, 200);
+        vec3 p1 = new vec3(20, 34, 50.0f);
+        vec3 p2 = new vec3(744, 400, 50.0f);
+        vec3 p3 = new vec3(120, 434, 50.0f);
         float[,] zbuffer = new float[w, h];
+        bool isRandomColor = false;
 
         public Form1()
         {
             InitializeComponent();
             ClearBitmap();
-            Width = w + 20;
-            Height = h + 30;
+            Width = 1000;
+            Height = 1000;
+
+            InitZBuffer();
+
+            KeyPress += Form1_KeyPress;
 
             Paint += Form1_Paint;
+        }
+
+        private void Form1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 'c')
+            {
+                isRandomColor = !isRandomColor;
+                Invalidate();
+            }
+            else if (e.KeyChar == 's')
+            {
+                mainImage.Save("output.png");
+            }
+        }
+
+        private void InitZBuffer()
+        {
+            for (int x = 0; x < zbuffer.GetLength(0); x++)
+            {
+                for (int y = 0; y < zbuffer.GetLength(1); y++)
+                {
+                    zbuffer[x, y] = -1.0f;
+                }
+            }
         }
 
         private void ClearBitmap()
@@ -50,12 +76,29 @@ namespace _014_DrawTriangle
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             ClearBitmap();
+            InitZBuffer();
 
             DrawModel();
+
+            //DrawZBuffer();
 
             mainImage.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
             e.Graphics.DrawImage(mainImage, 0, 0);
+        }
+
+        private void DrawZBuffer()
+        {
+            ClearBitmap();
+            for (int i = 0; i < w; i++)
+            {
+                for (int j = 0; j < h; j++)
+                {
+                    float zb = zbuffer[i, j];
+                    int v = (int)((zbuffer[i, j] + 1.0f) / 2 * 255);
+                    mainImage.SetPixel(i, j, Color.FromArgb(v, v, v));
+                }
+            }
         }
 
         static Random random = new Random();
@@ -92,8 +135,12 @@ namespace _014_DrawTriangle
                     count++;
                     var color = Color.FromArgb(value, value, value);
                     //color = Color.Bisque;
-                    //color = Color.FromArgb(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255));
-                    Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], color, mainImage);
+                    if (isRandomColor)
+                    {
+                        color = Color.FromArgb(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255));
+                    }
+
+                    Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], color, mainImage, zbuffer);
                 }
             }
             Console.WriteLine(count);

@@ -24,16 +24,6 @@ namespace _014_DrawTriangle
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
-
-
-            string text = @"
-v -1.0 2.0 -0.433
-v -1.0 2.0 -0.433
-v -1.0 2.0 -0.433
-f 0/1/2 0/1/2 0/1/1";
-            Model m = Model.Parse(text);
-            
-            Console.WriteLine(m);
         }
     }
 }
