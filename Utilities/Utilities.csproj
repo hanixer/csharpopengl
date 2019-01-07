@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Images.cs" />
+    <Compile Include="Model.cs" />
     <Compile Include="Shader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities.cs" />
