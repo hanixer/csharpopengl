@@ -14,11 +14,13 @@ namespace _014_DrawTriangle
 {
     public partial class Form1 : Form
     {
-        static int w = 100;
-        static int h = 100;
+        static int w = 500;
+        static int h = 500;
+        static int ww = 100;
+        static int hh = 100;
         Bitmap mainImage = new Bitmap(w, h);
-        Bitmap textureImage = new Bitmap("head.png");
-        Model model = Model.FromFile("head.obj");
+        Bitmap textureImage;
+        Model model;
         vec3 p1 = new vec3(20, 34, 50.0f);
         vec3 p2 = new vec3(744, 400, 50.0f);
         vec3 p3 = new vec3(120, 434, 50.0f);
@@ -79,13 +81,48 @@ namespace _014_DrawTriangle
             ClearBitmap();
             InitZBuffer();
 
-            DrawModel();
-
-            //DrawZBuffer();
-
             mainImage.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
-            e.Graphics.DrawImage(mainImage, 0, 0);
+            float angle = glm.radians(30);
+            float cos = (float)Math.Cos(angle);
+            float sin = (float)Math.Sin(angle);
+            mat2 t2 = new mat2(new vec2[] { new vec2(cos, sin), new vec2(-sin, cos) });
+            mat2 t1 = new mat2(new vec2[] { new vec2(3, 0), new vec2(0, 2) });
+            vec2 p1 = new vec2(0.0f, 0.0f);
+            vec2 p2 = new vec2(90, 10);
+            vec2 p3 = new vec2(90, 50);
+            vec2 p4 = new vec2(50, 90);
+            vec2 p5 = new vec2(10, 90);
+
+            vec2[] ps = new vec2[]
+            {
+                new vec2(0.0f, 0.0f),
+                new vec2(0.9f, 0.0f),
+                new vec2(0.9f, 0.45f),
+                new vec2(0.45f, 0.9f),
+                new vec2(0.0f, 0.9f),
+            };
+
+            for (int i = 0; i < ps.Length; i++)
+            {
+                ps[i] = WorldToScreen(ps[i], ww, hh);
+            }
+
+            for (int i = 0; i < ps.Length; i++)
+            {
+                ps[i] = t2 * ps[i];
+            }
+
+            for (int i = 0; i < ps.Length; i++)
+            {
+                ps[i] = t1 * ps[i];
+            }
+
+            Renderer.Line(ps, Color.DarkBlue, mainImage);
+
+            mainImage.RotateFlip(RotateFlipType.Rotate180FlipX);
+
+            e.Graphics.DrawImage(mainImage, 0, 0);            
         }
 
         private void DrawZBuffer()
@@ -155,6 +192,11 @@ namespace _014_DrawTriangle
         private static vec3 WorldToScreen(vec3 point, int w, int h)
         {
             return new vec3((point.x + 1.0f) * w / 2 + 0.5f, (point.y + 1.0f) * h / 2 + 0.5f, point.z);
+        }
+
+        private static vec2 WorldToScreen(vec2 point, int w, int h)
+        {
+            return new vec2((point.x + 1.0f) * w / 2 + 0.5f, (point.y + 1.0f) * h / 2 + 0.5f);
         }
 
         static float edgeFunction(vec2 a, vec2 b, vec2 p)

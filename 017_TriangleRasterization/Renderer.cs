@@ -81,6 +81,20 @@ namespace _014_DrawTriangle
             Line(p0.x, p0.y, p1.x, p1.y, color, bitmap);
         }
 
+
+        public static void Line(vec2 p0, vec2 p1, Color color, Bitmap bitmap)
+        {
+            Line((int)p0.x, (int)p0.y, (int)p1.x, (int)p1.y, color, bitmap);
+        }
+
+        public static void Line(vec2[] ps, Color color, Bitmap bitmap)
+        {
+            for (int i = 0; i < ps.Length; i++)
+            {
+                Line(ps[i], ps[(i + 1) % ps.Length], color, bitmap);
+            }
+        }
+
         public static void LineWithBuffer(vec2i p0, vec2i p1, Color color, Bitmap bitmap, int[] buffer)
         {
             if (p0.x > p1.x)
