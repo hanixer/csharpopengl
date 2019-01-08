@@ -16,15 +16,14 @@ namespace _014_DrawTriangle
     {
         static int w = 500;
         static int h = 500;
-        static int ww = 100;
-        static int hh = 100;
         Bitmap mainImage = new Bitmap(w, h);
-        Bitmap textureImage;
-        Model model;
+        Bitmap textureImage = new Bitmap("head.png");
+        Model model = Model.FromFile("head.obj");
         vec3 p1 = new vec3(20, 34, 50.0f);
         vec3 p2 = new vec3(744, 400, 50.0f);
         vec3 p3 = new vec3(120, 434, 50.0f);
         float[,] zbuffer = new float[w, h];
+        static float camera = 5;
         bool isRandomColor = false;
 
         public Form1()
@@ -81,46 +80,9 @@ namespace _014_DrawTriangle
             ClearBitmap();
             InitZBuffer();
 
+            DrawModel();
+
             mainImage.RotateFlip(RotateFlipType.RotateNoneFlipY);
-
-            float angle = glm.radians(30);
-            float cos = (float)Math.Cos(angle);
-            float sin = (float)Math.Sin(angle);
-            mat2 t2 = new mat2(new vec2[] { new vec2(cos, sin), new vec2(-sin, cos) });
-            mat2 t1 = new mat2(new vec2[] { new vec2(3, 0), new vec2(0, 2) });
-            vec2 p1 = new vec2(0.0f, 0.0f);
-            vec2 p2 = new vec2(90, 10);
-            vec2 p3 = new vec2(90, 50);
-            vec2 p4 = new vec2(50, 90);
-            vec2 p5 = new vec2(10, 90);
-
-            vec2[] ps = new vec2[]
-            {
-                new vec2(0.0f, 0.0f),
-                new vec2(0.9f, 0.0f),
-                new vec2(0.9f, 0.45f),
-                new vec2(0.45f, 0.9f),
-                new vec2(0.0f, 0.9f),
-            };
-
-            for (int i = 0; i < ps.Length; i++)
-            {
-                ps[i] = WorldToScreen(ps[i], ww, hh);
-            }
-
-            for (int i = 0; i < ps.Length; i++)
-            {
-                ps[i] = t2 * ps[i];
-            }
-
-            for (int i = 0; i < ps.Length; i++)
-            {
-                ps[i] = t1 * ps[i];
-            }
-
-            Renderer.Line(ps, Color.DarkBlue, mainImage);
-
-            mainImage.RotateFlip(RotateFlipType.Rotate180FlipX);
 
             e.Graphics.DrawImage(mainImage, 0, 0);            
         }
@@ -156,11 +118,14 @@ namespace _014_DrawTriangle
                     int w = Form1.w - 1;
                     int h = Form1.h - 1;
                     vec3 v0 = model.GetVertex(i, j);
+
                     if (Math.Abs(v0.x) <= 1 && Math.Abs(v0.y) <= 1)
                     {
+                        vec3 v1 = CameraConvert(v0);
                         worldCoords[j] = v0;
                         screenCoords[j] = WorldToScreen(v0, w, h);
                     }
+
                     if (model.HasTextures())
                     {
                         textureCoords[j] = model.GetTexture(i, j);
@@ -187,6 +152,12 @@ namespace _014_DrawTriangle
                 }
             }
             Console.WriteLine(count);
+        }
+
+        static vec3 CameraConvert(vec3 point)
+        {
+            float d = 1 - point.z / camera;
+            return new vec3(point.x / d, point.y / d, point.z / d);
         }
 
         private static vec3 WorldToScreen(vec3 point, int w, int h)
