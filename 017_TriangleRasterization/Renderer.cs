@@ -123,7 +123,7 @@ namespace _014_DrawTriangle
             return new Tuple<vec2i, vec2i>(new vec2i(xs.Min(), ys.Min()), new vec2i(xs.Max(), ys.Max()));
         }
 
-        public static void Triangle(vec3 v0, vec3 v1, vec3 v2, Color color, Bitmap bitmap, float[,] zbuffer)
+        public static void Triangle(vec3 v0, vec3 v1, vec3 v2, vec3[] textureCoords, Color color, Bitmap textureImage, Bitmap bitmap, float[,] zbuffer)
         {
             var boundingBox = GetBoundingBox(v0, v1, v2);
             float area = EdgeFunction(v0, v1, v2);
@@ -141,20 +141,28 @@ namespace _014_DrawTriangle
                         w0 /= area;
                         w1 /= area;
                         w2 /= area;
+
                         float z = w0 * v0.z + w1 * v1.z + w2 * v2.z;
+                        Color colorToUse = textureCoords != null ? ComputeTextureColor(textureCoords, textureImage, w0, w1, w2) : color;
 
                         if (zbuffer[x, y] < z)
                         {
                             zbuffer[x, y] = z;
-                            SetPixel(x, y, color, bitmap);
-                        }
-                        else
-                        {
-                            z--;
+                            SetPixel(x, y, colorToUse, bitmap);
                         }
                     }
                 }
             }
+        }
+
+        private static Color ComputeTextureColor(vec3[] textureCoords, Bitmap textureImage, float w0, float w1, float w2)
+        {
+            float u = w0 * textureCoords[0].x + w1 * textureCoords[1].x + w2 * textureCoords[2].x;
+            float v = w0 * textureCoords[0].y + w1 * textureCoords[1].y + w2 * textureCoords[2].y;
+            u *= textureImage.Width;
+            v *= textureImage.Height;
+            Color textureColor = textureImage.GetPixel((int)u, textureImage.Height - (int)v);
+            return textureColor;
         }
 
         public static float EdgeFunction(vec3 start, vec3 end, vec3 point) => (point.y - start.y) * (end.x - start.x) - (point.x - start.x) * (end.y - start.y);

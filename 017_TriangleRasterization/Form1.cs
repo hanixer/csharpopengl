@@ -14,9 +14,10 @@ namespace _014_DrawTriangle
 {
     public partial class Form1 : Form
     {
-        static int w = 400;
-        static int h = 400;
+        static int w = 100;
+        static int h = 100;
         Bitmap mainImage = new Bitmap(w, h);
+        Bitmap textureImage = new Bitmap("head.png");
         Model model = Model.FromFile("head.obj");
         vec3 p1 = new vec3(20, 34, 50.0f);
         vec3 p2 = new vec3(744, 400, 50.0f);
@@ -111,6 +112,7 @@ namespace _014_DrawTriangle
             {
                 var worldCoords = new vec3[3];
                 var screenCoords = new vec3[3];
+                var textureCoords = model.HasTextures() ? new vec3[3] : null;
 
                 for (int j = 0; j < 3; j++)
                 {
@@ -121,6 +123,10 @@ namespace _014_DrawTriangle
                     {
                         worldCoords[j] = v0;
                         screenCoords[j] = WorldToScreen(v0, w, h);
+                    }
+                    if (model.HasTextures())
+                    {
+                        textureCoords[j] = model.GetTexture(i, j);
                     }
                 }
 
@@ -140,7 +146,7 @@ namespace _014_DrawTriangle
                         color = Color.FromArgb(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255));
                     }
 
-                    Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], color, mainImage, zbuffer);
+                    Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], textureCoords, color, textureImage, mainImage, zbuffer);
                 }
             }
             Console.WriteLine(count);

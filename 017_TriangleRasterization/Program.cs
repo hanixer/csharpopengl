@@ -11,9 +11,6 @@ namespace _014_DrawTriangle
 {
     static class Program
     {
-        static int w = 100;
-        static int h = 100;
-
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
