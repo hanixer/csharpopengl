@@ -14,13 +14,10 @@ namespace _014_DrawTriangle
 {
     public partial class Form1 : Form
     {
-        static int w = 400;
-        static int h = 400;
+        static int w = 100;
+        static int h = 100;
         Bitmap mainImage = new Bitmap(w, h);
-        Model model = Model.FromFile("head.obj");
-        vec3 p1 = new vec3(20, 34, 50.0f);
-        vec3 p2 = new vec3(744, 400, 50.0f);
-        vec3 p3 = new vec3(120, 434, 50.0f);
+        Model model = Model.FromFile("triangle.obj");
         float[,] zbuffer = new float[w, h];
         bool isRandomColor = false;
 
@@ -47,7 +44,7 @@ namespace _014_DrawTriangle
             }
             else if (e.KeyChar == 's')
             {
-                mainImage.Save("output.png");
+                mainImage.Save("output.bmp");
             }
         }
 
@@ -107,6 +104,8 @@ namespace _014_DrawTriangle
         {
             vec3 lightDirection = new vec3(0, 0, -1);
             int count = 0;
+            mat4 viewport = Transformations.MakeViewportTransformation(w - 1, h - 1);
+
             for (int i = 0; i < model.Faces.Count; i++)
             {
                 var worldCoords = new vec3[3];
@@ -116,11 +115,12 @@ namespace _014_DrawTriangle
                 {
                     int w = Form1.w - 1;
                     int h = Form1.h - 1;
-                    vec3 v0 = model.GetVertex(i, j);
-                    if (Math.Abs(v0.x) <= 1 && Math.Abs(v0.y) <= 1)
+                    vec3 v = model.GetVertex(i, j);
+                    vec4 v4 = new vec4(v, 1);
+                    if (Math.Abs(v.x) <= 1 && Math.Abs(v.y) <= 1)
                     {
-                        worldCoords[j] = v0;
-                        screenCoords[j] = WorldToScreen(v0, w, h);
+                        worldCoords[j] = v;
+                        screenCoords[j] = Transformations.Vec4ToVec3(viewport * v4);
                     }
                 }
 

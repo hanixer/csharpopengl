@@ -102,7 +102,6 @@ namespace Project2_Shaders
             GL.BindTexture(TextureTarget.Texture2D, texture2);
             Images.LoadTexture("../../Textures/cloud.jpg", texture2);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-            glm.ortho()
             // set texture variables
             shader.Use();
             shader.Set("texture1", 0);
