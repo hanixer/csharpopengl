@@ -17,7 +17,7 @@ namespace _014_DrawTriangle
         static int w = 100;
         static int h = 100;
         Bitmap mainImage = new Bitmap(w, h);
-        Model model = Model.FromFile("triangle.obj");
+        Model model = Model.FromFile("cube.obj");
         float[,] zbuffer = new float[w, h];
         bool isRandomColor = false;
 
@@ -100,11 +100,14 @@ namespace _014_DrawTriangle
 
         static Random random = new Random();
 
+        static string Str(vec4 v) => string.Format("[{0}, {1}, {2}]", v.x, v.y, v.z);
+
         private void DrawModel()
         {
             vec3 lightDirection = new vec3(0, 0, -1);
             int count = 0;
             mat4 viewport = Transformations.MakeViewportTransformation(w - 1, h - 1);
+            mat4 view = Transformations.LookAt(new vec3(1), new vec3(0), new vec3(0, 1, 0));
 
             for (int i = 0; i < model.Faces.Count; i++)
             {
@@ -117,10 +120,11 @@ namespace _014_DrawTriangle
                     int h = Form1.h - 1;
                     vec3 v = model.GetVertex(i, j);
                     vec4 v4 = new vec4(v, 1);
+                    Console.WriteLine("{0} => {1}", Str(v4), Str(view * v4));
                     if (Math.Abs(v.x) <= 1 && Math.Abs(v.y) <= 1)
                     {
                         worldCoords[j] = v;
-                        screenCoords[j] = Transformations.Vec4ToVec3(viewport * v4);
+                        screenCoords[j] = Transformations.Vec4ToVec3(viewport * view * v4);
                     }
                 }
 

@@ -40,6 +40,46 @@ namespace _014_DrawTriangle.Tests
             m = Transformations.MakeViewportTransformation(3, 3);
             TestIt(m, 0, -1, 1, 0);
         }
+        [TestMethod()]
+        public void LookAtTest1()
+        {
+            vec3 eye = new vec3(0, 0, 3);
+            vec3 target = new vec3(0);
+            vec3 up = new vec3(0, 1, 0);
+            vec3 point = new vec3(1, 1, 0);
+
+            float ex = 1;
+            float ey = 1;
+
+            TestLookAt(eye, target, up, point, ex, ey);
+        }
+
+        //[TestMethod()]
+        //public void LookAtTest2()
+        //{
+        //    TestLookAt(new vec3(1, 0, 1), new vec3(1, 0, 0), new vec3(0, 1, 0), new vec3(0), -1, 0);
+        //}
+
+        //[TestMethod()]
+        //public void LookAtTest3()
+        //{
+        //    TestLookAt(new vec3(1, 1, 1), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(0), 0, 0);
+        //}
+
+        [TestMethod()]
+        public void LookAtTest4()
+        {
+            TestLookAt(new vec3(1, 0, 1), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(0), 0, 0);
+        }
+
+        private static void TestLookAt(vec3 eye, vec3 target, vec3 up, vec3 point, float ex, float ey)
+        {
+            mat4 m = Transformations.LookAt(eye, target, up);
+            vec4 result = m * new vec4(point, 1);
+
+            Assert.AreEqual(ex, result.x);
+            Assert.AreEqual(ey, result.y);
+        }
 
         private static void TestIt(mat4 m, float x, float y, float ex, float ey)
         {
