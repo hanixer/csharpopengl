@@ -20,6 +20,7 @@ namespace _014_DrawTriangle
         Model model = Model.FromFile("trianglesAndSquare.obj");
         float[,] zbuffer = new float[w, h];
         bool isRandomColor = false;
+        float userValue = 0.0f;
 
         public Form1()
         {
@@ -46,6 +47,21 @@ namespace _014_DrawTriangle
             {
                 mainImage.Save("output.bmp");
             }
+            else if (e.KeyChar == 'w')
+            {
+                userValue += 0.05f;
+                Invalidate();
+            }
+            else if (e.KeyChar == 'q')
+            {
+                userValue -= 0.05f;
+                Invalidate();
+            }
+            else if (e.KeyChar == 'r')
+            {
+                isRandomColor = !isRandomColor;
+                Invalidate();
+            }
         }
 
         private void InitZBuffer()
@@ -54,7 +70,7 @@ namespace _014_DrawTriangle
             {
                 for (int y = 0; y < zbuffer.GetLength(1); y++)
                 {
-                    zbuffer[x, y] = -1.0f;
+                    zbuffer[x, y] = -10.0f;
                 }
             }
         }
@@ -107,9 +123,7 @@ namespace _014_DrawTriangle
             vec3 lightDirection = new vec3(0, 0, -1);
             int count = 0;
             mat4 viewport = Transformations.MakeViewportTransformation(w - 1, h - 1);
-            mat4 cameraTransf = Transformations.LookAt(new vec3(0, 0, 1), new vec3(0, 0, 0));
-            //cameraTransf = mat4.identity();
-            mat4 transform = viewport * cameraTransf;
+            mat4 cameraTransf = Transformations.LookAt(new vec3(0, 0, 1), new vec3(userValue, 0, 0));
             for (int i = 0; i < model.Faces.Count; i++)
             {
                 var worldCoords = new vec3[3];
@@ -121,11 +135,15 @@ namespace _014_DrawTriangle
                     int h = Form1.h - 1;
                     vec3 v = model.GetVertex(i, j);
                     vec4 v4 = new vec4(v, 1);
-                    Console.WriteLine("{0} => {1}", Str(v4), Str(transform * v4));
+                    vec4 v5 = cameraTransf * v4;
+                    vec4 v6 = viewport * v5;
+                    Console.WriteLine("{0} => {1}", Str(v4), Str(v5));
+                    Console.WriteLine("{0} => {1}", Str(v5), Str(v6));
+                    Console.WriteLine();
                     if (Math.Abs(v.x) <= 1 && Math.Abs(v.y) <= 1)
                     {
                         worldCoords[j] = v;
-                        screenCoords[j] = Transformations.Vec4ToVec3(transform * v4);
+                        screenCoords[j] = Transformations.Vec4ToVec3(v6);
                     }
                 }
 
@@ -133,16 +151,18 @@ namespace _014_DrawTriangle
 
                 float intensity = glm.dot(norm, lightDirection);
 
-                //intensity = 1;
-                if (intensity > 0)
+                if (intensity > 0 || isRandomColor)
                 {
                     var value = (int)(intensity * 255);
                     count++;
-                    var color = Color.FromArgb(value, value, value);
-                    //color = Color.Bisque;
+                    Color color;
                     if (isRandomColor)
                     {
                         color = Color.FromArgb(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255));
+                    }
+                    else
+                    {
+                        color = Color.FromArgb(value, value, value);
                     }
 
                     Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], color, mainImage, zbuffer);

@@ -8,6 +8,12 @@ using System.Threading.Tasks;
 
 namespace _014_DrawTriangle
 {
+    enum RenderingMode
+    {
+        Lines,
+        Fill,
+    }
+
     public struct vec3i
     {
         public int x, y, z;
@@ -147,6 +153,11 @@ namespace _014_DrawTriangle
                         {
                             zbuffer[x, y] = z;
                             SetPixel(x, y, color, bitmap);
+                            double epsilon = 0.001;
+                            if (Math.Abs(w0) < epsilon || Math.Abs(w1) < epsilon || Math.Abs(w2) < epsilon)
+                            {
+                                SetPixel(x, y, Color.Magenta, bitmap);
+                            }
                         }
                         else
                         {

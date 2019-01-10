@@ -28,23 +28,27 @@ namespace _014_DrawTriangle
 
         public static mat4 LookAt(vec3 eye, vec3 target, vec3 up)
         {
-            mat4 rotation = mat4.identity();
-            vec3 offset = target - eye;
-            vec3 forward = glm.normalize(offset);
-            vec3 right = glm.cross(glm.normalize(up), forward);
-            vec3 upNew = glm.cross(forward, right);
+            mat4 lookAt = mat4.identity();
+            vec3 eyeMinus = eye * -1;
+            vec3 toUs = glm.normalize(eye - target);
+            vec3 right = glm.cross(glm.normalize(up), toUs);
+            vec3 upNew = glm.cross(toUs, right);
 
-            rotation[0, 0] = right.x;
-            rotation[1, 0] = right.y;
-            rotation[2, 0] = right.z;
-            rotation[0, 1] = upNew.x;
-            rotation[1, 1] = upNew.y;
-            rotation[2, 1] = upNew.z;
-            rotation[0, 2] = forward.x;
-            rotation[1, 2] = forward.y;
-            rotation[2, 2] = forward.z;
+            lookAt[0, 0] = right.x;
+            lookAt[1, 0] = right.y;
+            lookAt[2, 0] = right.z;
+            lookAt[0, 1] = upNew.x;
+            lookAt[1, 1] = upNew.y;
+            lookAt[2, 1] = upNew.z;
+            lookAt[0, 2] = toUs.x;
+            lookAt[1, 2] = toUs.y;
+            lookAt[2, 2] = toUs.z;
+            lookAt[3, 0] = glm.dot(right, eyeMinus);
+            lookAt[3, 1] = glm.dot(upNew, eyeMinus);
+            lookAt[3, 2] = glm.dot(toUs, eyeMinus);
+            lookAt[3, 3] = 1;
 
-            return rotation * glm.translate(mat4.identity(), -1 * eye);
+            return lookAt;
         }
 
         public static mat4 LookAt2(vec3 eye, vec3 target, vec3 up)

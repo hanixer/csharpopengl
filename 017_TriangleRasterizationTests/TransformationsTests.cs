@@ -66,27 +66,57 @@ namespace _014_DrawTriangle.Tests
         //    TestLookAt(new vec3(1, 1, 1), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(0), 0, 0);
         //}
 
+        //[TestMethod()]
+        //public void LookAtTest4()
+        //{
+        //    TestLookAt(new vec3(1, 0, 1), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(0), 0, -1);
+        //}
+
+        //[TestMethod()]
+        //public void LookAtTest5()
+        //{
+        //    TestLookAt(new vec3(1, 0, 1), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(1, 0, 0), 0.7071068f, 0);
+        //}
+
         [TestMethod()]
-        public void LookAtTest4()
+        public void LookAtTest6()
         {
-            TestLookAt(new vec3(1, 0, 1), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(0), 0, -1);
+            TestLookAt(new vec3(1, 0, 0), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(1, 1, 0), 0, 1, 0);
         }
 
         [TestMethod()]
-        public void LookAtTest5()
+        public void LookAtTestZero()
         {
-            TestLookAt(new vec3(1, 0, 1), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(1, 0, 0), 0.7071068f, 0);
+            TestLookAt(new vec3(0, 0, 1), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(0, 0, 0), 0, 0, -1);
         }
 
-        private static void TestLookAt(vec3 eye, vec3 target, vec3 up, vec3 point, float ex, float ez)
+        [TestMethod()]
+        public void LookAtTestRightOnX()
+        {
+            TestLookAt(new vec3(0, 0, 1), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(1, 0, 0), 1, 0, -1);
+        }
+
+        [TestMethod()]
+        public void StandOnXPointZero()
+        {
+            TestLookAt(new vec3(1, 0, 0), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(0, 0, 0), 0, 0, -1);
+        }
+
+        [TestMethod()]
+        public void StandOnXPointOneOneOne()
+        {
+            TestLookAt(new vec3(1, 0, 0), new vec3(0, 0, 0), new vec3(0, 1, 0), new vec3(1, 1, 1), -1, 1, 0);
+        }
+
+        private static void TestLookAt(vec3 eye, vec3 target, vec3 up, vec3 point, float ex, float ey, float ez)
         {
             mat4 m = Transformations.LookAt(eye, target, up);
             
             vec4 result = m * new vec4(point, 1);
 
-
-            Assert.AreEqual(ez, result.z, 0.0001f);
             Assert.AreEqual(ex, result.x, 0.0001f);
+            Assert.AreEqual(ey, result.y, 0.0001f);
+            Assert.AreEqual(ez, result.z, 0.0001f);
         }
 
         private static void TestIt(mat4 m, float x, float y, float ex, float ey)
