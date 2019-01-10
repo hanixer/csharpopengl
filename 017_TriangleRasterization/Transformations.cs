@@ -23,16 +23,34 @@ namespace _014_DrawTriangle
 
         public static mat4 LookAt(vec3 eye, vec3 target, vec3 up)
         {
-            mat4 lookAt = mat4.identity();
+            mat4 rotation = mat4.identity();
             vec3 offset = target - eye;
             vec3 forward = glm.normalize(offset);
+            vec3 right = glm.cross(glm.normalize(up), forward);
+            vec3 upNew = glm.cross(forward, right);
+
+            rotation[0, 0] = right.x;
+            rotation[1, 0] = right.y;
+            rotation[2, 0] = right.z;
+            rotation[0, 1] = upNew.x;
+            rotation[1, 1] = upNew.y;
+            rotation[2, 1] = upNew.z;
+            rotation[0, 2] = forward.x;
+            rotation[1, 2] = forward.y;
+            rotation[2, 2] = forward.z;
+
+            return rotation * glm.translate(mat4.identity(), -1 * eye);
+        }
+
+        public static mat4 LookAt2(vec3 eye, vec3 target, vec3 up)
+        {
+            mat4 lookAt = mat4.identity();
+            vec3 offset = eye - target;
+            vec3 forward = glm.normalize(-1 * offset);
             vec3 right = glm.cross(forward, glm.normalize(up));
             vec3 upNew = glm.cross(right, forward);
 
-            lookAt[0] = new vec4(right, 0);
-            lookAt[1] = new vec4(upNew, 0);
-            lookAt[2] = new vec4(forward, 0);
-            lookAt[3] = new vec4(offset, 1);
+            var what = glm.translate(mat4.identity(), -1 * eye);
 
             return lookAt;
         }

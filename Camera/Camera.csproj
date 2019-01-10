@@ -93,6 +93,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\017_TriangleRasterization\017_TriangleRasterization.csproj">
+      <Project>{85970c5f-33fa-4018-90d0-77320ef62f9e}</Project>
+      <Name>017_TriangleRasterization</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utilities\Utilities.csproj">
       <Project>{70cb64c0-2e8e-4826-b64e-84863127f11c}</Project>
       <Name>Utilities</Name>

@@ -8,6 +8,7 @@ using OpenTK;
 using Utilities;
 using System.Drawing;
 using GlmNet;
+using _014_DrawTriangle;
 
 namespace Camera
 {
@@ -226,7 +227,10 @@ namespace Camera
 
             float dt = (float)(DateTime.Now - startTime).TotalMilliseconds;
 
-            mat4 view = glm.lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+            mat4 view;
+            view = Transformations.LookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+            //view = glm.lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
             shader.Set("view", view);
 
             if (Height != 0)
