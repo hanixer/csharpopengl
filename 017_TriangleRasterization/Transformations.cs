@@ -21,6 +21,11 @@ namespace _014_DrawTriangle
             return m;
         }
 
+        public static mat4 LookAt(vec3 eye, vec3 target)
+        {
+            return LookAt(eye, target, new vec3(0, 1, 0));
+        }
+
         public static mat4 LookAt(vec3 eye, vec3 target, vec3 up)
         {
             mat4 rotation = mat4.identity();

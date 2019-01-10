@@ -107,8 +107,9 @@ namespace _014_DrawTriangle
             vec3 lightDirection = new vec3(0, 0, -1);
             int count = 0;
             mat4 viewport = Transformations.MakeViewportTransformation(w - 1, h - 1);
-            mat4 view = Transformations.LookAt(new vec3(1), new vec3(0), new vec3(0, 1, 0));
-            view = mat4.identity();
+            mat4 cameraTransf = Transformations.LookAt(new vec3(0, 0, 1), new vec3(0, 0, 0));
+            //cameraTransf = mat4.identity();
+            mat4 transform = viewport * cameraTransf;
             for (int i = 0; i < model.Faces.Count; i++)
             {
                 var worldCoords = new vec3[3];
@@ -120,11 +121,11 @@ namespace _014_DrawTriangle
                     int h = Form1.h - 1;
                     vec3 v = model.GetVertex(i, j);
                     vec4 v4 = new vec4(v, 1);
-                    Console.WriteLine("{0} => {1}", Str(v4), Str(viewport * v4));
+                    Console.WriteLine("{0} => {1}", Str(v4), Str(transform * v4));
                     if (Math.Abs(v.x) <= 1 && Math.Abs(v.y) <= 1)
                     {
                         worldCoords[j] = v;
-                        screenCoords[j] = Transformations.Vec4ToVec3(viewport * v4);
+                        screenCoords[j] = Transformations.Vec4ToVec3(transform * v4);
                     }
                 }
 
