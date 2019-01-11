@@ -17,7 +17,7 @@ namespace _014_DrawTriangle
         static int w = 100;
         static int h = 100;
         Bitmap mainImage = new Bitmap(w, h);
-        Model model = Model.FromFile("trianglesAndSquare.obj");
+        Model model = Model.FromFile("head.obj");
         float[,] zbuffer = new float[w, h];
         bool isRandomColor = false;
         float userValue = 0.0f;
@@ -137,8 +137,14 @@ namespace _014_DrawTriangle
                     vec4 v4 = new vec4(v, 1);
                     vec4 v5 = cameraTransf * v4;
                     vec4 v6 = viewport * v5;
-                    Console.WriteLine("{0} => {1}", Str(v4), Str(v5));
-                    Console.WriteLine("{0} => {1}", Str(v5), Str(v6));
+                    v6.z--;
+                    v6.z--;
+                    v6.z--;
+                    v6.z--;
+                    v6.z--;
+
+                    //Console.WriteLine("{0} => {1}", Str(v4), Str(v5));
+                    //Console.WriteLine("{0} => {1}", Str(v5), Str(v6));
                     Console.WriteLine();
                     if (Math.Abs(v.x) <= 1 && Math.Abs(v.y) <= 1)
                     {
@@ -164,7 +170,7 @@ namespace _014_DrawTriangle
                     {
                         color = Color.FromArgb(value, value, value);
                     }
-
+                    
                     Renderer.Triangle(screenCoords[0], screenCoords[1], screenCoords[2], color, mainImage, zbuffer);
                 }
             }
