@@ -14,8 +14,8 @@ namespace _014_DrawTriangle
 {
     public partial class Form1 : Form
     {
-        static int w = 100;
-        static int h = 100;
+        static int w = 1000;
+        static int h = 1000;
         Bitmap mainImage = new Bitmap(w, h);
         Model model = Model.FromFile("head.obj");
         float[,] zbuffer = new float[w, h];
@@ -123,7 +123,7 @@ namespace _014_DrawTriangle
             vec3 lightDirection = new vec3(0, 0, -1);
             int count = 0;
             mat4 viewport = Transformations.MakeViewportTransformation(w - 1, h - 1);
-            mat4 cameraTransf = Transformations.LookAt(new vec3(0, 0, 1), new vec3(userValue, 0, 0));
+            mat4 cameraTransf = Transformations.LookAt(new vec3(0, 0.5f, 0.5f), new vec3(userValue, 0, 0));
             for (int i = 0; i < model.Faces.Count; i++)
             {
                 var worldCoords = new vec3[3];
