@@ -13,8 +13,7 @@ namespace RayTracing
         ViewPort viewport = new ViewPort();
         Color background = Color.Black;
         public Bitmap Bitmap;
-        public Sphere sphere;
-        Tracer tracer;
+        List<GeometricObject> objects = new List<GeometricObject>();
 
         public World()
         {
@@ -25,9 +24,17 @@ namespace RayTracing
 
             Bitmap = new Bitmap(viewport.HorResolution, viewport.VertResolution);
 
-            sphere = new Sphere(new vec3(0), 80);
+            Sphere sphere = new Sphere(new vec3(0, -25, 0), 80);
+            sphere.Color = Colors.Red;            
+            AddObject(sphere);
 
-            tracer = new SphereTracer(this);
+            sphere = new Sphere(new vec3(0, 30, 0), 60);
+            sphere.Color = Colors.Yellow;
+            AddObject(sphere);
+
+            Plane plane = new Plane(new vec3(0), new vec3(0, 1, 1));
+            plane.Color = Colors.Green;
+            AddObject(plane);
         }
 
         public void RenderScene()
@@ -41,11 +48,10 @@ namespace RayTracing
                 {
                     float x = viewport.PixelSize * (c - (viewport.HorResolution - 1.0f) / 2);
                     float y = viewport.PixelSize * (r - (viewport.VertResolution - 1.0f) / 2);
-                    float z = 1;
+                    float z = 100;
                     ray.Origin = new vec3(x, y, z);
 
-                    vec3 color = tracer.TraceRay(ray);
-
+                    vec3 color = Trace(ray);
                     DisplayPixel(r, c, color);
                 }
             }
@@ -53,9 +59,31 @@ namespace RayTracing
             Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
         }
 
+        private vec3 Trace(Ray ray)
+        {
+            float tmin = float.MaxValue;
+            float t = 0;
+            vec3 color = Colors.Black;
+
+            foreach (var obj in objects)
+            {
+                if (obj.Hit(ray, ref t))
+                {
+                    if (t < tmin)
+                    {
+                        tmin = t;
+                        color = obj.Color;
+                    }
+                }
+            }
+            return color;
+        }
+
         void DisplayPixel(int row, int column, vec3 color)
         {
-            Bitmap.SetPixel(column, row, Color.FromArgb((int)color.x * 255, (int)color.y * 255, (int)color.z * 255));
+            Bitmap.SetPixel(column, row, Color.FromArgb((int)(color.x * 255), (int)(color.y * 255), (int)(color.z * 255)));
         }
+
+        void AddObject(GeometricObject obj) => objects.Add(obj);
     }
 }
