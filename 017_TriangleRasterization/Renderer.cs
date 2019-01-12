@@ -158,12 +158,12 @@ namespace _014_DrawTriangle
                         w1 /= area;
                         w2 /= area;
                         float z = w0 * v0.z + w1 * v1.z + w2 * v2.z;
-
-                        if (zbuffer[x, y] < z)
+                        
+                        if (zbuffer[x, y] > z)
                         {
                             zbuffer[x, y] = z;
                             SetPixel(x, y, color, bitmap);
-                            double epsilon = 0.001;
+                            //double epsilon = 0.001;
                             //if (Math.Abs(w0) < epsilon || Math.Abs(w1) < epsilon || Math.Abs(w2) < epsilon)
                             //{
                             //    SetPixel(x, y, Color.Magenta, bitmap);

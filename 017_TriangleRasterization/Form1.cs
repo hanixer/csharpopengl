@@ -17,7 +17,7 @@ namespace _014_DrawTriangle
         static int w = 1000;
         static int h = 1000;
         Bitmap mainImage = new Bitmap(w, h);
-        Model model = Model.FromFile("trianglesAndSquare.obj");
+        Model model = Model.FromFile("head.obj");
         float[,] zbuffer = new float[w, h];
         bool isRandomColor = false;
         float userValue = 0.0f;
@@ -70,7 +70,7 @@ namespace _014_DrawTriangle
             {
                 for (int y = 0; y < zbuffer.GetLength(1); y++)
                 {
-                    zbuffer[x, y] = -10.0f;
+                    zbuffer[x, y] = float.MaxValue;
                 }
             }
         }
@@ -125,7 +125,7 @@ namespace _014_DrawTriangle
             int count = 0;
             mat4 viewport = Transformations.ViewportTransformation(w, h);
             mat4 perspective = Transformations.PerspectiveTransformation(0.5f, 0.5f, 1, 10);
-            mat4 cameraTransf = Transformations.LookAt(new vec3(0.0f, 0, 1 + userValue), new vec3(0, 0, 0));
+            mat4 cameraTransf = Transformations.LookAt(new vec3(2 + userValue, 0, 0), new vec3(0, 0, 0));
             for (int i = 0; i < model.Faces.Count; i++)
             {
                 var worldCoords = new vec3[3];
@@ -178,6 +178,7 @@ namespace _014_DrawTriangle
 
             //Console.WriteLine("{0} => {1} - eye", Str(obj), Str(eye));
             //Console.WriteLine("{0} => {1} - clip", Str(eye), Str(clip));
+            //Console.WriteLine("{0} - norma", Str(Transformations.Vec4ToVec3(clip)));
             //Console.WriteLine("{0} => {1} - screen", Str(clip), Str(screen));
             //Console.WriteLine("{0} => {1} - final", Str(screen), Str(final));
             //Console.WriteLine();
