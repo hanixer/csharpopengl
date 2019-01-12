@@ -82,6 +82,16 @@ namespace _014_DrawTriangle
             }
         }
 
+        public static void Line(vec3 p0, vec3 p1, Color color, Bitmap bitmap)
+        {
+            Line((int)p0.x, (int)p0.y, (int)p1.x, (int)p1.y, color, bitmap);
+        }
+
+        public static void Line(vec2 p0, vec2 p1, Color color, Bitmap bitmap)
+        {
+            Line((int)p0.x, (int)p0.y, (int)p1.x, (int)p1.y, color, bitmap);
+        }
+
         public static void Line(vec2i p0, vec2i p1, Color color, Bitmap bitmap)
         {
             Line(p0.x, p0.y, p1.x, p1.y, color, bitmap);
@@ -154,10 +164,10 @@ namespace _014_DrawTriangle
                             zbuffer[x, y] = z;
                             SetPixel(x, y, color, bitmap);
                             double epsilon = 0.001;
-                            if (Math.Abs(w0) < epsilon || Math.Abs(w1) < epsilon || Math.Abs(w2) < epsilon)
-                            {
-                                SetPixel(x, y, Color.Magenta, bitmap);
-                            }
+                            //if (Math.Abs(w0) < epsilon || Math.Abs(w1) < epsilon || Math.Abs(w2) < epsilon)
+                            //{
+                            //    SetPixel(x, y, Color.Magenta, bitmap);
+                            //}
                         }
                         else
                         {

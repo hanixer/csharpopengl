@@ -9,14 +9,32 @@ namespace _014_DrawTriangle
 {
     public class Transformations
     {
-        public static mat4 MakeViewportTransformation(int width, int height)
+        public static mat4 ViewportTransformation(int width, int height)
         {
-            int w = width - 1;
-            int h = height - 1;
+            int w = width;
+            int h = height;
             mat4 m = mat4.identity();
             m[0] = new vec4(w / 2, 0, 0, 0);
             m[1] = new vec4(0, h / 2, 0, 0);
-            m[3] = new vec4(w / 2 + 0.5f, h / 2 + 0.5f, 0, 1);
+            m[2] = new vec4(0, 0, 1, 0);
+            m[3] = new vec4(w / 2 - 0.5f, h / 2 - 0.5f, 0, 1);
+
+            return m;
+        }
+
+        public static mat4 PerspectiveTransformation(float maxX, float maxY, float near, float far)
+        {
+            return PerspectiveTransformation(-maxX, maxX, -maxY, maxY, near, far);
+        }
+
+        public static mat4 PerspectiveTransformation(float left, float right, float bottom, float top, float near, float far)
+        {
+            mat4 m = mat4.identity();
+
+            m[0] = new vec4(2 * near / (right - left), 0, (right + left) / (right - left), 0);
+            m[1] = new vec4(0, 2 * near / (top - bottom), (top + bottom) / (top - bottom), 0);
+            m[2] = new vec4(0, 0, -(far + near) / (far - near), -2 * far * near / (far - near));
+            m[3] = new vec4(0, 0, -1, 0);
 
             return m;
         }
@@ -64,6 +82,6 @@ namespace _014_DrawTriangle
             return lookAt;
         }
 
-        public static vec3 Vec4ToVec3(vec4 v4) => new vec3(v4.x, v4.y, v4.z);
+        public static vec3 Vec4ToVec3(vec4 v4) => new vec3(v4.x / v4.w, v4.y / v4.w, v4.z / v4.w);
     }
 }

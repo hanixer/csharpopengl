@@ -17,7 +17,7 @@ namespace _014_DrawTriangle
         static int w = 1000;
         static int h = 1000;
         Bitmap mainImage = new Bitmap(w, h);
-        Model model = Model.FromFile("head.obj");
+        Model model = Model.FromFile("trianglesAndSquare.obj");
         float[,] zbuffer = new float[w, h];
         bool isRandomColor = false;
         float userValue = 0.0f;
@@ -116,14 +116,16 @@ namespace _014_DrawTriangle
 
         static Random random = new Random();
 
-        static string Str(vec4 v) => string.Format("[{0}, {1}, {2}]", v.x, v.y, v.z);
+        static string Str(vec4 v) => string.Format("[{0}, {1}, {2}, {3}]", v.x, v.y, v.z, v.w);
+        static string Str(vec3 v) => string.Format("[{0}, {1}, {2}]", v.x, v.y, v.z);
 
         private void DrawModel()
         {
             vec3 lightDirection = new vec3(0, 0, -1);
             int count = 0;
-            mat4 viewport = Transformations.MakeViewportTransformation(w - 1, h - 1);
-            mat4 cameraTransf = Transformations.LookAt(new vec3(0, 0.5f, 0.5f), new vec3(userValue, 0, 0));
+            mat4 viewport = Transformations.ViewportTransformation(w, h);
+            mat4 perspective = Transformations.PerspectiveTransformation(0.5f, 0.5f, 1, 10);
+            mat4 cameraTransf = Transformations.LookAt(new vec3(0.0f, 0, 1 + userValue), new vec3(0, 0, 0));
             for (int i = 0; i < model.Faces.Count; i++)
             {
                 var worldCoords = new vec3[3];
@@ -134,22 +136,11 @@ namespace _014_DrawTriangle
                     int w = Form1.w - 1;
                     int h = Form1.h - 1;
                     vec3 v = model.GetVertex(i, j);
-                    vec4 v4 = new vec4(v, 1);
-                    vec4 v5 = cameraTransf * v4;
-                    vec4 v6 = viewport * v5;
-                    v6.z--;
-                    v6.z--;
-                    v6.z--;
-                    v6.z--;
-                    v6.z--;
-
-                    //Console.WriteLine("{0} => {1}", Str(v4), Str(v5));
-                    //Console.WriteLine("{0} => {1}", Str(v5), Str(v6));
-                    Console.WriteLine();
+                    vec3 screen = ToScreen(viewport, perspective, cameraTransf, v);
                     if (Math.Abs(v.x) <= 1 && Math.Abs(v.y) <= 1)
                     {
                         worldCoords[j] = v;
-                        screenCoords[j] = Transformations.Vec4ToVec3(v6);
+                        screenCoords[j] = screen;
                     }
                 }
 
@@ -175,6 +166,23 @@ namespace _014_DrawTriangle
                 }
             }
             Console.WriteLine(count);
+        }
+
+        private static vec3 ToScreen(mat4 viewport, mat4 perspective, mat4 cameraTransf, vec3 v)
+        {
+            vec4 obj = new vec4(v, 1);
+            vec4 eye = cameraTransf * obj;
+            vec4 clip = perspective * eye;
+            vec4 screen = viewport * clip;
+            vec3 final = Transformations.Vec4ToVec3(screen);
+
+            //Console.WriteLine("{0} => {1} - eye", Str(obj), Str(eye));
+            //Console.WriteLine("{0} => {1} - clip", Str(eye), Str(clip));
+            //Console.WriteLine("{0} => {1} - screen", Str(clip), Str(screen));
+            //Console.WriteLine("{0} => {1} - final", Str(screen), Str(final));
+            //Console.WriteLine();
+
+            return final;
         }
 
         private static vec3 WorldToScreen(vec3 point, int w, int h)
