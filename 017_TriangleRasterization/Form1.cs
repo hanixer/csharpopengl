@@ -125,7 +125,7 @@ namespace _014_DrawTriangle
             int count = 0;
             mat4 viewport = Transformations.ViewportTransformation(w, h);
             mat4 perspective = Transformations.PerspectiveTransformation(0.5f, 0.5f, 1, 10);
-            mat4 cameraTransf = Transformations.LookAt(new vec3(2 + userValue, 0, 0), new vec3(0, 0, 0));
+            mat4 cameraTransf = Transformations.LookAt(new vec3(1.5f + userValue, 0, 1.5f), new vec3(0, 0, 0));
             for (int i = 0; i < model.Faces.Count; i++)
             {
                 var worldCoords = new vec3[3];

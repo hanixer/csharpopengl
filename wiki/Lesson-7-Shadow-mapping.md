@@ -2,13 +2,11 @@
 
 Well, we are approaching the end of your short course of CG lectures. The goal for today is to compute shadows. **Attention, we are talking about hard shadows here, soft shadows computation is another story.** As always, the source code is [available](https://github.com/ssloy/tinyrenderer/tree/0c1d955e4f86c25f31f97e4f4563313ddba0c104).
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/07-shadows/50de2abe990efa345664f98c9464a4c8.png)
 
 # Problem statement
 
 Up to this moment convex objects were shaded correctly by our simple local shading. Local means computation with light direction and the normal vector. Unfortunately, it does not produce correct results for non-convex objects. Here is the image we can got during previous lesson:
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/07-shadows/b4af24130ecb1536703e4793308af425.png)
 
 Why is there some light at the right (right, our left) shoulder? Why do not we see a shadow from his left horn? Not good.
 
@@ -61,7 +59,7 @@ This shader simply copies the z-buffer into the framebuffer. Here is how it I ca
 
 I put the camera at the light source position (lookat(light_dir, center, up);) and then perform the render. Note that I keep the z-buffer, it is pointed by the **shadowbuffer** pointer. Also it is useful to note that in the last line I keep the object-to-screen transformation matrix. Here is the result of the shader's work:
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/07-shadows/f743999b9d21aee9d0704c4036e18dce.png)
+
 
 The second pass is naturally made with another shader:
 
@@ -140,7 +138,6 @@ Recall that the matrix M is the transformation matrix from the object space to t
 We know that ```Viewport*Projection*ModelView``` transforms the object's coordinates into the (framebuffer) screen space. We need to know how to transform the framebuffer screen into the shadow screen. It is really simple: ```(Viewport*Projection*ModelView).invert()``` allows to convert framebuffer coordinates into object coordinates and then ```M*(Viewport*Projection*ModelView).invert()``` gives the transformation between the framebuffer and the shadow buffer.
 
 All that is mighty well but there is a hiccup:
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/07-shadows/164be1dce9e980d47a90159103b954a3.png)
 
 Notice the ugly shadow rendering? This artifact is known as the [z-fighting](http://en.wikipedia.org/wiki/Z-fighting). Resolution of our buffers is insufficient to obtain precise results. How to solve the problem? I like brute force solutions:
 
@@ -155,7 +152,6 @@ I simply move a bit one z-buffer with respect to another, it is sufficient to re
 ## shadow maps
 I uploaded a  model, try to add shadows to the render:
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/07-shadows/e3cd704925f52b5466ab3c4f9fbab899.png)
 
 ## glow
 Notice the crystal (and the eyes), they are glowing. How to achieve this effect?

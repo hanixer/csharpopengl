@@ -8,7 +8,6 @@ In this model final illumination intensity for a point is a sum of three compone
 
 Well, I was not 100% right: we did use a bit global illumination when we computed shadow mapping. Let us check another possibility to improve our renders (note that one does not exclude another!). Here is an example where I used only ambient component of the Phong reflection model:
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/08-ambient-occlusion/45d82ad9f666f7068488dc3f1e5c9da1.png)
 
 **No diffuse component, no specular. Ambient only, however it is easy to see that I did not choose it to be constant.** Okay, the problem is stated as follows: let us ambient intensity for each point of our scene. When we previously supposed constant ambient illumination, it means that we supposed our scene so nice that all light was reflected everywhere equally. A bit strong hypothesis that is. Of course, it was made back in the old days where computing power was severely limited. Nowadays, we can spend a bit more to get more realistic images. Global illumination is more expensive than the local is. Recall that for shadow mapping we were forced to do two-passes rendering, thus roughly dividing our FPS by 2. 
 
@@ -34,7 +33,6 @@ Thus, we do a two-pass rendering for each point we picked on the sphere, here is
     }
 ```
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/08-ambient-occlusion/d6393412463267f66a15c48e2816b5cc.png)
 
 This image is not very interesting for us, we are more interested in its z-buffer, exactly as in the previous lesson. Then we do another pass:
 
@@ -57,7 +55,6 @@ The resulting image is not interesting either, it will simply draw a red image. 
 
 occl - is initially clear image; this line tells us that if the fragment is visible, then we put a white point in this image using fragment's texture coordinates. Here is the resulting occl image for one point we choose on the hemisphere:
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/08-ambient-occlusion/05c950df6f1b4bac904bc309068ba260.png)
 
 **Question:** Why are there holes in obviously visible triangles?
 
@@ -65,7 +62,6 @@ occl - is initially clear image; this line tells us that if the fragment is visi
 
 Well, we repeat above procedure a thousand times, compute average of all occl images and here is the average visible texture:
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/08-ambient-occlusion/5ef7454c7294416fa7fa3b80c3663a71.png)
 
 Cool, looks like something we could want. Let us draw our Diable without any lighting computation, simply by putting above texture:
 
@@ -80,7 +76,6 @@ Cool, looks like something we could want. Let us draw our Diable without any lig
 
 Here aoimage is the above (average lighting) texture. And resulting render is:
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/08-ambient-occlusion/6031c8b2ccd84e2d8e15584a3b91c8a2.png)
 
 **Question:** Wow, he is in a bad mood... Why?
 
@@ -94,7 +89,6 @@ This method allows to precompute ambient occlusion for scenes with static geomet
 
 Well, we see that global illumination is still an expensive thing, it requires visibility computations for many points. Let us try to find a compromise between computing time and rendering quality. Here is an image I want to compute (recall that in this lesson I do not use other lighting besides the ambient one):
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/08-ambient-occlusion/1ba93fa5a48646e2a9614271c943b4da.png)
 
 Here is the shader to compute the image:
 
@@ -156,4 +150,3 @@ The source code is available [here](https://github.com/ssloy/tinyrenderer/tree/d
 
 Enjoy!
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/08-ambient-occlusion/feceed3f2a964e2fb79926a167f15500.png)

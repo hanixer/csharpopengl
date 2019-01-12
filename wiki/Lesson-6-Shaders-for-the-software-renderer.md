@@ -9,7 +9,6 @@ Time for fun! First of all, let us check the current state of the [source code](
 
 For a total of 525 lines, exactly what we wanted. Please note that the only files responsible for actual rendering are in our_gl.* and main.cpp with **168 lines in total**.
 
-![](https://raw.githubusercontent.com/ssloy/tinyrenderer/gh-pages/img/06-shaders/e3cd704925f52b5466ab3c4f9fbab899.png)
 
 # Refactoring the source code
 
