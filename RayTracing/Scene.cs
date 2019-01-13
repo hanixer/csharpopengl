@@ -16,79 +16,93 @@ namespace RayTracing
         List<GeometricObject> objects = new List<GeometricObject>();
         float planeZ = 45;
         static vec3 lightDirection = glm.normalize(new vec3(0, 0, -1));
+        Triangle triangle;
+        Light light;
+        Camera camera = new Camera();
 
         public Scene()
         {
-            viewport.HorResolution = 200;
-            viewport.VertResolution = 200;
+            viewport.Width = 800;
+            viewport.Height = 600;
             viewport.PixelSize = 1;
             viewport.Gamma = 1;
             viewport.SamplesCount = 16;
 
-            Bitmap = new Bitmap(viewport.HorResolution, viewport.VertResolution);
+            Bitmap = new Bitmap(viewport.Width, viewport.Height);
 
-            Sphere sphere = new Sphere(new vec3(0, -50, 0), 20);
-            sphere.Color = Colors.Red;
-            //AddObject(sphere);
+            vec3 v1 = new vec3(0, 1, -2);
+            vec3 v2 = new vec3(-1.9f, -1, -2);
+            vec3 v3 = new vec3(1.6f, -0.5f, -2);
 
-            sphere = new Sphere(new vec3(-0, 50, 0), 20);
-            sphere.Color = Colors.Yellow;
-            //AddObject(sphere);
+            vec3 n1 = glm.normalize(new vec3(0, 0.6f, 1));
+            vec3 n2 = glm.normalize(new vec3(-0.4f, -0.4f, 1));
+            vec3 n3 = glm.normalize(new vec3(0.4f, -0.4f, 1));
 
-            Plane plane = new Plane(new vec3(0), new vec3(0, 1, 1));
-            //plane.Color = Colors.Green;
+            triangle = new Triangle(new vec3[] { v1, v2, v3 }, new vec3[] { n1, n2, n3 });
 
-            AddObject(new Sphere(new vec3(0, 0, 0), 10, new vec3(1, 0, 1)));
-            AddObject(new Sphere(new vec3(20, 0, 0), 10, new vec3(1, 0, 1)));
-            AddObject(new Sphere(new vec3(40, 0, 0), 10, new vec3(1, 0, 1)));
-            AddObject(new Sphere(new vec3(60, 0, 0), 10, new vec3(1, 0, 1)));
-            AddObject(new Sphere(new vec3(80, 0, 0), 10, new vec3(1, 0, 1)));
-            AddObject(new Sphere(new vec3(100, 0, 0), 10, new vec3(1, 0, 1)));
-            AddObject(new Sphere(new vec3(-20, 0, 0), 10, new vec3(0, 1, 1)));
-            AddObject(new Sphere(new vec3(-40, 0, 0), 10, new vec3(0, 1, 1)));
-            AddObject(new Sphere(new vec3(-60, 0, 0), 10, new vec3(0, 1, 1)));
-
-            AddObject(new Sphere(new vec3(0, 20, 20), 10, new vec3(0.5f, 0.5f, 1)));
-            AddObject(new Sphere(new vec3(0, -20, -20), 10, new vec3(0.5f, 0.5f, 1)));
-
-            Random rand = new Random();
-            for (int i = 0; i < 100; i++)
-            {
-                float x = rand.Next(80, 200);
-                float y = rand.Next(80, 200);
-                float z = rand.Next(-10, 0);
-                float r = rand.Next(5, 15);
-                float re = (float)rand.NextDouble();
-                float g = (float)rand.NextDouble();
-                float b = (float)rand.NextDouble();
-                //AddObject(new Sphere(new vec3(x, y, z), r, new vec3(re, g, b)));
-            }
-
-            //AddObject(plane);
+            light = new Light(new vec3(1, 3, 1), new vec3(10, 10, 10));                
         }
 
         public void RenderScene()
         {
-            Ray ray = new Ray();
-            float z = 50;
+            float distance = float.PositiveInfinity;
 
-            for (int r = 0; r < viewport.VertResolution; r++)
+            for (int r = 0; r < viewport.Height; r++)
             {
-                for (int c = 0; c < viewport.HorResolution; c++)
+                for (int c = 0; c < viewport.Width; c++)
                 {
-                    float x = viewport.PixelSize * (c - (viewport.HorResolution - 1.0f) / 2);
-                    float y = viewport.PixelSize * (r - (viewport.VertResolution - 1.0f) / 2);
+                    Ray ray = ComputeEyeRay(c + 0.5f, r + 0.5f, viewport.Width, viewport.Height, camera);
 
-                    ray.Origin = new vec3(0, 0, z);
-                    ray.Direction = glm.normalize(new vec3(x, y, planeZ));
+                    vec3 color;
 
-                    vec3 color = Trace(ray);
+                    if (Sample(ref distance, ray))
+                    {
+                        color = Colors.White;
+                    }
+                    else
+                    {
+                        color = Colors.Black;
+                    }
 
-                    DisplayPixel(c, r, color);
+                    DisplayPixel(r, c, color);
                 }
             }
-
+            
             Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+        }
+
+        private bool Sample(ref float distance, Ray ray)
+        {
+            float d = ComputeIntersection(ray, triangle);
+            if (d >= distance)
+            {
+                return false;
+            }
+
+            distance = d;
+            return true;
+        }
+
+        static Ray ComputeEyeRay(float x, float y, int width, int height, Camera camera)
+        {
+            float aspect = (float)height / width;
+            float side = (float)(-2.0f * Math.Tan(camera.fieldOfViewX * 0.5));
+            float originX = (x / width - 0.5f) * side;
+            float originY = -(y / height - 0.5f) * side * aspect;
+            var origin = new vec3(originX, originY, 1.0f) * camera.nearZ;
+
+            return new Ray(origin, glm.normalize(origin));
+        }
+
+        static float ComputeIntersection(Ray ray, Triangle triangle)
+        {
+            vec3 e1 = triangle.Point(1) - triangle.Point(0);
+            vec3 e2 = triangle.Point(2) - triangle.Point(0);
+            vec3 triNormal = glm.cross(e1, e2);
+
+            float d = -glm.dot(triNormal, ray.Origin - triangle.Point(0)) / glm.dot(triNormal, ray.Direction);
+
+            return d;
         }
 
         public void AddPlaneZ(float add)
@@ -123,7 +137,7 @@ namespace RayTracing
             vec3 point = ray.GetPoint(t);
             vec3 normal = obj.GetNormal(point);
             float dot = glm.dot(normal, lightDirection);
-            //return obj.Color;
+
             if (dot > 0)
             {
                 return obj.Color * dot;

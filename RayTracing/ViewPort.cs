@@ -8,8 +8,8 @@ namespace RayTracing
 {
     class ViewPort
     {
-        public int HorResolution;
-        public int VertResolution;
+        public int Width;
+        public int Height;
         public float PixelSize;
         public float Gamma;
         public int SamplesCount;

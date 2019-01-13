@@ -32,6 +32,8 @@ namespace RayTracing
             scene.RenderScene();
 
             DrawBitmapWithZoom(e, scene.Bitmap);
+            Color leftBot = Color.FromArgb(0, 0, 0);
+            Color rightBot = Color.FromArgb(255, 0, 0);
         }
 
         private void DrawBitmapWithZoom(PaintEventArgs e, Bitmap bitmap)

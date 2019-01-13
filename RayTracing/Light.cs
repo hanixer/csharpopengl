@@ -11,5 +11,11 @@ namespace RayTracing
     {
         public vec3 Position;
         public vec3 Power;
+
+        public Light(vec3 position, vec3 power)
+        {
+            Position = position;
+            Power = power;
+        }
     }
 }

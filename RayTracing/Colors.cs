@@ -29,5 +29,9 @@ namespace RayTracing
         {
             get { return new vec3(0, 0.2f, 0); }
         }
+        public static vec3 DarkBlue
+        {
+            get { return new vec3(0, 0, 0.2f); }
+        }
     }
 }
