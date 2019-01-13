@@ -12,7 +12,7 @@ namespace RayTracing
 {
     public partial class Form1 : Form
     {
-        World world;
+        Scene scene;
         float pixelSize = 1;
 
         public Form1()
@@ -21,7 +21,7 @@ namespace RayTracing
             Load += Form1_Load;
             KeyPress += Form1_KeyPress;
             Paint += Form1_Paint;
-            world = new World();
+            scene = new Scene();
             Width = 1000;
             Height = 1000;
         }
@@ -29,9 +29,9 @@ namespace RayTracing
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             //RenderScene(e);
-            world.RenderScene();
+            scene.RenderScene();
 
-            DrawBitmapWithZoom(e, world.Bitmap);
+            DrawBitmapWithZoom(e, scene.Bitmap);
         }
 
         private void DrawBitmapWithZoom(PaintEventArgs e, Bitmap bitmap)
@@ -49,15 +49,15 @@ namespace RayTracing
 
         private void RenderScene(PaintEventArgs e)
         {
-            world.RenderScene();
-            e.Graphics.DrawImage(world.Bitmap, 0, 0);
+            scene.RenderScene();
+            e.Graphics.DrawImage(scene.Bitmap, 0, 0);
         }
 
         private void Form1_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == 's')
             {
-                world.Bitmap.Save("output.bmp");
+                scene.Bitmap.Save("output.bmp");
             }
             else if (e.KeyChar == 'w')
             {
@@ -81,12 +81,12 @@ namespace RayTracing
             }
             else if (e.KeyChar == 'f')
             {
-                world.AddPlaneZ(1);
+                scene.AddPlaneZ(1);
                 Invalidate();
             }
             else if (e.KeyChar == 'd')
             {
-                world.AddPlaneZ(-1);
+                scene.AddPlaneZ(-1);
                 Invalidate();
             }
         }

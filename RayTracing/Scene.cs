@@ -8,15 +8,16 @@ using System.Threading.Tasks;
 
 namespace RayTracing
 {
-    class World
+    class Scene
     {
         ViewPort viewport = new ViewPort();
         Color background = Color.Black;
         public Bitmap Bitmap;
         List<GeometricObject> objects = new List<GeometricObject>();
         float planeZ = 45;
+        static vec3 lightDirection = glm.normalize(new vec3(0, 0, -1));
 
-        public World()
+        public Scene()
         {
             viewport.HorResolution = 200;
             viewport.VertResolution = 200;
@@ -26,16 +27,43 @@ namespace RayTracing
 
             Bitmap = new Bitmap(viewport.HorResolution, viewport.VertResolution);
 
-            Sphere sphere = new Sphere(new vec3(0, -25, 0), 80);
-            sphere.Color = Colors.Red;            
+            Sphere sphere = new Sphere(new vec3(0, -50, 0), 20);
+            sphere.Color = Colors.Red;
             //AddObject(sphere);
 
-            sphere = new Sphere(new vec3(-0, 0, 0), 40);
+            sphere = new Sphere(new vec3(-0, 50, 0), 20);
             sphere.Color = Colors.Yellow;
-            AddObject(sphere);
+            //AddObject(sphere);
 
             Plane plane = new Plane(new vec3(0), new vec3(0, 1, 1));
-            plane.Color = Colors.Green;
+            //plane.Color = Colors.Green;
+
+            AddObject(new Sphere(new vec3(0, 0, 0), 10, new vec3(1, 0, 1)));
+            AddObject(new Sphere(new vec3(20, 0, 0), 10, new vec3(1, 0, 1)));
+            AddObject(new Sphere(new vec3(40, 0, 0), 10, new vec3(1, 0, 1)));
+            AddObject(new Sphere(new vec3(60, 0, 0), 10, new vec3(1, 0, 1)));
+            AddObject(new Sphere(new vec3(80, 0, 0), 10, new vec3(1, 0, 1)));
+            AddObject(new Sphere(new vec3(100, 0, 0), 10, new vec3(1, 0, 1)));
+            AddObject(new Sphere(new vec3(-20, 0, 0), 10, new vec3(0, 1, 1)));
+            AddObject(new Sphere(new vec3(-40, 0, 0), 10, new vec3(0, 1, 1)));
+            AddObject(new Sphere(new vec3(-60, 0, 0), 10, new vec3(0, 1, 1)));
+
+            AddObject(new Sphere(new vec3(0, 20, 20), 10, new vec3(0.5f, 0.5f, 1)));
+            AddObject(new Sphere(new vec3(0, -20, -20), 10, new vec3(0.5f, 0.5f, 1)));
+
+            Random rand = new Random();
+            for (int i = 0; i < 100; i++)
+            {
+                float x = rand.Next(80, 200);
+                float y = rand.Next(80, 200);
+                float z = rand.Next(-10, 0);
+                float r = rand.Next(5, 15);
+                float re = (float)rand.NextDouble();
+                float g = (float)rand.NextDouble();
+                float b = (float)rand.NextDouble();
+                //AddObject(new Sphere(new vec3(x, y, z), r, new vec3(re, g, b)));
+            }
+
             //AddObject(plane);
         }
 
@@ -56,7 +84,7 @@ namespace RayTracing
 
                     vec3 color = Trace(ray);
 
-                    DisplayPixel(r, c, color);
+                    DisplayPixel(c, r, color);
                 }
             }
 
@@ -89,7 +117,6 @@ namespace RayTracing
             return color;
         }
 
-        static vec3 lightDirection = glm.normalize(new vec3(0, -0.5f, -1));
 
         private static vec3 ComputeColorWithNormal(Ray ray, float t, GeometricObject obj)
         {

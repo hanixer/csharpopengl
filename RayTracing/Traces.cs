@@ -9,11 +9,11 @@ namespace RayTracing
 {
     class Tracer
     {
-        protected World world;
+        protected Scene scene;
 
-        public Tracer(World world)
+        public Tracer(Scene scene)
         {
-            this.world = world;
+            this.scene = scene;
         }
 
         public virtual vec3 TraceRay(Ray ray)

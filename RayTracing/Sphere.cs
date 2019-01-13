@@ -12,6 +12,11 @@ namespace RayTracing
         vec3 center;
         float radius;
 
+        public Sphere(vec3 center, float radius, vec3 color) : this(center, radius)
+        {
+            Color = color;
+        }
+
         public Sphere(vec3 center, float radius)
         {
             this.center = new vec3(center);
