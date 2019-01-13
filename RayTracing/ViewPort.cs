@@ -12,7 +12,7 @@ namespace RayTracing
         public int VertResolution;
         public float PixelSize;
         public float Gamma;
-
+        public int SamplesCount;
 
     }
 }

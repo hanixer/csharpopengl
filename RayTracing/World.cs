@@ -17,10 +17,11 @@ namespace RayTracing
 
         public World()
         {
-            viewport.HorResolution = 200;
-            viewport.VertResolution = 200;
-            viewport.PixelSize = 1;
+            viewport.HorResolution = 1000;
+            viewport.VertResolution = 1000;
+            viewport.PixelSize = 3;
             viewport.Gamma = 1;
+            viewport.SamplesCount = 16;
 
             Bitmap = new Bitmap(viewport.HorResolution, viewport.VertResolution);
 
@@ -51,12 +52,22 @@ namespace RayTracing
                     float z = 100;
                     ray.Origin = new vec3(x, y, z);
 
-                    vec3 color = Trace(ray);
+                    vec3 color = TraceFunctionF(c, r);
+
                     DisplayPixel(r, c, color);
                 }
             }
 
             Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+        }
+
+        private vec3 TraceFunctionF(float x, float y)
+        {
+            x /= 100;
+            y /= 100;
+            float value = (float)(1 + Math.Sin(x * x * y * y)) / 2;
+            //Console.WriteLine("{0}, {1}, {2}", x, y, value);
+            return new vec3(value, value, value);
         }
 
         private vec3 Trace(Ray ray)
