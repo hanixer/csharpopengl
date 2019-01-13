@@ -14,11 +14,12 @@ namespace RayTracing
         Color background = Color.Black;
         public Bitmap Bitmap;
         List<GeometricObject> objects = new List<GeometricObject>();
+        float planeZ = 45;
 
         public World()
         {
-            viewport.HorResolution = 10;
-            viewport.VertResolution = 10;
+            viewport.HorResolution = 200;
+            viewport.VertResolution = 200;
             viewport.PixelSize = 1;
             viewport.Gamma = 1;
             viewport.SamplesCount = 16;
@@ -29,7 +30,7 @@ namespace RayTracing
             sphere.Color = Colors.Red;            
             //AddObject(sphere);
 
-            sphere = new Sphere(new vec3(-0, 0, 0), 5);
+            sphere = new Sphere(new vec3(-0, 0, 0), 40);
             sphere.Color = Colors.Yellow;
             AddObject(sphere);
 
@@ -41,7 +42,7 @@ namespace RayTracing
         public void RenderScene()
         {
             Ray ray = new Ray();
-            ray.Direction = new vec3(0, 0, -1);
+            float z = 50;
 
             for (int r = 0; r < viewport.VertResolution; r++)
             {
@@ -49,8 +50,9 @@ namespace RayTracing
                 {
                     float x = viewport.PixelSize * (c - (viewport.HorResolution - 1.0f) / 2);
                     float y = viewport.PixelSize * (r - (viewport.VertResolution - 1.0f) / 2);
-                    float z = 50;
-                    ray.Origin = new vec3(x, y, z);
+
+                    ray.Origin = new vec3(0, 0, z);
+                    ray.Direction = glm.normalize(new vec3(x, y, planeZ));
 
                     vec3 color = Trace(ray);
 
@@ -61,9 +63,14 @@ namespace RayTracing
             Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
         }
 
+        public void AddPlaneZ(float add)
+        {
+            planeZ += add;
+        }
+
         private vec3 Trace(Ray ray)
         {
-            float tmin = float.MaxValue;
+            float tmin = float.PositiveInfinity;
             float t = 0;
             vec3 color = Colors.Black;
 
@@ -82,11 +89,13 @@ namespace RayTracing
             return color;
         }
 
+        static vec3 lightDirection = glm.normalize(new vec3(0, -0.5f, -1));
+
         private static vec3 ComputeColorWithNormal(Ray ray, float t, GeometricObject obj)
         {
             vec3 point = ray.GetPoint(t);
             vec3 normal = obj.GetNormal(point);
-            float dot = -glm.dot(normal, ray.Direction);
+            float dot = glm.dot(normal, lightDirection);
             //return obj.Color;
             if (dot > 0)
             {

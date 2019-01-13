@@ -79,8 +79,17 @@ namespace RayTracing
                 pixelSize /= 2;
                 Invalidate();
             }
+            else if (e.KeyChar == 'f')
+            {
+                world.AddPlaneZ(1);
+                Invalidate();
+            }
+            else if (e.KeyChar == 'd')
+            {
+                world.AddPlaneZ(-1);
+                Invalidate();
+            }
         }
-
         private void Form1_Load(object sender, EventArgs e)
         {
         }

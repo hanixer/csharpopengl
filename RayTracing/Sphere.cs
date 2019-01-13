@@ -18,6 +18,34 @@ namespace RayTracing
             this.radius = radius;
         }
 
+        public override bool Hit(Ray ray, ref float tmin)
+        {
+            vec3 v = ray.Origin - center;
+            float a = glm.dot(ray.Direction, ray.Direction);
+            float b = 2 * glm.dot(ray.Direction, v);
+            float c = glm.dot(v, v) - radius * radius;
+            float discriminant = b * b - 4 * a * c;
+
+            if (discriminant > 0)
+            {
+                float root = (float)Math.Sqrt(discriminant);
+                float t1 = (-b + discriminant) / (2 * a);
+                float t2 = (-b - discriminant) / (2 * a);
+                tmin = Math.Min(t1, t2);
+                return true;
+            }
+            else if (discriminant == 0)
+            {
+                float t1 = -b / (2 * a);
+                tmin = t1;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public bool Hit2(Ray ray, ref float tmin)
         {
             vec3 offset = center - ray.Origin;
@@ -52,34 +80,6 @@ namespace RayTracing
             else if (diff == 0)
             {
                 tmin = 0;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public override bool Hit(Ray ray, ref float tmin)
-        {
-            vec3 v = ray.Origin - center;
-            float a = glm.dot(ray.Direction, ray.Direction);
-            float b = 2 * glm.dot(ray.Direction, v);
-            float c = glm.dot(v, v) - radius * radius;
-            float discriminant = b * b - 4 * a * c;
-
-            if (discriminant > 0)
-            {
-                float root = (float)Math.Sqrt(discriminant);
-                float t1 = (-b + discriminant) / (2 * a);
-                float t2 = (-b - discriminant) / (2 * a);
-                tmin = Math.Min(t1, t2);
-                return true;
-            }
-            else if (discriminant == 0)
-            {
-                float t1 = -b / (2 * a);
-                tmin = t1;
                 return true;
             }
             else
