@@ -17,9 +17,9 @@ namespace RayTracing
 
         public World()
         {
-            viewport.HorResolution = 1000;
-            viewport.VertResolution = 1000;
-            viewport.PixelSize = 3;
+            viewport.HorResolution = 10;
+            viewport.VertResolution = 10;
+            viewport.PixelSize = 1;
             viewport.Gamma = 1;
             viewport.SamplesCount = 16;
 
@@ -27,15 +27,15 @@ namespace RayTracing
 
             Sphere sphere = new Sphere(new vec3(0, -25, 0), 80);
             sphere.Color = Colors.Red;            
-            AddObject(sphere);
+            //AddObject(sphere);
 
-            sphere = new Sphere(new vec3(0, 30, 0), 60);
+            sphere = new Sphere(new vec3(-0, 0, 0), 5);
             sphere.Color = Colors.Yellow;
             AddObject(sphere);
 
             Plane plane = new Plane(new vec3(0), new vec3(0, 1, 1));
             plane.Color = Colors.Green;
-            AddObject(plane);
+            //AddObject(plane);
         }
 
         public void RenderScene()
@@ -49,25 +49,16 @@ namespace RayTracing
                 {
                     float x = viewport.PixelSize * (c - (viewport.HorResolution - 1.0f) / 2);
                     float y = viewport.PixelSize * (r - (viewport.VertResolution - 1.0f) / 2);
-                    float z = 100;
+                    float z = 50;
                     ray.Origin = new vec3(x, y, z);
 
-                    vec3 color = TraceFunctionF(c, r);
+                    vec3 color = Trace(ray);
 
                     DisplayPixel(r, c, color);
                 }
             }
 
             Bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
-        }
-
-        private vec3 TraceFunctionF(float x, float y)
-        {
-            x /= 100;
-            y /= 100;
-            float value = (float)(1 + Math.Sin(x * x * y * y)) / 2;
-            //Console.WriteLine("{0}, {1}, {2}", x, y, value);
-            return new vec3(value, value, value);
         }
 
         private vec3 Trace(Ray ray)
@@ -83,11 +74,28 @@ namespace RayTracing
                     if (t < tmin)
                     {
                         tmin = t;
-                        color = obj.Color;
+                        color = ComputeColorWithNormal(ray, t, obj);
                     }
                 }
             }
+
             return color;
+        }
+
+        private static vec3 ComputeColorWithNormal(Ray ray, float t, GeometricObject obj)
+        {
+            vec3 point = ray.GetPoint(t);
+            vec3 normal = obj.GetNormal(point);
+            float dot = -glm.dot(normal, ray.Direction);
+            //return obj.Color;
+            if (dot > 0)
+            {
+                return obj.Color * dot;
+            }
+            else
+            {
+                return Colors.Black;
+            }            
         }
 
         void DisplayPixel(int row, int column, vec3 color)
@@ -96,5 +104,14 @@ namespace RayTracing
         }
 
         void AddObject(GeometricObject obj) => objects.Add(obj);
+
+        private vec3 TraceFunctionF(float x, float y)
+        {
+            x /= 100;
+            y /= 100;
+            float value = (float)(1 + Math.Sin(x * x * y * y)) / 2;
+            //Console.WriteLine("{0}, {1}, {2}", x, y, value);
+            return new vec3(value, value, value);
+        }
     }
 }

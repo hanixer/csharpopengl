@@ -23,5 +23,10 @@ namespace RayTracing
             Origin = new vec3(0);
             Direction = new vec3(0);
         }
+
+        public vec3 GetPoint(float distance)
+        {
+            return Origin + distance * Direction;
+        }
     }
 }

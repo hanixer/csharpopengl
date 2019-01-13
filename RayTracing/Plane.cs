@@ -31,5 +31,10 @@ namespace RayTracing
 
             return false;
         }
+
+        public override vec3 GetNormal(vec3 point)
+        {
+            return normal;
+        }
     }
 }

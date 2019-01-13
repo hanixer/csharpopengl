@@ -24,5 +24,6 @@ namespace RayTracing
         }
 
         public abstract bool Hit(Ray ray, ref float tmin);
+        public abstract vec3 GetNormal(vec3 point);
     }
 }

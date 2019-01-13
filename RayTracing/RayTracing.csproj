@@ -58,6 +58,7 @@
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="GeometricObject.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="Sphere.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Program.cs" />
