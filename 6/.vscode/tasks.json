@@ -12,6 +12,17 @@
                 "reveal": "silent"
             },
             "problemMatcher": "$msCompile"
+        },        
+        {
+            "label": "run",
+            "command": "dotnet run",
+            "type": "shell",
+            "group": "test",
+            "dependsOn":["build"],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
         }
     ]
 }

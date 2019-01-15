@@ -25,29 +25,18 @@ module Helper =
         bitmap.UnlockBits(data)
         bytes
 
+    let colorToVector (color : Drawing.Color) =
+        Vector3d(float color.R / 255.0, float color.G / 255.0, float color.B / 255.0)
+
 type Game() =
     /// <summary>Creates a 800x600 window with the specified title.</summary>
     inherit GameWindow(800, 600)
 
-    let mutable idtex = 0
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-
-    let drawOnCanvas() =    
-        use graphics = System.Drawing.Graphics.FromImage(canvas)
-        graphics.FillRectangle(System.Drawing.Brushes.DarkOliveGreen, 0, 0, canvas.Width, canvas.Height)
-        graphics.Flush()
-
-    let loadTexture (bitmap : System.Drawing.Bitmap) =
-        let id = GL.GenTexture()
-        GL.BindTexture(TextureTarget.Texture2D, id)
-        let data = bitmap.LockBits(Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), Drawing.Imaging.ImageLockMode.ReadOnly, Drawing.Imaging.PixelFormat.Format32bppArgb)
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-            OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
-        bitmap.UnlockBits(data)
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear);
-        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear);
-        id
+    let sphereCenter = Vector3d(0.0, 0.0, -1.0)
+    let sphereRadius = 5.0
+    let sphereColor = Helper.colorToVector Drawing.Color.Brown
 
     do 
         base.VSync <- VSyncMode.On
@@ -56,15 +45,14 @@ type Game() =
      /// <param name="e">Not used.</param>
     override o.OnLoad e =
         base.OnLoad(e)
-        idtex <- loadTexture(new System.Drawing.Bitmap("1.jpg"))
         GL.ClearColor(0.f, 0.f, 0.f, 0.0f)
         GL.Enable(EnableCap.DepthTest)
-        drawOnCanvas()
-        canvas.SetPixel(0, 0, Drawing.Color.Red)
-        canvas.SetPixel(1, 0, Drawing.Color.Red)
-        canvas.SetPixel(2, 0, Drawing.Color.Blue)
+        let bitmap = new Drawing.Bitmap(100, 100)
+        
+        Render.renderSphereWithRays bitmap sphereCenter sphereRadius sphereColor
+
+        Render.drawBitmap bitmap canvas 5.0
         bytes <-Helper.getBytesFromBitmap canvas
-        printfn "size = %d, %x %x %x %x" bytes.Length bytes.[0] bytes.[1] bytes.[2] bytes.[3]
 
     /// <summary>
     /// Called when your window is resized. Set your viewport here. It is also
@@ -99,18 +87,6 @@ type Game() =
         GL.MatrixMode(MatrixMode.Modelview)
         GL.LoadMatrix(&modelview)
 
-        // GL.BindTexture(TextureTarget.Texture2D, idtex);
-        // GL.Begin(PrimitiveType.Quads)
-        // GL.TexCoord2(0, 0);
-        // GL.Vertex3(-1.0f, -1.0f, 4.0f);
-        // GL.TexCoord2(1, 0);
-        // GL.Vertex3(1.0f, -1.0f, 4.0f);
-        // GL.TexCoord2(1, 1);
-        // GL.Vertex3(1.0f, 1.0f, 4.0f);
-        // GL.TexCoord2(0, 1);
-        // GL.Vertex3(-1.0f, 1.0f, 4.0f);
-        // GL.End()
-                
         GL.DrawPixels(canvas.Width, canvas.Height, PixelFormat.Bgra, PixelType.UnsignedByte, bytes)
 
         base.SwapBuffers()  

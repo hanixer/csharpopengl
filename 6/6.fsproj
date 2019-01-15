@@ -1,18 +1,16 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <RootNamespace>_6</RootNamespace>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <RootNamespace>_6</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
+    <Compile Include="Render.fs" />
+    <Compile Include="Rest.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="OpenTK.NETCore" Version="1.1.2749.6433" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
   </ItemGroup>
-  
 </Project>
