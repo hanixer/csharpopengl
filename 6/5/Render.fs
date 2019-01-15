@@ -28,7 +28,7 @@ let rayDirection c r width (height : int) nearZ fieldOfView =
     v.Normalize()
     v
 
-let computeColorFromLight ray point (sphereCenter : Vector3d) lightPosition (diffuseColor : Vector3d, specularColor : Vector3d, specularPower) =
+let computeColorFromLight ray point (sphereCenter : Vector3d) lightPosition (ambientIntensity : float, diffuseColor : Vector3d, specularColor : Vector3d, specularPower) =
     let viewVector = -ray.Direction.Normalized() 
     let normal = (point - sphereCenter).Normalized()
     let lightDir = (lightPosition - sphereCenter).Normalized()
@@ -41,9 +41,10 @@ let computeColorFromLight ray point (sphereCenter : Vector3d) lightPosition (dif
     if diffuse > 0.0 then
         let specularAngle = Math.Max(0.0, Vector3d.Dot(normal, reflectDir))
         let specular = Math.Pow(specularAngle, specularPower)
-        (diffuse * diffuseColor + specular * specularColor) / 2.0
+        let c = (ambientIntensity * diffuseColor + 0.5 * diffuse * diffuseColor + 0.5 * specular * specularColor)
+        Vector3d(Math.Min(c.X, 1.0), Math.Min(c.Y, 1.0), Math.Min(c.Z, 1.0))
     else
-        Vector3d(0.0)
+        ambientIntensity * diffuseColor
     // let coef = Vector3d.Dot(normal, lightDirection)
     // sphereColor * (1.0 - (coef / 2.0 + 0.5))
     // let dbgval = 1.0 - (Vector3d.Dot(normal, half) / 2.0 + 0.5)
@@ -52,8 +53,13 @@ let computeColorFromLight ray point (sphereCenter : Vector3d) lightPosition (dif
 
 let pickNearestAndGetColor ray lightPosition a b discr sphereCenter color  =
     let root = Math.Sqrt(discr)
-    let t1 = (-b - root) / (2.0 * a)
-    let point = ray.Origin + t1 * ray.Direction
+    let t0 = (-b - root) / (2.0 * a)
+    let t1 = (-b + root) / (2.0 * a)
+    let t =
+        if Math.Abs(t0) < Math.Abs(t1) 
+        then t0
+        else t1
+    let point = ray.Origin + t * ray.Direction
     let color = computeColorFromLight ray point sphereCenter lightPosition color         
     Some color
 

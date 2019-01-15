@@ -28,6 +28,7 @@ type Game() =
     let mutable bytes = Array.create 1 (byte 0)
     let sphereCenter = Vector3d(0.0, 0.0, -4.0)
     let sphereRadius = 2.0
+    let ambientIntensity = 0.1
     let diffuseColor = Helper.colorToVector Drawing.Color.Red
     let specularColor = Vector3d(1.0)
     let specularPower = 10.0
@@ -47,7 +48,7 @@ type Game() =
         GL.Enable(EnableCap.DepthTest)
         let bitmap = new Drawing.Bitmap(width, height)
         
-        Render.renderSphereWithRays bitmap lightPosition sphereCenter sphereRadius (diffuseColor, specularColor, specularPower)
+        Render.renderSphereWithRays bitmap lightPosition sphereCenter sphereRadius (ambientIntensity, diffuseColor, specularColor, specularPower)
 
         Render.drawBitmap bitmap canvas zoom
         bytes <-Helper.getBytesFromBitmap canvas
