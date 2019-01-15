@@ -6,11 +6,37 @@ open OpenTK.Graphics.OpenGL
 open OpenTK.Input
 open OpenTK.Graphics.OpenGL
 
-type Game() as this =
+module Helper =
+    let getBytesFromBitmap (bitmap: System.Drawing.Bitmap) =
+        let data = bitmap.LockBits(System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), 
+                                   System.Drawing.Imaging.ImageLockMode.ReadWrite, 
+                                   bitmap.PixelFormat)
+        let size = data.Stride * data.Height
+        let bytes = Array.create size (byte 0)
+        for i = 0 to 2 do
+            for j = 0 to 3 do
+                printf "%x " bytes.[i * 4 + j]
+            printfn ""
+        System.Runtime.InteropServices.Marshal.Copy(data.Scan0, bytes, 0, size)
+        for i = 0 to 2 do
+            for j = 0 to 3 do
+                printf "%x " bytes.[i * 4 + j]
+            printfn ""
+        bitmap.UnlockBits(data)
+        bytes
+
+type Game() =
     /// <summary>Creates a 800x600 window with the specified title.</summary>
     inherit GameWindow(800, 600)
 
     let mutable idtex = 0
+    let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
+    let mutable bytes = Array.create 1 (byte 0)
+
+    let drawOnCanvas() =    
+        use graphics = System.Drawing.Graphics.FromImage(canvas)
+        graphics.FillRectangle(System.Drawing.Brushes.DarkOliveGreen, 0, 0, canvas.Width, canvas.Height)
+        graphics.Flush()
 
     let loadTexture (bitmap : System.Drawing.Bitmap) =
         let id = GL.GenTexture()
@@ -30,9 +56,15 @@ type Game() as this =
      /// <param name="e">Not used.</param>
     override o.OnLoad e =
         base.OnLoad(e)
-        idtex <- loadTexture(new System.Drawing.Bitmap("1.png"))
-        GL.ClearColor(0.1f, 0.2f, 0.5f, 0.0f)
+        idtex <- loadTexture(new System.Drawing.Bitmap("1.jpg"))
+        GL.ClearColor(0.f, 0.f, 0.f, 0.0f)
         GL.Enable(EnableCap.DepthTest)
+        drawOnCanvas()
+        canvas.SetPixel(0, 0, Drawing.Color.Red)
+        canvas.SetPixel(1, 0, Drawing.Color.Red)
+        canvas.SetPixel(2, 0, Drawing.Color.Blue)
+        bytes <-Helper.getBytesFromBitmap canvas
+        printfn "size = %d, %x %x %x %x" bytes.Length bytes.[0] bytes.[1] bytes.[2] bytes.[3]
 
     /// <summary>
     /// Called when your window is resized. Set your viewport here. It is also
@@ -67,21 +99,19 @@ type Game() as this =
         GL.MatrixMode(MatrixMode.Modelview)
         GL.LoadMatrix(&modelview)
 
-        // GL.Begin(PrimitiveType.Triangles)
-        // GL.Color3(1.f, 1.f, 0.f); GL.Vertex3(-1.f, -1.f, 4.f)
-        // GL.Color3(1.f, 0.f, 0.f); GL.Vertex3(1.f, -1.f, 4.f)
-        // GL.Color3(0.2f, 0.9f, 1.f); GL.Vertex3(0.f, 1.f, 4.f)
+        // GL.BindTexture(TextureTarget.Texture2D, idtex);
+        // GL.Begin(PrimitiveType.Quads)
+        // GL.TexCoord2(0, 0);
+        // GL.Vertex3(-1.0f, -1.0f, 4.0f);
+        // GL.TexCoord2(1, 0);
+        // GL.Vertex3(1.0f, -1.0f, 4.0f);
+        // GL.TexCoord2(1, 1);
+        // GL.Vertex3(1.0f, 1.0f, 4.0f);
+        // GL.TexCoord2(0, 1);
+        // GL.Vertex3(-1.0f, 1.0f, 4.0f);
         // GL.End()
-
-        GL.Begin(PrimitiveType.Triangles)
-        GL.BindTexture(TextureTarget.Texture2D, idtex);
-        GL.TexCoord2(0, 0);
-        GL.Vertex3(-1.0f, -1.0f, 4.0f);
-        GL.TexCoord2(1, 0);
-        GL.Vertex3(1.0f, -1.0f, 4.0f);
-        GL.TexCoord2(0.5f, 1.0f);
-        GL.Vertex3(0.0f, 1.0f, 4.0f);
-        GL.End()
+                
+        GL.DrawPixels(canvas.Width, canvas.Height, PixelFormat.Bgra, PixelType.UnsignedByte, bytes)
 
         base.SwapBuffers()  
 
