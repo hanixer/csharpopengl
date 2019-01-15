@@ -13,15 +13,7 @@ module Helper =
                                    bitmap.PixelFormat)
         let size = data.Stride * data.Height
         let bytes = Array.create size (byte 0)
-        for i = 0 to 2 do
-            for j = 0 to 3 do
-                printf "%x " bytes.[i * 4 + j]
-            printfn ""
         System.Runtime.InteropServices.Marshal.Copy(data.Scan0, bytes, 0, size)
-        for i = 0 to 2 do
-            for j = 0 to 3 do
-                printf "%x " bytes.[i * 4 + j]
-            printfn ""
         bitmap.UnlockBits(data)
         bytes
 
@@ -35,8 +27,12 @@ type Game() =
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
     let sphereCenter = Vector3d(0.0, 0.0, -5.0)
-    let sphereRadius = 0.5
-    let sphereColor = Helper.colorToVector Drawing.Color.White
+    let sphereRadius = 2.0
+    let sphereColor = Helper.colorToVector Drawing.Color.BurlyWood
+    let lightDirection = Vector3d(-1.0, 1.0, 0.0).Normalized()
+    let width = 600
+    let height = 400
+    let zoom = 1.0
 
     do 
         base.VSync <- VSyncMode.On
@@ -47,11 +43,11 @@ type Game() =
         base.OnLoad(e)
         GL.ClearColor(0.f, 0.f, 0.f, 0.0f)
         GL.Enable(EnableCap.DepthTest)
-        let bitmap = new Drawing.Bitmap(100, 100)
+        let bitmap = new Drawing.Bitmap(width, height)
         
-        Render.renderSphereWithRays bitmap sphereCenter sphereRadius sphereColor
+        Render.renderSphereWithRays bitmap lightDirection sphereCenter sphereRadius sphereColor
 
-        Render.drawBitmap bitmap canvas 5.0
+        Render.drawBitmap bitmap canvas zoom
         bytes <-Helper.getBytesFromBitmap canvas
 
     /// <summary>

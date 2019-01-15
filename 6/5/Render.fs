@@ -22,15 +22,26 @@ let rayDirection c r width (height : int) nearZ fieldOfView =
     v.Normalize()
     v
 
-let traceRay ray sphereCenter sphereRadius sphereColor =
+let computeColorFromLight (dirToSurface : Vector3d) lightDirection (sphereColor : Vector3d) =
+    let coef = Vector3d.Dot(dirToSurface.Normalized(), lightDirection)    
+    sphereColor * (1.0 - (coef / 2.0 + 0.5))
+
+let pickNearestAndGetColor ray lightDirection a b discr sphereCenter sphereColor =
+    let root = Math.Sqrt(discr)
+    let t1 = (-b - root) / (2.0 * a)
+    let point = ray.Origin + t1 * ray.Direction
+    let dirToSurface = (point - sphereCenter).Normalized()
+    let color = computeColorFromLight dirToSurface lightDirection sphereColor        
+    Some color
+
+let traceRay ray lightDirection sphereCenter sphereRadius (sphereColor : Vector3d) =
     let offset = ray.Origin - sphereCenter
-    let dirToCenter = offset.Normalized()
     let a = Vector3d.Dot(ray.Direction, ray.Direction)
     let b = 2.0 * Vector3d.Dot(ray.Direction, offset)
     let c = Vector3d.Dot(offset, offset) - sphereRadius * sphereRadius
     let discr = b * b - 4.0 * a * c
     if discr >= 0.0 then
-        Some sphereColor
+        pickNearestAndGetColor ray lightDirection a b discr sphereCenter sphereColor
     else
         None
 
@@ -40,13 +51,13 @@ let setPixel (bitmap : Bitmap) x y (color : Vector3d) =
                                         color.Z * 255.0 |> int)
     bitmap.SetPixel(x, y, color)
 
-let renderSphereWithRays (bitmap : Bitmap) sphereCenter sphereRadius sphereColor =
-    for r = 0 to bitmap.Width-1 do
-        for c = 0 to bitmap.Height - 1 do
+let renderSphereWithRays (bitmap : Bitmap) lightDirection sphereCenter sphereRadius sphereColor =
+    for r = 0 to bitmap.Height-1 do
+        for c = 0 to bitmap.Width - 1 do
             let origin = Vector3d.Zero
             let direction = rayDirection c r bitmap.Width bitmap.Height nearZ fieldOfView
             let ray = {Origin = origin; Direction = direction}
-            match traceRay ray sphereCenter sphereRadius sphereColor with
+            match traceRay ray lightDirection sphereCenter sphereRadius sphereColor with
             | Some color ->
                 setPixel bitmap c r color
             | _ ->
