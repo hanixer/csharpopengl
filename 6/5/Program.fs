@@ -26,13 +26,15 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let sphereCenter = Vector3d(0.0, 0.0, -5.0)
+    let sphereCenter = Vector3d(0.0, 0.0, -4.0)
     let sphereRadius = 2.0
-    let sphereColor = Helper.colorToVector Drawing.Color.BurlyWood
-    let lightDirection = Vector3d(-1.0, 1.0, 0.0).Normalized()
-    let width = 600
-    let height = 400
-    let zoom = 1.0
+    let diffuseColor = Helper.colorToVector Drawing.Color.Red
+    let specularColor = Vector3d(1.0)
+    let specularPower = 10.0
+    let lightPosition = Vector3d(2.0, 2.0, -2.0)
+    let width = 400
+    let height = 300
+    let zoom = 2.0
 
     do 
         base.VSync <- VSyncMode.On
@@ -45,7 +47,7 @@ type Game() =
         GL.Enable(EnableCap.DepthTest)
         let bitmap = new Drawing.Bitmap(width, height)
         
-        Render.renderSphereWithRays bitmap lightDirection sphereCenter sphereRadius sphereColor
+        Render.renderSphereWithRays bitmap lightPosition sphereCenter sphereRadius (diffuseColor, specularColor, specularPower)
 
         Render.drawBitmap bitmap canvas zoom
         bytes <-Helper.getBytesFromBitmap canvas
