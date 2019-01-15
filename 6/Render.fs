@@ -18,7 +18,7 @@ let rayDirection c r width (height : int) nearZ fieldOfView =
     let aspect = height / width
     let x = (float c / width - 0.5) * 2.0 * side
     let y = (float r / height - 0.5) * 2.0 * side * aspect
-    let v = Vector3d(x, y, nearZ)
+    let v = Vector3d(x, y, -nearZ)
     v.Normalize()
     v
 
@@ -48,10 +48,9 @@ let renderSphereWithRays (bitmap : Bitmap) sphereCenter sphereRadius sphereColor
             let ray = {Origin = origin; Direction = direction}
             match traceRay ray sphereCenter sphereRadius sphereColor with
             | Some color ->
-                let color = (Vector3d(direction.X + 1.0, direction.Y + 1.0, direction.Z + 1.0) ) / 2.0
                 setPixel bitmap c r color
             | _ ->
-                ()
+                setPixel bitmap c r <| Vector3d(0.3, 0.3, 0.3)
 
 let drawBitmap (source : Bitmap) (destination : Bitmap) (pixelSize : float) =
     use graphics = Graphics.FromImage(destination)

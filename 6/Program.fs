@@ -34,9 +34,9 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let sphereCenter = Vector3d(0.0, 0.0, -1.0)
-    let sphereRadius = 5.0
-    let sphereColor = Helper.colorToVector Drawing.Color.Brown
+    let sphereCenter = Vector3d(0.0, 0.0, -5.0)
+    let sphereRadius = 0.5
+    let sphereColor = Helper.colorToVector Drawing.Color.White
 
     do 
         base.VSync <- VSyncMode.On
