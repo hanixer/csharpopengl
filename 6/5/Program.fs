@@ -22,9 +22,9 @@ type Game() =
     let specularColor = Vector3d(1.0)
     let specularPower = 10.0
     let lightPosition = Vector3d(2.0, 2.0, -2.0)
-    let width = 400
-    let height = 300
-    let zoom = 2.0
+    let width = 200
+    let height = 100
+    let zoom = 4.0
     let hitable = 
         HitableList [Sphere(center1, radius1)
                      Sphere(center2, radius2)]

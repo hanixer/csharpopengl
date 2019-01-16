@@ -137,12 +137,24 @@ let colorIt ray hitable =
         t * c2 + (1.0 - t) * c1
 
 let mainRender (bitmap : Bitmap) hitable =
+    let samples = 100
+    let origin = Vector3d.Zero
+    let random = Random()
+
+    let rec sampling c r s (color : Vector3d) =
+        if s < samples then
+            let colRandom = float c + random.NextDouble()
+            let rowRandom = float r + random.NextDouble()
+            let direction = rayDirection colRandom rowRandom bitmap.Width bitmap.Height nearZ fieldOfView
+            let ray = {Origin = origin; Direction = direction}
+            sampling c r (s + 1) (color + colorIt ray hitable)
+        else 
+            color / (float samples)
+
     for r = 0 to bitmap.Height-1 do
         for c = 0 to bitmap.Width - 1 do
-            let origin = Vector3d.Zero
-            let direction = rayDirection c r bitmap.Width bitmap.Height nearZ fieldOfView
-            let ray = {Origin = origin; Direction = direction}
-            setPixel bitmap c r (colorIt ray hitable)
+            let color = sampling c r 0 Vector3d.Zero
+            setPixel bitmap c r color
 
 let drawBitmap (source : Bitmap) (destination : Bitmap) (pixelSize : float) =
     use graphics = Graphics.FromImage(destination)
