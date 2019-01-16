@@ -7,9 +7,19 @@ open OpenTK
 type Bitmap = System.Drawing.Bitmap
 type Color = System.Drawing.Color
 type Ray = {Origin : Vector3d; Direction : Vector3d}
+type HitRecord =
+    { T : float             // parameter used to determine point from ray
+      Point : Vector3d
+      Normal : Vector3d }
+type Hitable = 
+    | Sphere of Vector3d * float
+    | HitableList of Hitable list
 
 let nearZ = 0.1
 let fieldOfView = OpenTK.MathHelper.DegreesToRadians(45.0)
+
+let rayPointAtParameter ray t =
+    ray.Origin + ray.Direction * t
 
 let setPixel (bitmap : Bitmap) x y (color : Vector3d) =    
     let color = Drawing.Color.FromArgb(color.X * 255.0 |> int, 
@@ -45,11 +55,6 @@ let computeColorFromLight ray point (sphereCenter : Vector3d) lightPosition (amb
         Vector3d(Math.Min(c.X, 1.0), Math.Min(c.Y, 1.0), Math.Min(c.Z, 1.0))
     else
         ambientIntensity * diffuseColor
-    // let coef = Vector3d.Dot(normal, lightDirection)
-    // sphereColor * (1.0 - (coef / 2.0 + 0.5))
-    // let dbgval = 1.0 - (Vector3d.Dot(normal, half) / 2.0 + 0.5)
-    // printfn "%A %A" viewVector lightDirection
-    // Vector3d(dbgval)
 
 let pickNearestAndGetColor ray lightPosition a b discr sphereCenter color  =
     let root = Math.Sqrt(discr)
@@ -74,17 +79,70 @@ let traceRay ray lightPosition sphereCenter sphereRadius color =
     else
         None
 
-let renderSphereWithRays (bitmap : Bitmap) lightPosition sphereCenter sphereRadius color =
+let hitSphere ray (center, radius) tMin tMax =
+    let computeHit t =
+        let point = rayPointAtParameter ray t
+        let normal = (point - center) / radius
+        Some {T = t; Point = point; Normal = normal}
+
+    let offset = ray.Origin - center
+    let a = Vector3d.Dot(ray.Direction, ray.Direction)
+    let b = 2.0 * Vector3d.Dot(ray.Direction, offset)
+    let c = Vector3d.Dot(offset, offset) - radius * radius
+    let discr = b * b - 4.0 * a * c
+    if discr >= 0.0 then
+        let t = (-b - Math.Sqrt(discr)) / (2.0 * a)
+        if t < tMax && t > tMin then
+            computeHit t
+        else
+            let t = (-b - Math.Sqrt(discr)) / (2.0 * a)
+            if t < tMax && t > tMin then
+                computeHit t
+            else None        
+    else
+        None
+        
+
+
+let rec hit hitable ray tMin tMax =
+    match hitable with
+    | Sphere (center, radius) ->
+        hitSphere ray (center, radius) tMin tMax
+    | HitableList hitables ->
+        hitList ray hitables tMin tMax
+
+and hitList ray hitables tMin tMax =
+    let fold (closest, result : HitRecord option) hitable =
+        match hit hitable ray tMin tMax with
+        | Some record ->
+            if record.T < closest then
+                (record.T, Some record)
+            else
+                closest, result
+        | None ->
+            closest, result
+
+    List.fold fold (Double.PositiveInfinity, None) hitables
+    |> snd
+
+let colorIt ray hitable =
+    match hit hitable ray 0.0 Double.PositiveInfinity with
+    | Some record ->
+        0.5 * Vector3d(record.Normal.X + 1.0, record.Normal.Y + 1.0, record.Normal.Z + 1.0)
+    | None ->
+        let dir = ray.Direction.Normalized()
+        let t = (dir.Y + 1.0) / 2.0
+        let c1 = (Rest.colorToVector Drawing.Color.White) 
+        let c2 = (Rest.colorToVector Drawing.Color.Blue)
+        t * c2 + (1.0 - t) * c1
+
+let mainRender (bitmap : Bitmap) hitable =
     for r = 0 to bitmap.Height-1 do
         for c = 0 to bitmap.Width - 1 do
             let origin = Vector3d.Zero
             let direction = rayDirection c r bitmap.Width bitmap.Height nearZ fieldOfView
             let ray = {Origin = origin; Direction = direction}
-            match traceRay ray lightPosition sphereCenter sphereRadius color with
-            | Some color ->
-                setPixel bitmap c r color
-            | _ ->
-                setPixel bitmap c r <| Vector3d(0.3, 0.3, 0.3)
+            setPixel bitmap c r (colorIt ray hitable)
 
 let drawBitmap (source : Bitmap) (destination : Bitmap) (pixelSize : float) =
     use graphics = Graphics.FromImage(destination)
