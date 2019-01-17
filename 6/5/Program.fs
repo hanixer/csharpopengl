@@ -5,20 +5,7 @@ open OpenTK
 open OpenTK.Graphics.OpenGL
 open OpenTK.Input
 open OpenTK.Graphics.OpenGL
-
-module Helper =
-    let getBytesFromBitmap (bitmap: System.Drawing.Bitmap) =
-        let data = bitmap.LockBits(System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), 
-                                   System.Drawing.Imaging.ImageLockMode.ReadWrite, 
-                                   bitmap.PixelFormat)
-        let size = data.Stride * data.Height
-        let bytes = Array.create size (byte 0)
-        System.Runtime.InteropServices.Marshal.Copy(data.Scan0, bytes, 0, size)
-        bitmap.UnlockBits(data)
-        bytes
-
-    let colorToVector (color : Drawing.Color) =
-        Vector3d(float color.R / 255.0, float color.G / 255.0, float color.B / 255.0)
+open Render
 
 type Game() =
     /// <summary>Creates a 800x600 window with the specified title.</summary>
@@ -26,16 +13,21 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let sphereCenter = Vector3d(0.0, 0.0, -4.0)
-    let sphereRadius = 2.0
+    let center1 = Vector3d(1.0, 0.0, -4.0)
+    let radius1 = 2.0
+    let center2 = Vector3d(-4.0, -4.0, -20.0)
+    let radius2 = 4.0
     let ambientIntensity = 0.1
-    let diffuseColor = Helper.colorToVector Drawing.Color.Red
+    let diffuseColor = Rest.colorToVector Drawing.Color.Red
     let specularColor = Vector3d(1.0)
     let specularPower = 10.0
     let lightPosition = Vector3d(2.0, 2.0, -2.0)
-    let width = 400
-    let height = 300
-    let zoom = 2.0
+    let width = 200
+    let height = 100
+    let zoom = 4.0
+    let hitable = 
+        HitableList [Sphere(center1, radius1)
+                     Sphere(center2, radius2)]
 
     do 
         base.VSync <- VSyncMode.On
@@ -48,10 +40,10 @@ type Game() =
         GL.Enable(EnableCap.DepthTest)
         let bitmap = new Drawing.Bitmap(width, height)
         
-        Render.renderSphereWithRays bitmap lightPosition sphereCenter sphereRadius (ambientIntensity, diffuseColor, specularColor, specularPower)
+        Render.mainRender bitmap hitable
 
         Render.drawBitmap bitmap canvas zoom
-        bytes <-Helper.getBytesFromBitmap canvas
+        bytes <-Rest.getBytesFromBitmap canvas
 
     /// <summary>
     /// Called when your window is resized. Set your viewport here. It is also
