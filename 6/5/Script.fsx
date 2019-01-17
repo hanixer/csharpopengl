@@ -32,3 +32,9 @@ let randomInUnitSphere () =
     Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
 
 randomInUnitSphere()
+
+let reflected (rayDir : Vector3d) (normal : Vector3d) =
+    let proj = normal * Vector3d.Dot(-rayDir, normal)
+    (rayDir + 2.0 * proj).Normalized()
+
+reflected (Vector3d(1.0, -1.0, 0.0).Normalized()) (Vector3d(0.0, 1.0, 0.0)) |> printfn "%A"

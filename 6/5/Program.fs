@@ -13,9 +13,11 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
+    let material1 = Lambertian(Vector3d(0.5, 0.5, 0.5))
+    let material2 = Metal(Vector3d(1.0))
     let center1 = Vector3d(-0.75, 0.0, -2.0)
     let radius1 = 0.5
-    let center2 = Vector3d(0.2, 0.0, -2.0)
+    let center2 = Vector3d(0.3, 0.0, -2.0)
     let radius2 = 0.5
     let center3 = Vector3d(0.0, -20.0, -5.0)
     let radius3 = 20.0
@@ -23,9 +25,9 @@ type Game() =
     let height = 100
     let zoom = 1.0
     let hitable = 
-        HitableList [//Sphere(center1, radius1)
-                     Sphere(center3, radius3)
-                     Sphere(center2, radius2)]
+        HitableList [Sphere(center1, radius1, material2)
+                     Sphere(center3, radius3, material1)
+                     Sphere(center2, radius2, material1)]
 
     do 
         base.VSync <- VSyncMode.On

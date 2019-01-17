@@ -3,16 +3,21 @@ module Render
 open System
 open System.Drawing
 open OpenTK
+open System.Diagnostics
 
 type Bitmap = System.Drawing.Bitmap
 type Color = System.Drawing.Color
 type Ray = {Origin : Vector3d; Direction : Vector3d}
+type Material =
+    | Lambertian of Vector3d
+    | Metal of Vector3d
 type HitRecord =
     { T : float             // parameter used to determine point from ray
       Point : Vector3d
-      Normal : Vector3d }
+      Normal : Vector3d
+      Material : Material }
 type Hitable = 
-    | Sphere of Vector3d * float
+    | Sphere of Vector3d * float * Material
     | HitableList of Hitable list
 
 let nearZ = 0.1
@@ -57,11 +62,11 @@ let rayDirection c r width (height : int) nearZ fieldOfView =
     v.Normalize()
     v
 
-let hitSphere ray (center, radius) tMin tMax =
+let hitSphere ray (center, radius, material) tMin tMax =
     let computeHit t =
         let point = rayPointAtParameter ray t
         let normal = (point - center) / radius
-        Some {T = t; Point = point; Normal = normal}
+        Some {T = t; Point = point; Normal = normal; Material = material}
 
     let offset = ray.Origin - center
     let a = Vector3d.Dot(ray.Direction, ray.Direction)
@@ -83,8 +88,8 @@ let hitSphere ray (center, radius) tMin tMax =
 
 let rec hit hitable ray tMin tMax =
     match hitable with
-    | Sphere (center, radius) ->
-        hitSphere ray (center, radius) tMin tMax
+    | Sphere (center, radius, material) ->
+        hitSphere ray (center, radius, material) tMin tMax
     | HitableList hitables ->
         hitList ray hitables tMin tMax
 
@@ -102,22 +107,36 @@ and hitList ray hitables tMin tMax =
     List.fold fold (Double.PositiveInfinity, None) hitables
     |> snd
 
-let rec colorIt ray hitable =
+let reflected (rayDir : Vector3d) (normal : Vector3d) =
+    let proj = normal * Vector3d.Dot(-rayDir, normal)
+    (rayDir + 2.0 * proj).Normalized()
+
+let scatter material rayIn hitRec =
+    match material with
+    | Lambertian(albedo) ->
+        let randPoint = randomInUnitSphere()
+        let target = hitRec.Point + hitRec.Normal + randPoint
+        let scattered = {Origin = hitRec.Point; Direction = target - hitRec.Point}
+        albedo, scattered
+    | Metal(albedo) ->
+        let direction = reflected rayIn.Direction hitRec.Normal
+        let scattered = {Origin = hitRec.Point; Direction = direction}
+        albedo, scattered
+
+let rec colorIt ray hitable depth : Vector3d =
     match hit hitable ray 0.0001 Double.PositiveInfinity with
     | Some record ->
-        let randPoint = randomInUnitSphere()
-        let target = record.Point + record.Normal + randPoint
-        let newRay = {Origin = record.Point; Direction = target - record.Point}
-        0.5 * colorIt newRay hitable
-        // 0.5 * Vector3d(record.Normal.X + 1.0, record.Normal.Y + 1.0, record.Normal.Z + 1.0)
+        if depth < 50 then
+            let attenuation, scattered = scatter record.Material ray record
+            attenuation * colorIt scattered hitable (depth + 1)
+        else
+            Vector3d(0.0)
     | None ->
         let dir = ray.Direction.Normalized()
         let t = (dir.Y + 1.0) / 2.0
         let c1 = (Rest.colorToVector Drawing.Color.White) 
         let c2 = (Rest.colorToVector Drawing.Color.Blue)
         t * c2 + (1.0 - t) * c1
-        // Vector3d(1.0)
-        // dir
 
 let mainRender (bitmap : Bitmap) hitable =
     let samples = 100
@@ -130,8 +149,9 @@ let mainRender (bitmap : Bitmap) hitable =
             let rowRandom = float r + random.NextDouble()
             let direction = rayDirection colRandom rowRandom bitmap.Width bitmap.Height nearZ fieldOfView
             let ray = {Origin = origin; Direction = direction}
-            sampling c r (s + 1) (color + colorIt ray hitable)
-        else 
+            sampling c r (s + 1) (color + colorIt ray hitable 0)
+        else
+            Debug.Assert(Double.IsNaN(color.Y) |> not)
             color / (float samples)
 
     for r = 0 to bitmap.Height-1 do
