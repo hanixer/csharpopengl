@@ -13,18 +13,13 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let center1 = Vector3d(1.0, 0.0, -4.0)
-    let radius1 = 2.0
-    let center2 = Vector3d(-4.0, -4.0, -20.0)
-    let radius2 = 4.0
-    let ambientIntensity = 0.1
-    let diffuseColor = Rest.colorToVector Drawing.Color.Red
-    let specularColor = Vector3d(1.0)
-    let specularPower = 10.0
-    let lightPosition = Vector3d(2.0, 2.0, -2.0)
+    let center1 = Vector3d(0.0, 0.2, -2.0)
+    let radius1 = 0.5
+    let center2 = Vector3d(0.0, -20.0, -5.0)
+    let radius2 = 20.0
     let width = 200
     let height = 100
-    let zoom = 4.0
+    let zoom = 1.0
     let hitable = 
         HitableList [Sphere(center1, radius1)
                      Sphere(center2, radius2)]

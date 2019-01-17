@@ -22,10 +22,20 @@ let rayPointAtParameter ray t =
     ray.Origin + ray.Direction * t
 
 let setPixel (bitmap : Bitmap) x y (color : Vector3d) =    
-    let color = Drawing.Color.FromArgb(color.X * 255.0 |> int, 
-                                        color.Y * 255.0 |> int,
-                                        color.Z * 255.0 |> int)
+    let r = int(Math.Sqrt(color.X) * 255.0)
+    let g = int(Math.Sqrt(color.Y) * 255.0)
+    let b = int(Math.Sqrt(color.Z) * 255.0)
+    let color = Drawing.Color.FromArgb(r, g, b)
     bitmap.SetPixel(x, y, color)
+
+let randomInUnitSphere () =
+    let random = new System.Random()
+    let points = Seq.initInfinite (fun _ -> 
+        let x = random.NextDouble()
+        let y = random.NextDouble()
+        let z = random.NextDouble()
+        2.0 * Vector3d(x, y, z) - Vector3d(1.0, 1.0, 1.0))
+    Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
 
 let rayDirection c r width (height : int) nearZ fieldOfView =
     let side = Math.Tan(fieldOfView) * nearZ
@@ -37,47 +47,6 @@ let rayDirection c r width (height : int) nearZ fieldOfView =
     let v = Vector3d(x, y, -nearZ)
     v.Normalize()
     v
-
-let computeColorFromLight ray point (sphereCenter : Vector3d) lightPosition (ambientIntensity : float, diffuseColor : Vector3d, specularColor : Vector3d, specularPower) =
-    let viewVector = -ray.Direction.Normalized() 
-    let normal = (point - sphereCenter).Normalized()
-    let lightDir = (lightPosition - sphereCenter).Normalized()
-    let reflectDir = viewVector + lightDir
-    let reflectDir = 
-        if Vector3d.Zero = reflectDir 
-        then Vector3d.Zero
-        else reflectDir.Normalized()
-    let diffuse = Math.Max(0.0, Vector3d.Dot(lightDir, normal))
-    if diffuse > 0.0 then
-        let specularAngle = Math.Max(0.0, Vector3d.Dot(normal, reflectDir))
-        let specular = Math.Pow(specularAngle, specularPower)
-        let c = (ambientIntensity * diffuseColor + 0.5 * diffuse * diffuseColor + 0.5 * specular * specularColor)
-        Vector3d(Math.Min(c.X, 1.0), Math.Min(c.Y, 1.0), Math.Min(c.Z, 1.0))
-    else
-        ambientIntensity * diffuseColor
-
-let pickNearestAndGetColor ray lightPosition a b discr sphereCenter color  =
-    let root = Math.Sqrt(discr)
-    let t0 = (-b - root) / (2.0 * a)
-    let t1 = (-b + root) / (2.0 * a)
-    let t =
-        if Math.Abs(t0) < Math.Abs(t1) 
-        then t0
-        else t1
-    let point = ray.Origin + t * ray.Direction
-    let color = computeColorFromLight ray point sphereCenter lightPosition color         
-    Some color
-
-let traceRay ray lightPosition sphereCenter sphereRadius color =
-    let offset = ray.Origin - sphereCenter
-    let a = Vector3d.Dot(ray.Direction, ray.Direction)
-    let b = 2.0 * Vector3d.Dot(ray.Direction, offset)
-    let c = Vector3d.Dot(offset, offset) - sphereRadius * sphereRadius
-    let discr = b * b - 4.0 * a * c
-    if discr >= 0.0 then
-        pickNearestAndGetColor ray lightPosition a b discr sphereCenter color
-    else
-        None
 
 let hitSphere ray (center, radius) tMin tMax =
     let computeHit t =
@@ -101,7 +70,6 @@ let hitSphere ray (center, radius) tMin tMax =
             else None        
     else
         None
-        
 
 
 let rec hit hitable ray tMin tMax =
@@ -125,10 +93,14 @@ and hitList ray hitables tMin tMax =
     List.fold fold (Double.PositiveInfinity, None) hitables
     |> snd
 
-let colorIt ray hitable =
-    match hit hitable ray 0.0 Double.PositiveInfinity with
+let rec colorIt ray hitable =
+    match hit hitable ray 0.0001 Double.PositiveInfinity with
     | Some record ->
-        0.5 * Vector3d(record.Normal.X + 1.0, record.Normal.Y + 1.0, record.Normal.Z + 1.0)
+        let randDirection = randomInUnitSphere()
+        let point = record.Point
+        let newRay = {Origin = point; Direction = randDirection}
+        0.5 * colorIt newRay hitable
+        // 0.5 * Vector3d(record.Normal.X + 1.0, record.Normal.Y + 1.0, record.Normal.Z + 1.0)
     | None ->
         let dir = ray.Direction.Normalized()
         let t = (dir.Y + 1.0) / 2.0
