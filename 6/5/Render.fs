@@ -11,6 +11,7 @@ type Ray = {Origin : Vector3d; Direction : Vector3d}
 type Material =
     | Lambertian of Vector3d
     | Metal of Vector3d * float
+    | Dielectric of float
 type HitRecord =
     { T : float             // parameter used to determine point from ray
       Point : Vector3d
@@ -42,14 +43,6 @@ let randomInUnitSphere () =
         let z = random.NextDouble()
         2.0 * Vector3d(x, y, z) - Vector3d(1.0, 1.0, 1.0))
     Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
-    // let mutable p = Vector3d(1.0)
-    // while p.Length >= 1.0 do
-    //     let x = random.NextDouble()
-    //     let y = random.NextDouble()
-    //     let z = random.NextDouble()
-    //     p <- 2.0 * Vector3d(x, y, z) - Vector3d(1.0, 1.0, 1.0)
-    // p    
-
 
 let rayDirection c r width (height : int) nearZ fieldOfView =
     let side = Math.Tan(fieldOfView) * nearZ
@@ -107,9 +100,29 @@ and hitList ray hitables tMin tMax =
     List.fold fold (Double.PositiveInfinity, None) hitables
     |> snd
 
+let refract (rayDir : Vector3d) (normal : Vector3d) niOverNt =
+    let rayDir = rayDir.Normalized()
+    let dot = Vector3d.Dot(rayDir, normal)
+    let discr = 4.0 * (1.0 - niOverNt * niOverNt * (1.0 - dot * dot))
+    if discr >= 0.0 then
+        let cos = -Math.Sqrt(discr) / 2.0
+        let projection = normal * dot
+        let component1 = rayDir * niOverNt - projection
+        let component2 = -normal * cos * niOverNt
+        Some(component1 + component2)
+    else
+        None
+
 let reflect (rayDir : Vector3d) (normal : Vector3d) =
     let proj = normal * Vector3d.Dot(-rayDir, normal)
     (rayDir + 2.0 * proj).Normalized()
+
+let refractiveRelation (rayDir : Vector3d) (normal : Vector3d) refrIndex =
+    let dot = Vector3d.Dot(rayDir, normal)
+    if dot > 0.0 then 
+        refrIndex, normal
+    else    
+        1.0 / refrIndex, -normal
 
 let scatter material rayIn hitRec =
     match material with
@@ -124,6 +137,17 @@ let scatter material rayIn hitRec =
         let randPoint = randomInUnitSphere() * fuzzy
         let scattered = {Origin = hitRec.Point; Direction = reflected + randPoint}
         albedo, scattered
+    | Dielectric(index) ->
+        let refrRelation, outwardNormal = refractiveRelation rayIn.Direction hitRec.Normal index
+        let attenuation = Vector3d(1.0)
+        match refract rayIn.Direction outwardNormal refrRelation with
+        | Some refracted ->
+            let scattered = {Origin = hitRec.Point; Direction = refracted}
+            attenuation, scattered
+        | None ->
+            let reflected = reflect rayIn.Direction hitRec.Normal
+            let scattered = {Origin = hitRec.Point; Direction = reflected}
+            attenuation, scattered
 
 let rec colorIt ray hitable depth : Vector3d =
     match hit hitable ray 0.0001 Double.PositiveInfinity with
