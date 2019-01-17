@@ -13,15 +13,18 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let center1 = Vector3d(0.0, 0.2, -2.0)
+    let center1 = Vector3d(-0.75, 0.0, -2.0)
     let radius1 = 0.5
-    let center2 = Vector3d(0.0, -20.0, -5.0)
-    let radius2 = 20.0
+    let center2 = Vector3d(0.2, 0.0, -2.0)
+    let radius2 = 0.5
+    let center3 = Vector3d(0.0, -20.0, -5.0)
+    let radius3 = 20.0
     let width = 200
     let height = 100
     let zoom = 1.0
     let hitable = 
-        HitableList [Sphere(center1, radius1)
+        HitableList [//Sphere(center1, radius1)
+                     Sphere(center3, radius3)
                      Sphere(center2, radius2)]
 
     do 
@@ -34,8 +37,13 @@ type Game() =
         GL.ClearColor(0.f, 0.f, 0.f, 0.0f)
         GL.Enable(EnableCap.DepthTest)
         let bitmap = new Drawing.Bitmap(width, height)
-        
+
+        let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
+
         Render.mainRender bitmap hitable
+
+        stopwatch.Stop();
+        Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
         Render.drawBitmap bitmap canvas zoom
         bytes <-Rest.getBytesFromBitmap canvas

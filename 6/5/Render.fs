@@ -28,14 +28,23 @@ let setPixel (bitmap : Bitmap) x y (color : Vector3d) =
     let color = Drawing.Color.FromArgb(r, g, b)
     bitmap.SetPixel(x, y, color)
 
+let random = new System.Random()
+
 let randomInUnitSphere () =
-    let random = new System.Random()
     let points = Seq.initInfinite (fun _ -> 
         let x = random.NextDouble()
         let y = random.NextDouble()
         let z = random.NextDouble()
         2.0 * Vector3d(x, y, z) - Vector3d(1.0, 1.0, 1.0))
     Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
+    // let mutable p = Vector3d(1.0)
+    // while p.Length >= 1.0 do
+    //     let x = random.NextDouble()
+    //     let y = random.NextDouble()
+    //     let z = random.NextDouble()
+    //     p <- 2.0 * Vector3d(x, y, z) - Vector3d(1.0, 1.0, 1.0)
+    // p    
+
 
 let rayDirection c r width (height : int) nearZ fieldOfView =
     let side = Math.Tan(fieldOfView) * nearZ
@@ -96,9 +105,9 @@ and hitList ray hitables tMin tMax =
 let rec colorIt ray hitable =
     match hit hitable ray 0.0001 Double.PositiveInfinity with
     | Some record ->
-        let randDirection = randomInUnitSphere()
-        let point = record.Point
-        let newRay = {Origin = point; Direction = randDirection}
+        let randPoint = randomInUnitSphere()
+        let target = record.Point + record.Normal + randPoint
+        let newRay = {Origin = record.Point; Direction = target - record.Point}
         0.5 * colorIt newRay hitable
         // 0.5 * Vector3d(record.Normal.X + 1.0, record.Normal.Y + 1.0, record.Normal.Z + 1.0)
     | None ->
@@ -107,6 +116,8 @@ let rec colorIt ray hitable =
         let c1 = (Rest.colorToVector Drawing.Color.White) 
         let c2 = (Rest.colorToVector Drawing.Color.Blue)
         t * c2 + (1.0 - t) * c1
+        // Vector3d(1.0)
+        // dir
 
 let mainRender (bitmap : Bitmap) hitable =
     let samples = 100

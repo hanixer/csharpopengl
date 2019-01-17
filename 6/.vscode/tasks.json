@@ -15,7 +15,7 @@
         },        
         {
             "label": "run",
-            "command": "dotnet run",
+            "command": "dotnet run -p 5",
             "type": "shell",
             "group": "test",
             "dependsOn":["build"],
