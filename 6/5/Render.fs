@@ -10,7 +10,7 @@ type Color = System.Drawing.Color
 type Ray = {Origin : Vector3d; Direction : Vector3d}
 type Material =
     | Lambertian of Vector3d
-    | Metal of Vector3d
+    | Metal of Vector3d * float
 type HitRecord =
     { T : float             // parameter used to determine point from ray
       Point : Vector3d
@@ -107,7 +107,7 @@ and hitList ray hitables tMin tMax =
     List.fold fold (Double.PositiveInfinity, None) hitables
     |> snd
 
-let reflected (rayDir : Vector3d) (normal : Vector3d) =
+let reflect (rayDir : Vector3d) (normal : Vector3d) =
     let proj = normal * Vector3d.Dot(-rayDir, normal)
     (rayDir + 2.0 * proj).Normalized()
 
@@ -118,9 +118,11 @@ let scatter material rayIn hitRec =
         let target = hitRec.Point + hitRec.Normal + randPoint
         let scattered = {Origin = hitRec.Point; Direction = target - hitRec.Point}
         albedo, scattered
-    | Metal(albedo) ->
-        let direction = reflected rayIn.Direction hitRec.Normal
-        let scattered = {Origin = hitRec.Point; Direction = direction}
+    | Metal(albedo, fuzzy) ->
+        let fuzzy = if fuzzy < 1.0 then fuzzy else 1.0
+        let reflected = reflect rayIn.Direction hitRec.Normal
+        let randPoint = randomInUnitSphere() * fuzzy
+        let scattered = {Origin = hitRec.Point; Direction = reflected + randPoint}
         albedo, scattered
 
 let rec colorIt ray hitable depth : Vector3d =
@@ -135,7 +137,7 @@ let rec colorIt ray hitable depth : Vector3d =
         let dir = ray.Direction.Normalized()
         let t = (dir.Y + 1.0) / 2.0
         let c1 = (Rest.colorToVector Drawing.Color.White) 
-        let c2 = (Rest.colorToVector Drawing.Color.Blue)
+        let c2 = Vector3d(0.5, 0.7, 1.0)
         t * c2 + (1.0 - t) * c1
 
 let mainRender (bitmap : Bitmap) hitable =
@@ -151,7 +153,6 @@ let mainRender (bitmap : Bitmap) hitable =
             let ray = {Origin = origin; Direction = direction}
             sampling c r (s + 1) (color + colorIt ray hitable 0)
         else
-            Debug.Assert(Double.IsNaN(color.Y) |> not)
             color / (float samples)
 
     for r = 0 to bitmap.Height-1 do
