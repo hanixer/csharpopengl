@@ -103,15 +103,7 @@ and hitList ray hitables tMin tMax =
 let refract (rayDir : Vector3d) (normal : Vector3d) niOverNt =
     let rayDir = rayDir.Normalized()
     let dot = Vector3d.Dot(rayDir, normal)
-    let discr = 4.0 * (1.0 - niOverNt * niOverNt * (1.0 - dot * dot))
-    if discr >= 0.0 then
-        let cos = -Math.Sqrt(discr) / 2.0
-        let projection = normal * dot
-        let component1 = rayDir * niOverNt - projection
-        let component2 = -normal * cos * niOverNt
-        Some(component1 + component2)
-    else
-        None
+    Some((rayDir * niOverNt + (niOverNt * dot - Math.Sqrt(1.0 - dot*dot)) * normal).Normalized())
 
 let reflect (rayDir : Vector3d) (normal : Vector3d) =
     let proj = normal * Vector3d.Dot(-rayDir, normal)
@@ -120,9 +112,10 @@ let reflect (rayDir : Vector3d) (normal : Vector3d) =
 let refractiveRelation (rayDir : Vector3d) (normal : Vector3d) refrIndex =
     let dot = Vector3d.Dot(rayDir, normal)
     if dot > 0.0 then 
-        refrIndex, normal
+        Debug.Assert(false)
+        refrIndex, -normal
     else    
-        1.0 / refrIndex, -normal
+        1.0 / refrIndex, normal
 
 let scatter material rayIn hitRec =
     match material with
@@ -165,7 +158,7 @@ let rec colorIt ray hitable depth : Vector3d =
         t * c2 + (1.0 - t) * c1
 
 let mainRender (bitmap : Bitmap) hitable =
-    let samples = 100
+    let samples = 50
     let origin = Vector3d.Zero
     let random = Random()
 

@@ -14,26 +14,24 @@ type Game() =
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
     let material1 = Lambertian(Vector3d(1.0, 0.3, 0.3))
-    let material3 = Lambertian(Vector3d(0.2, 0.5, 0.5))
+    let materialBig = Lambertian(Vector3d(0.2, 0.5, 0.5))
     let material2 = Metal(Vector3d(1.0), 0.1)
-    let material4 = Metal(Vector3d(1.0), 0.8)
-    let material5 = Dielectric(1.5)
-    let center1 = Vector3d(0.0, 0.2, -1.5)
+    let material4 = Dielectric(1.5)
     let radius1 = 0.5
-    let center2 = Vector3d(-1.2, 0.3, -2.0)
-    let center3 = Vector3d(1.2, 0.3, -2.0)
-    let center4 = Vector3d(0.0, -20.0, -5.0)
-    let center5 = Vector3d(0.0, 0.0, -1.5)
+    let center1 = Vector3d(-1.0, 0.0, -1.5)
+    let center2 = Vector3d(0.0, -100.5, -1.0)
+    let center3 = Vector3d(1.0, 0.0, -1.0)
+    let center4 = Vector3d(0.0, 0.0, -2.0)
     let radius4 = 20.0
-    let width = 800
-    let height = 600
-    let zoom = 1.0
+    let width = 200
+    let height = 100
+    let zoom = 2.0
     let hitable = 
         HitableList [Sphere(center1, radius1, material1)
-                     Sphere(center4, radius4, material3)
-                     Sphere(center2, radius1, material5)
-                     Sphere(center3, radius1, material4)
-                     Sphere(center5, radius1, material5)
+                     Sphere(center2, 100.0, materialBig)
+                     Sphere(center3, radius1, material2)
+                     Sphere(center4, radius1, material4)
+                    //  Sphere(center5, radius1, material5)
                      
                      ]
 
