@@ -6,6 +6,7 @@ open OpenTK.Graphics.OpenGL
 open OpenTK.Input
 open OpenTK.Graphics.OpenGL
 open Render
+open System.Threading.Tasks
 
 type Game() =
     /// <summary>Creates a 800x600 window with the specified title.</summary>
@@ -24,8 +25,8 @@ type Game() =
     let center4 = Vector3d(0.0, 0.0, -2.0)
     let radius4 = 20.0
     let width = 200
-    let height = 100
-    let zoom = 2.0
+    let height = 400
+    let zoom = 1.0
     let hitable = 
         HitableList [Sphere(center1, radius1, material1)
                      Sphere(center2, 100.0, materialBig)
@@ -34,6 +35,10 @@ type Game() =
                     //  Sphere(center5, radius1, material5)
                      
                      ]
+    // let R = Math.Cos(Math.PI / 4.0)
+    // let hitable = 
+    //     HitableList [Sphere(Vector3d(-R, 0.0, -1.0), R, Lambertian(Vector3d(0.0, 0.0, 1.0)))
+    //                  Sphere(Vector3d(R, 0.0, -1.0), R, Lambertian(Vector3d(1.0, 0.0, 0.0)))]
 
     do 
         base.VSync <- VSyncMode.On
@@ -48,7 +53,8 @@ type Game() =
 
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
 
-        Render.mainRender bitmap hitable
+        Render.mainRender bitmap hitable 45.0
+
 
         stopwatch.Stop();
         Console.WriteLine(stopwatch.ElapsedMilliseconds);

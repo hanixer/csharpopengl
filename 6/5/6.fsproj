@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Rest.fs" />
+    <Compile Include="Camera.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

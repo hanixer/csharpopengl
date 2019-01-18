@@ -34,7 +34,7 @@ let setPixel (bitmap : Bitmap) x y (color : Vector3d) =
     let color = Drawing.Color.FromArgb(r, g, b)
     bitmap.SetPixel(x, y, color)
 
-let random = new System.Random()
+let private random = new System.Random()
 
 let randomInUnitSphere () =
     let points = Seq.initInfinite (fun _ -> 
@@ -169,16 +169,21 @@ let rec colorIt ray hitable depth : Vector3d =
         let c2 = Vector3d(0.5, 0.7, 1.0)
         t * c2 + (1.0 - t) * c1
 
-let mainRender (bitmap : Bitmap) hitable =
+let mainRender (bitmap : Bitmap) hitable fov =
     let samples = 50
-    let origin = Vector3d.Zero
+    let lookFrom = Vector3d(0.0, 5.0, 5.0)
+    let lookAt = Vector3d(0.0, 0.0, -1.0)    
+    let up = Vector3d(0.0, 1.0, 0.0)
     let random = Random()
+    let camera = Camera.Camera(lookFrom, lookAt, up, fov, bitmap.Width, bitmap.Height, nearZ)
+    let origin = camera.RayOrigin
 
     let rec sampling c r s (color : Vector3d) =
         if s < samples then
             let colRandom = float c + random.NextDouble()
             let rowRandom = float r + random.NextDouble()
             let direction = rayDirection colRandom rowRandom bitmap.Width bitmap.Height nearZ fieldOfView
+            let direction = camera.RayDirection c r
             let ray = {Origin = origin; Direction = direction}
             sampling c r (s + 1) (color + colorIt ray hitable 0)
         else
