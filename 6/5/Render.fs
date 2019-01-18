@@ -113,9 +113,16 @@ let refractiveRelation (rayDir : Vector3d) (normal : Vector3d) refrIndex =
     let dot = Vector3d.Dot(rayDir, normal)
     if dot > 0.0 then 
         Debug.Assert(false)
-        refrIndex, -normal
+        let cosine = refrIndex * Vector3d.Dot(rayDir, normal) / rayDir.Length
+        refrIndex, -normal, cosine
     else    
-        1.0 / refrIndex, normal
+        let cosine = -Vector3d.Dot(rayDir, normal) / rayDir.Length
+        1.0 / refrIndex, normal, cosine
+
+let schlick cosine refrIndex = 
+    let r0 = (1.0 - refrIndex) / (1.0 + refrIndex)
+    let r0 = r0 * r0
+    r0 + (1.0 - r0) * Math.Pow(1.0 - cosine, 5.0)
 
 let scatter material rayIn hitRec =
     match material with
@@ -131,14 +138,19 @@ let scatter material rayIn hitRec =
         let scattered = {Origin = hitRec.Point; Direction = reflected + randPoint}
         albedo, scattered
     | Dielectric(index) ->
-        let refrRelation, outwardNormal = refractiveRelation rayIn.Direction hitRec.Normal index
+        let refrRelation, outwardNormal, cosine = refractiveRelation rayIn.Direction hitRec.Normal index
         let attenuation = Vector3d(1.0)
+        let reflected = reflect rayIn.Direction hitRec.Normal
         match refract rayIn.Direction outwardNormal refrRelation with
         | Some refracted ->
-            let scattered = {Origin = hitRec.Point; Direction = refracted}
-            attenuation, scattered
+            let reflectProb = schlick cosine index
+            if random.NextDouble() < reflectProb then
+                let scattered = {Origin = hitRec.Point; Direction = reflected}
+                attenuation, scattered
+            else
+                let scattered = {Origin = hitRec.Point; Direction = refracted}
+                attenuation, scattered
         | None ->
-            let reflected = reflect rayIn.Direction hitRec.Normal
             let scattered = {Origin = hitRec.Point; Direction = reflected}
             attenuation, scattered
 
