@@ -22,12 +22,12 @@ type Hitable =
     | HitableList of Hitable list
 
 let nearZ = 0.1
-let farZ = 1.0
-let aperture = 0.001
-let samples = 2
-let lookFrom = Vector3d(0.0, 0.0, 500.0)
+let aperture = 0.05
+let samples = 1
+let lookFrom = Vector3d(0.0, 1.0, 5.0)
 let lookAt = Vector3d(0.0, 0.0, 0.0)    
 let up = Vector3d(0.0, 1.0, 0.0)
+let farZ = (lookFrom - lookAt).Length
 
 let rayPointAtParameter ray t =
     ray.Origin + ray.Direction * t

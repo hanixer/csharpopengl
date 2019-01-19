@@ -22,8 +22,8 @@ type Game() =
     let radius1 = 0.5
     let center1 = Vector3d(-1.0, 0.0, -1.5)
     let center2 = Vector3d(0.0, -100.5, -1.0)
-    let width = 200
-    let height = 100
+    let width = 800
+    let height = 600
     let zoom = 1.0
     let hitable = 
         HitableList [Sphere(center1, radius1, material1)
@@ -59,20 +59,22 @@ type Game() =
                     else
                         yield Sphere(center, 0.2, Dielectric(1.5)) ]
         @ [ Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(Vector3d(0.5, 0.5, 0.5)))
-            // Sphere(Vector3d(0.0, 1.0, 0.0), 1.0, Dielectric(1.5))
+            Sphere(Vector3d(0.0, 1.0, 0.0), 1.0, Dielectric(1.5))
             Sphere(Vector3d(-4.0, 1.0, 0.0), 1.0, Lambertian(Vector3d(0.4, 0.2, 0.1)))
             Sphere(Vector3d(4.0, 1.0, 0.0), 1.0, Metal(Vector3d(0.7, 0.6, 0.5), 0.0)) ]
         |> HitableList
 
-    let R = 0.1
     let hitable = randomScene()
-    let hitable = 
-        HitableList [Sphere(Vector3d(0.0, R, 0.0), R, Lambertian(Vector3d(0.9, 0.5, 0.5)))
-                     Sphere(Vector3d(R, R, 0.0), R, Lambertian(Vector3d(0.9, 0.1, 0.5)))
-                     Sphere(Vector3d(2.0 * R, R, 0.0), R, Lambertian(Vector3d(0.9, 0.1, 0.5)))
-                     Sphere(Vector3d(3.0 * R, R, 0.0), R, Lambertian(Vector3d(0.9, 0.1, 0.5)))
-                     Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(Vector3d(0.5, 0.5, 0.5))) 
-                     ]
+
+    // let R = 0.1
+    // let hitable = 
+    //     HitableList [Sphere(Vector3d(-4.0 * R, R, 4.0 * R), R, Lambertian(Vector3d(0.9, 0.8, 0.5)))
+    //                  Sphere(Vector3d(-2.0 * R, R, 2.0 * R), R, Lambertian(Vector3d(0.1, 0.5, 0.5)))
+    //                  Sphere(Vector3d(0.0, R, 0.0), R, Lambertian(Vector3d(0.9, 0.5, 0.5)))
+    //                  Sphere(Vector3d(2.0 * R, R, -2.0 * R), R, Lambertian(Vector3d(0.1, 0.8, 0.5)))
+    //                  Sphere(Vector3d(4.0 * R, R, -4.0 * R), R, Lambertian(Vector3d(0.1, 0.8, 0.8)))
+    //                  Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(Vector3d(0.5, 0.5, 0.5))) 
+    //                  ]
     
     do 
         base.VSync <- VSyncMode.On
@@ -88,7 +90,7 @@ type Game() =
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
 
         Render.mainRender bitmap hitable 90.0
-
+        bitmap.Save("test-images/output.png")
 
         stopwatch.Stop();
         Console.WriteLine(stopwatch.ElapsedMilliseconds);
