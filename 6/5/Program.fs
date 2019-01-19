@@ -64,9 +64,13 @@ type Game() =
             Sphere(Vector3d(4.0, 1.0, 0.0), 1.0, Metal(Vector3d(0.7, 0.6, 0.5), 0.0)) ]
         |> HitableList
 
+    let R = 0.1
     let hitable = randomScene()
     let hitable = 
-        HitableList [Sphere(Vector3d(0.0, 1.0, 0.0), 1.0, Lambertian(Vector3d(0.9, 0.5, 0.5)))
+        HitableList [Sphere(Vector3d(0.0, R, 0.0), R, Lambertian(Vector3d(0.9, 0.5, 0.5)))
+                     Sphere(Vector3d(R, R, 0.0), R, Lambertian(Vector3d(0.9, 0.1, 0.5)))
+                     Sphere(Vector3d(2.0 * R, R, 0.0), R, Lambertian(Vector3d(0.9, 0.1, 0.5)))
+                     Sphere(Vector3d(3.0 * R, R, 0.0), R, Lambertian(Vector3d(0.9, 0.1, 0.5)))
                      Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(Vector3d(0.5, 0.5, 0.5))) 
                      ]
     

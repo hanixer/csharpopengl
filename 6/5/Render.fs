@@ -25,7 +25,7 @@ let nearZ = 0.1
 let farZ = 1.0
 let aperture = 0.001
 let samples = 2
-let lookFrom = Vector3d(50.0, 50.0, 50.0)
+let lookFrom = Vector3d(0.0, 0.0, 500.0)
 let lookAt = Vector3d(0.0, 0.0, 0.0)    
 let up = Vector3d(0.0, 1.0, 0.0)
 

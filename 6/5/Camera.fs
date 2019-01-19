@@ -44,12 +44,6 @@ type Camera(LookFrom : Vector3d, LookAt : Vector3d, Up : Vector3d,
     let transform x y z = 
         let v = Vector4d.Transform(Vector4d(x, y, z, 1.0), lookAt)
         Vector3d(v.X / v.W, v.Y / v.W, v.Z / v.W)
-    let transformV (v : Vector3d) =
-        // let v =  Vector4d(v, 1.0)
-        // let v = lookAt.Row0 * v + lookAt.Row1 * v + lookAt.Row2 * v + lookAt.Row3 * v 
-        // let v = Vector4d.Transform(v, lookAt)
-        (v.X * right + v.Y * upVector + v.Z * towardViwer) + lookFromMinus
-        // Vector3d(v.X / v.W, v.Y / v.W, v.Z / v.W)
 
     do  
         lookAt <- Matrix4d.LookAt(LookFrom, LookAt, Up)
@@ -60,13 +54,16 @@ type Camera(LookFrom : Vector3d, LookAt : Vector3d, Up : Vector3d,
         lookAt.Column3 <- Vector4d(lookFromMinus, 1.0)
         printfn "look1 = %A" lookAt
         printfn "row2 = %A" lookAt.Row2
-        printfn "result = %A" (transformV (Vector3d(0.0, 0.0, 0.0)))
+
+    member this.TransformV (v : Vector3d) =
+        (v.X * right + v.Y * upVector + v.Z * towardViwer) + lookFromMinus
 
     member this.Ray column row =
         let x = ((float column + random.NextDouble()) / width - 0.5) * 2.0 * side
         let y = ((float row + random.NextDouble()) / height - 0.5) * 2.0 * side * aspect
         let pointNear = Vector3d(x, y, -nearZ)
-        let pointFar = pointNear * -far / -nearZ |> transformV
+        let pointFar = pointNear * -far / -nearZ |> this.TransformV
         let pointLens = randomInUnitDisk() * lensRadius + LookFrom
         let direction = (pointFar - pointLens).Normalized()
+        let direction = (this.TransformV pointNear - LookFrom).Normalized()
         {Origin = pointLens; Direction = direction}
