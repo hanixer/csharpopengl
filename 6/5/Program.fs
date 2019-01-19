@@ -7,6 +7,7 @@ open OpenTK.Input
 open OpenTK.Graphics.OpenGL
 open Render
 open System.Threading.Tasks
+open Render
 
 type Game() =
     /// <summary>Creates a 800x600 window with the specified title.</summary>
@@ -21,25 +22,54 @@ type Game() =
     let radius1 = 0.5
     let center1 = Vector3d(-1.0, 0.0, -1.5)
     let center2 = Vector3d(0.0, -100.5, -1.0)
-    let center3 = Vector3d(1.0, 0.0, -1.0)
-    let center4 = Vector3d(0.0, 0.0, -2.0)
-    let radius4 = 20.0
     let width = 200
-    let height = 400
+    let height = 100
     let zoom = 1.0
     let hitable = 
         HitableList [Sphere(center1, radius1, material1)
                      Sphere(center2, 100.0, materialBig)
-                     Sphere(center3, radius1, material2)
-                     Sphere(center4, radius1, material4)
+                     Sphere(Vector3d(0.0, 0.0, -8.0), 4.0, material1)
+                     Sphere(Vector3d(0.0, 1.0, -1.0), radius1, material4)
+                     Sphere(Vector3d(0.0, 0.0, -2.0), radius1, Lambertian(Vector3d(1.0, 0.3, 0.7)))
+                     Sphere(Vector3d(1.0, 0.0, -3.0), radius1, Lambertian(Vector3d(0.0, 1.0, 0.2)))
                     //  Sphere(center5, radius1, material5)
                      
                      ]
-    // let R = Math.Cos(Math.PI / 4.0)
-    // let hitable = 
-    //     HitableList [Sphere(Vector3d(-R, 0.0, -1.0), R, Lambertian(Vector3d(0.0, 0.0, 1.0)))
-    //                  Sphere(Vector3d(R, 0.0, -1.0), R, Lambertian(Vector3d(1.0, 0.0, 0.0)))]
 
+    let randomScene() =
+        let n = 3
+        let random = Random()
+        [ for a = -11 to 10 do
+            for b = -11 to 10 do
+                let choose = random.NextDouble()
+                let z = (float b) + 0.9 * (random.NextDouble())
+                let center = Vector3d(float a + 0.9 * random.NextDouble(), 0.2, z)
+                if ((center - Vector3d(4.0, 0.2, 0.0)).Length > 0.9) then
+                    if choose < 0.8 then
+                        let r = random.NextDouble() * random.NextDouble()
+                        let g = random.NextDouble() * random.NextDouble()
+                        let b = random.NextDouble() * random.NextDouble()
+                        yield Sphere(center, 0.2, Lambertian(Vector3d(r, g, b)))
+                    else if choose < 0.95 then
+                        let r = 0.5 *(1.0 + random.NextDouble())
+                        let g = 0.5 *(1.0 + random.NextDouble())
+                        let b = 0.5 *(1.0 + random.NextDouble())
+                        let fuzzy = 0.5 *(1.0 + random.NextDouble())
+                        yield Sphere(center, 0.2, Metal(Vector3d(r, g, b), fuzzy))
+                    else
+                        yield Sphere(center, 0.2, Dielectric(1.5)) ]
+        @ [ Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(Vector3d(0.5, 0.5, 0.5)))
+            // Sphere(Vector3d(0.0, 1.0, 0.0), 1.0, Dielectric(1.5))
+            Sphere(Vector3d(-4.0, 1.0, 0.0), 1.0, Lambertian(Vector3d(0.4, 0.2, 0.1)))
+            Sphere(Vector3d(4.0, 1.0, 0.0), 1.0, Metal(Vector3d(0.7, 0.6, 0.5), 0.0)) ]
+        |> HitableList
+
+    let hitable = randomScene()
+    let hitable = 
+        HitableList [Sphere(Vector3d(0.0, 1.0, 0.0), 1.0, Lambertian(Vector3d(0.9, 0.5, 0.5)))
+                     Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(Vector3d(0.5, 0.5, 0.5))) 
+                     ]
+    
     do 
         base.VSync <- VSyncMode.On
 
@@ -53,7 +83,7 @@ type Game() =
 
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
 
-        Render.mainRender bitmap hitable 45.0
+        Render.mainRender bitmap hitable 90.0
 
 
         stopwatch.Stop();

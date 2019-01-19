@@ -13,37 +13,8 @@
 
 open OpenTK
 open System
+open Camera
 
-
-let sleepWorkflow  = async{
-    printfn "Starting sleep workflow at %O" DateTime.Now.TimeOfDay
-    do! Async.Sleep 2000
-    printfn "Finished sleep workflow at %O" DateTime.Now.TimeOfDay
-    }
-
-let nestedWorkflow  = async{
-
-    printfn "Starting parent"
-    let! childWorkflow = Async.StartChild sleepWorkflow
-
-    // give the child a chance and then keep working
-    do! Async.Sleep 100
-    printfn "Doing something useful while waiting "
-
-    // block on the child
-    let! result = childWorkflow
-
-    // done
-    printfn "Finished parent" 
-    }
-
-let testLoop = async {
-    for i in [1..100] do
-        // do something
-        printf "%i before.." i
-        
-        // sleep a bit
-        do! Async.Sleep 10  
-        printfn "..after"
-    }
-Async.RunSynchronously testLoop
+let cam = Camera(Vector3d(0.0, 0.0, 3.0), Vector3d(0.0, 0.0, -1.0), Vector3d(0.0, 1.0, 0.0), 90.0, 200, 100, 10.0, 100.0, 0.2)
+// cam.Ray 0 0
+// cam.Ray 199 50

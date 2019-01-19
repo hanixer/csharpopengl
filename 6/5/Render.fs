@@ -4,10 +4,10 @@ open System
 open System.Drawing
 open OpenTK
 open System.Diagnostics
+open Camera
 
 type Bitmap = System.Drawing.Bitmap
 type Color = System.Drawing.Color
-type Ray = {Origin : Vector3d; Direction : Vector3d}
 type Material =
     | Lambertian of Vector3d
     | Metal of Vector3d * float
@@ -22,7 +22,12 @@ type Hitable =
     | HitableList of Hitable list
 
 let nearZ = 0.1
-let fieldOfView = OpenTK.MathHelper.DegreesToRadians(45.0)
+let farZ = 1.0
+let aperture = 0.001
+let samples = 2
+let lookFrom = Vector3d(50.0, 50.0, 50.0)
+let lookAt = Vector3d(0.0, 0.0, 0.0)    
+let up = Vector3d(0.0, 1.0, 0.0)
 
 let rayPointAtParameter ray t =
     ray.Origin + ray.Direction * t
@@ -170,21 +175,11 @@ let rec colorIt ray hitable depth : Vector3d =
         t * c2 + (1.0 - t) * c1
 
 let mainRender (bitmap : Bitmap) hitable fov =
-    let samples = 50
-    let lookFrom = Vector3d(0.0, 5.0, 5.0)
-    let lookAt = Vector3d(0.0, 0.0, -1.0)    
-    let up = Vector3d(0.0, 1.0, 0.0)
-    let random = Random()
-    let camera = Camera.Camera(lookFrom, lookAt, up, fov, bitmap.Width, bitmap.Height, nearZ)
-    let origin = camera.RayOrigin
+    let camera = Camera.Camera(lookFrom, lookAt, up, fov, bitmap.Width, bitmap.Height, nearZ, farZ, aperture)
 
     let rec sampling c r s (color : Vector3d) =
         if s < samples then
-            let colRandom = float c + random.NextDouble()
-            let rowRandom = float r + random.NextDouble()
-            let direction = rayDirection colRandom rowRandom bitmap.Width bitmap.Height nearZ fieldOfView
-            let direction = camera.RayDirection c r
-            let ray = {Origin = origin; Direction = direction}
+            let ray = camera.Ray c r
             sampling c r (s + 1) (color + colorIt ray hitable 0)
         else
             color / (float samples)
