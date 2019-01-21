@@ -5,6 +5,7 @@ open System.Drawing
 open OpenTK
 open System.Diagnostics
 open Camera
+open Rest
 
 type Bitmap = System.Drawing.Bitmap
 type Color = System.Drawing.Color
@@ -104,6 +105,8 @@ and hitList ray hitables tMin tMax =
 
     List.fold fold (Double.PositiveInfinity, None) hitables
     |> snd
+
+let rec boundingBox 
 
 let refract (rayDir : Vector3d) (normal : Vector3d) niOverNt =
     let rayDir = rayDir.Normalized()

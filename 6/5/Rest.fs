@@ -4,6 +4,9 @@ open System
 open OpenTK.Graphics.OpenGL
 open OpenTK
 
+type Bbox = Vector3d * Vector3d
+type Ray = {Origin : Vector3d; Direction : Vector3d}
+
 let loadTexture (bitmap : System.Drawing.Bitmap) =
    let id = GL.GenTexture()
    GL.BindTexture(TextureTarget.Texture2D, id)
@@ -14,7 +17,6 @@ let loadTexture (bitmap : System.Drawing.Bitmap) =
    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear);
    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear);
    id
-
 
 let getBytesFromBitmap (bitmap: System.Drawing.Bitmap) =
   let data = bitmap.LockBits(System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), 
@@ -28,3 +30,18 @@ let getBytesFromBitmap (bitmap: System.Drawing.Bitmap) =
 
 let colorToVector (color : Drawing.Color) =
   Vector3d(float color.R / 255.0, float color.G / 255.0, float color.B / 255.0)
+
+let hitBbox ((box1, box2) : Bbox) ray tmin tmax = 
+   let handle (tmin, tmax) (box1, box2, rayOrig, rayDir) =
+      let inv = 1.0 / rayDir
+      let t1 = (box1 - rayOrig) * inv
+      let t2 = (box2 - rayOrig) * inv
+      let t3, t4 =  if rayDir < 0.0 then t2, t1 else t1, t2
+      let t5 = Math.Max(tmin, t3)
+      let t6 = Math.Min(tmax, t4)
+      (t5, t6)
+
+   let t1, t2 = handle (tmin, tmax) (box1.X, box2.X, ray.Origin.X, ray.Direction.X) 
+   let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y) 
+   let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y) 
+   t1 < t2 && t2 > 0.0

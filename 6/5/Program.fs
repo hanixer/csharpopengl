@@ -7,7 +7,6 @@ open OpenTK.Input
 open OpenTK.Graphics.OpenGL
 open Render
 open System.Threading.Tasks
-open Render
 
 type Game() =
     /// <summary>Creates a 800x600 window with the specified title.</summary>
