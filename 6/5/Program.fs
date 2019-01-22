@@ -25,7 +25,7 @@ type Game() =
     let height = 600
     let zoom = 1.0
     let hitable = 
-        HitableList [Sphere(center1, radius1, material1)
+                    [Sphere(center1, radius1, material1)
                      Sphere(center2, 100.0, materialBig)
                      Sphere(Vector3d(0.0, 0.0, -8.0), 4.0, material1)
                      Sphere(Vector3d(0.0, 1.0, -1.0), radius1, material4)
@@ -61,7 +61,7 @@ type Game() =
             Sphere(Vector3d(0.0, 1.0, 0.0), 1.0, Dielectric(1.5))
             Sphere(Vector3d(-4.0, 1.0, 0.0), 1.0, Lambertian(Vector3d(0.4, 0.2, 0.1)))
             Sphere(Vector3d(4.0, 1.0, 0.0), 1.0, Metal(Vector3d(0.7, 0.6, 0.5), 0.0)) ]
-        |> HitableList
+        |> Seq.ofList
 
     let hitable = randomScene()
 
@@ -75,6 +75,8 @@ type Game() =
     //                  Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(Vector3d(0.5, 0.5, 0.5))) 
     //                  ]
     
+    let hitableBvh = makeBvh hitable
+
     do 
         base.VSync <- VSyncMode.On
 
@@ -88,7 +90,7 @@ type Game() =
 
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
 
-        Render.mainRender bitmap hitable 90.0
+        Render.mainRender bitmap hitableBvh 90.0
         bitmap.Save("test-images/output.png")
 
         stopwatch.Stop();
