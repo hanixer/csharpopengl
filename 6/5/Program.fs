@@ -14,23 +14,22 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let material1 = Lambertian(Vector3d(1.0, 0.3, 0.3))
-    let materialBig = Lambertian(Vector3d(0.2, 0.5, 0.5))
-    let material2 = Metal(Vector3d(1.0), 0.1)
+    let material1 = Lambertian(ConstantTexture(Vector3d(1.0, 0.3, 0.3)))
+    let materialBig = Lambertian(ConstantTexture(Vector3d(0.2, 0.5, 0.5)))
     let material4 = Dielectric(1.5)
     let radius1 = 0.5
     let center1 = Vector3d(-1.0, 0.0, -1.5)
     let center2 = Vector3d(0.0, -100.5, -1.0)
-    let width = 800
-    let height = 600
+    let width = 200
+    let height = 100
     let zoom = 1.0
     let hitable = 
                     [Sphere(center1, radius1, material1)
                      Sphere(center2, 100.0, materialBig)
                      Sphere(Vector3d(0.0, 0.0, -8.0), 4.0, material1)
                      Sphere(Vector3d(0.0, 1.0, -1.0), radius1, material4)
-                     Sphere(Vector3d(0.0, 0.0, -2.0), radius1, Lambertian(Vector3d(1.0, 0.3, 0.7)))
-                     Sphere(Vector3d(1.0, 0.0, -3.0), radius1, Lambertian(Vector3d(0.0, 1.0, 0.2)))
+                     Sphere(Vector3d(0.0, 0.0, -2.0), radius1, Lambertian(ConstantTexture(Vector3d(1.0, 0.3, 0.7))))
+                     Sphere(Vector3d(1.0, 0.0, -3.0), radius1, Lambertian(ConstantTexture(Vector3d(0.0, 1.0, 0.2))))
                     //  Sphere(center5, radius1, material5)
                      
                      ]
@@ -48,19 +47,19 @@ type Game() =
                         let r = random.NextDouble() * random.NextDouble()
                         let g = random.NextDouble() * random.NextDouble()
                         let b = random.NextDouble() * random.NextDouble()
-                        yield Sphere(center, 0.2, Lambertian(Vector3d(r, g, b)))
+                        yield Sphere(center, 0.2, Lambertian(ConstantTexture(Vector3d(r, g, b))))
                     else if choose < 0.95 then
                         let r = 0.5 *(1.0 + random.NextDouble())
                         let g = 0.5 *(1.0 + random.NextDouble())
                         let b = 0.5 *(1.0 + random.NextDouble())
                         let fuzzy = 0.5 *(1.0 + random.NextDouble())
-                        yield Sphere(center, 0.2, Metal(Vector3d(r, g, b), fuzzy))
+                        yield Sphere(center, 0.2, Metal(ConstantTexture(Vector3d(r, g, b)), fuzzy))
                     else
                         yield Sphere(center, 0.2, Dielectric(1.5)) ]
-        @ [ Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(Vector3d(0.5, 0.5, 0.5)))
+        @ [ Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(CheckerTexture((ConstantTexture(Vector3d(0.0, 0.0, 0.0))), ConstantTexture(Vector3d(0.5, 0.5, 0.5)))))
             Sphere(Vector3d(0.0, 1.0, 0.0), 1.0, Dielectric(1.5))
-            Sphere(Vector3d(-4.0, 1.0, 0.0), 1.0, Lambertian(Vector3d(0.4, 0.2, 0.1)))
-            Sphere(Vector3d(4.0, 1.0, 0.0), 1.0, Metal(Vector3d(0.7, 0.6, 0.5), 0.0)) ]
+            Sphere(Vector3d(-4.0, 1.0, 0.0), 1.0, Lambertian(ConstantTexture(Vector3d(0.4, 0.2, 0.1))))
+            Sphere(Vector3d(4.0, 1.0, 0.0), 1.0, Metal(ConstantTexture(Vector3d(0.7, 0.6, 0.5)), 0.0)) ]
         |> Seq.ofList
 
     let hitable = randomScene()

@@ -9,9 +9,12 @@ open Rest
 
 type Bitmap = System.Drawing.Bitmap
 type Color = System.Drawing.Color
+type Texture = 
+    | ConstantTexture of Vector3d
+    | CheckerTexture of Texture * Texture
 type Material =
-    | Lambertian of Vector3d
-    | Metal of Vector3d * float
+    | Lambertian of Texture
+    | Metal of Texture * float
     | Dielectric of float
 type HitRecord =
     { T : float             // parameter used to determine point from ray
@@ -25,7 +28,7 @@ type Hitable =
 
 let nearZ = 0.1
 let aperture = 0.05
-let samples = 1
+let samples = 10
 let lookFrom = Vector3d(0.0, 1.0, 5.0)
 let lookAt = Vector3d(0.0, 0.0, 0.0)    
 let up = Vector3d(0.0, 1.0, 0.0)
@@ -172,6 +175,16 @@ let rec makeBvh hitables =
         let right = makeBvh (Seq.skip (length / 2) hitables)
         finishConstruction left right
 
+let rec textureValue texture u v (p : Vector3d) =
+    match texture with
+    | ConstantTexture(color) -> color
+    | CheckerTexture(one, two) ->
+        let sin = Math.Sin(p.X * 10.0) * Math.Sin(p.Y * 10.0) * Math.Sin(p.Z * 10.0)
+        if sin < 0.0 then
+            textureValue one u v p
+        else        
+            textureValue two u v p
+
 let refract (rayDir : Vector3d) (normal : Vector3d) niOverNt =
     let rayDir = rayDir.Normalized()
     let dot = Vector3d.Dot(rayDir, normal)
@@ -202,13 +215,13 @@ let scatter material rayIn hitRec =
         let randPoint = randomInUnitSphere()
         let target = hitRec.Point + hitRec.Normal + randPoint
         let scattered = {Origin = hitRec.Point; Direction = target - hitRec.Point}
-        albedo, scattered
+        textureValue albedo 0 0 hitRec.Point, scattered
     | Metal(albedo, fuzzy) ->
         let fuzzy = if fuzzy < 1.0 then fuzzy else 1.0
         let reflected = reflect rayIn.Direction hitRec.Normal
         let randPoint = randomInUnitSphere() * fuzzy
         let scattered = {Origin = hitRec.Point; Direction = reflected + randPoint}
-        albedo, scattered
+        textureValue albedo 0 0 hitRec.Point, scattered
     | Dielectric(index) ->
         let refrRelation, outwardNormal, cosine = refractiveRelation rayIn.Direction hitRec.Normal index
         let attenuation = Vector3d(1.0)
