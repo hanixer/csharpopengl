@@ -6,12 +6,14 @@ open OpenTK
 open System.Diagnostics
 open Camera
 open Rest
+open Noise
 
 type Bitmap = System.Drawing.Bitmap
 type Color = System.Drawing.Color
 type Texture = 
     | ConstantTexture of Vector3d
     | CheckerTexture of Texture * Texture
+    | NoiseTexture of float
 type Material =
     | Lambertian of Texture
     | Metal of Texture * float
@@ -29,7 +31,7 @@ type Hitable =
 let nearZ = 0.1
 let aperture = 0.05
 let samples = 10
-let lookFrom = Vector3d(0.0, 1.0, 5.0)
+let lookFrom = Vector3d(13.0, 2.0, 3.0) / 2.0
 let lookAt = Vector3d(0.0, 0.0, 0.0)    
 let up = Vector3d(0.0, 1.0, 0.0)
 let farZ = (lookFrom - lookAt).Length
@@ -184,6 +186,8 @@ let rec textureValue texture u v (p : Vector3d) =
             textureValue one u v p
         else        
             textureValue two u v p
+    | NoiseTexture(scale) ->
+        noise (scale * p) * Vector3d(1.0)
 
 let refract (rayDir : Vector3d) (normal : Vector3d) niOverNt =
     let rayDir = rayDir.Normalized()
