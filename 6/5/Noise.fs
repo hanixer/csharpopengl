@@ -35,7 +35,7 @@ let interp (array : float [,,]) u v w =
                 let a = ii * u + (1.0 - ii) * (1.0 - u)
                 let b = jj * v + (1.0 - jj) * (1.0 - v)
                 let c = kk * w + (1.0 - kk) * (1.0 - w)
-                accum <- accum + a + b + c + array.[i, j, k]
+                accum <- accum + (a * b * c * array.[i, j, k])
     accum
 
 let noise (point : Vector3d) =     
@@ -53,6 +53,6 @@ let noise (point : Vector3d) =
                 let permY = permutationY.[(j + dj) &&& 255]
                 let permZ = permutationZ.[(k + dk) &&& 255]
                 let index =  permX ^^^ permY ^^^ permZ
-                c.[di, di, dk] <- randFloats.[index]
+                c.[di, dj, dk] <- randFloats.[index]
     // interp c u v w
     c.[1, 1, 1]

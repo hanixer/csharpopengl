@@ -8,17 +8,52 @@ open OpenTK.Graphics.OpenGL
 open Render
 open System.Threading.Tasks
 
+let random = new Random()
+let tableSize = 256
+let maxTableIndex = 256 - 1
+let frequency = 0.1
+let randoms =
+    Array2D.init tableSize tableSize (fun _ _ -> 
+        random.NextDouble())
+
+let lerp low high t =  (1.0 - t) * low + t * high
+let smoothstep t = t * t * (3.0 - 2.0 * t)
+
+let computeNoise (p : Vector2d) =
+    let ix = int (Math.Floor p.X)
+    let iy = int (Math.Floor p.Y)
+    let tx = p.X - float ix
+    let ty = p.Y - float iy
+    let x0 = ix &&& maxTableIndex
+    let x1 = (x0 + 1) &&& maxTableIndex
+    let y0 = iy &&& maxTableIndex
+    let y1 = (y0 + 1) &&& maxTableIndex
+    let c00 = randoms.[y0, x0]
+    let c10 = randoms.[y0, x1]
+    let c01 = randoms.[y1, x0]
+    let c11 = randoms.[y1, x1]
+    let sx = smoothstep tx
+    let sy = smoothstep ty
+    let nx0 = lerp c00 c10 sx
+    let nx1 = lerp c01 c11 sx
+    lerp nx0 nx1 sy
+
+let generateNoiseMap width height frequency = 
+    Array2D.init height width <| fun r c ->
+        computeNoise (Vector2d(float c, float r) * frequency)
+
+let subMainRender (bitmap : Bitmap) =
+    generateNoiseMap bitmap.Width bitmap.Height frequency
+    |> Array2D.iteri (fun c r t ->
+        let tt = int (t * 255.0)
+        bitmap.SetPixel(r, c, Color.FromArgb(tt, tt, tt)))
+
 type Game() =
     /// <summary>Creates a 800x600 window with the specified title.</summary>
     inherit GameWindow(800, 600)
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let material1 = Lambertian(ConstantTexture(Vector3d(1.0, 0.3, 0.3)))
-    let materialBig = Lambertian(ConstantTexture(Vector3d(0.2, 0.5, 0.5)))
-    let material4 = Dielectric(1.5)
-    let radius1 = 0.5
-    let center2 = Vector3d(0.0, -100.5, -1.0)
     let width = 400
     let height = 200
     let zoom = 1.0
@@ -26,12 +61,6 @@ type Game() =
     let hitable = 
                     [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, Lambertian(NoiseTexture(noiseScale)))
                      Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(NoiseTexture(noiseScale)))
-                    //  Sphere(Vector3d(0.0, 0.0, -8.0), 4.0, material1)
-                    //  Sphere(Vector3d(0.0, 1.0, -1.0), radius1, material4)
-                    //  Sphere(Vector3d(0.0, 0.0, -2.0), radius1, Lambertian(ConstantTexture(Vector3d(1.0, 0.3, 0.7))))
-                    //  Sphere(Vector3d(1.0, 0.0, -3.0), radius1, Lambertian(ConstantTexture(Vector3d(0.0, 1.0, 0.2))))
-                    //  Sphere(center5, radius1, material5)
-                     
                     ]
                     |> Seq.ofList
                     |> HitableList 
@@ -62,18 +91,6 @@ type Game() =
             Sphere(Vector3d(-4.0, 1.0, 0.0), 1.0, Lambertian(ConstantTexture(Vector3d(0.4, 0.2, 0.1))))
             Sphere(Vector3d(4.0, 1.0, 0.0), 1.0, Metal(ConstantTexture(Vector3d(0.7, 0.6, 0.5)), 0.0)) ]
         |> Seq.ofList
-
-    // let hitable = randomScene()
-
-    // let R = 0.1
-    // let hitable = 
-    //     HitableList [Sphere(Vector3d(-4.0 * R, R, 4.0 * R), R, Lambertian(Vector3d(0.9, 0.8, 0.5)))
-    //                  Sphere(Vector3d(-2.0 * R, R, 2.0 * R), R, Lambertian(Vector3d(0.1, 0.5, 0.5)))
-    //                  Sphere(Vector3d(0.0, R, 0.0), R, Lambertian(Vector3d(0.9, 0.5, 0.5)))
-    //                  Sphere(Vector3d(2.0 * R, R, -2.0 * R), R, Lambertian(Vector3d(0.1, 0.8, 0.5)))
-    //                  Sphere(Vector3d(4.0 * R, R, -4.0 * R), R, Lambertian(Vector3d(0.1, 0.8, 0.8)))
-    //                  Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(Vector3d(0.5, 0.5, 0.5))) 
-    //                  ]
     
     // let hitable = makeBvh hitable
 
@@ -90,14 +107,16 @@ type Game() =
 
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
 
-        Render.mainRender bitmap hitable 90.0
-        bitmap.Save("test-images/output.png")
+        // Render.mainRender bitmap hitable 90.0
+        subMainRender bitmap
 
         stopwatch.Stop();
         Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
         Render.drawBitmap bitmap canvas zoom
         bytes <-Rest.getBytesFromBitmap canvas
+        bitmap.RotateFlip(Drawing.RotateFlipType.RotateNoneFlipY)
+        bitmap.Save("test-images/output.png")
 
     /// <summary>
     /// Called when your window is resized. Set your viewport here. It is also
