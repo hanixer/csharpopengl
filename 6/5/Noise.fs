@@ -87,3 +87,16 @@ let noise (point : Vector3d) =
                 c.[di, dj, dk] <- randVectors.[index]
     perlinInterp c u v w
     // c.[1, 1, 1]
+
+let turbulence (point : Vector3d) depth =
+    let rec loop i accum weight scale maxVal =
+        if i < depth then
+            let accum = (accum + (weight * noise (scale * point)))
+            let maxVal = Math.Max(accum, maxVal)
+            loop (i + 1) accum (weight * 0.5) (scale * 2.0) maxVal
+        else
+            accum, maxVal
+    let accum, maxVal = loop 0 0.0 1.0 1.0 Double.MinValue
+    Debug.Assert(accum / maxVal <= 1.0)
+    accum / maxVal
+    

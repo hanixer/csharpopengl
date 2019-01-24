@@ -187,7 +187,7 @@ let rec textureValue texture u v (p : Vector3d) =
         else        
             textureValue two u v p
     | NoiseTexture(scale) ->
-        noise (scale * p) * Vector3d(1.0)
+        (turbulence (scale * p) 1) * Vector3d.One
 
 let refract (rayDir : Vector3d) (normal : Vector3d) niOverNt =
     let rayDir = rayDir.Normalized()
