@@ -273,6 +273,18 @@ let mainRender (bitmap : Bitmap) hitable fov =
             let color = sampling c r 0 Vector3d.Zero
             setPixel bitmap c r color
 
+let drawBitmapTwo (source : Bitmap) (destination : Bitmap) (pixelSize : float) offsetX offsetY =
+    use graphics = Graphics.FromImage(destination)
+    use brush = new SolidBrush(Color.Black)    
+    for r in 0..source.Height - 1 do        
+        for c in 0..source.Width - 1 do
+            let color = source.GetPixel(c, r)
+            let x = ((float c) + offsetX) * pixelSize
+            let y = ((float r) + offsetY) * pixelSize
+            brush.Color <- color
+            let rect = Drawing.RectangleF(float32 x, float32 y, float32 pixelSize, float32 pixelSize)
+            graphics.FillRectangle(brush, rect)
+
 let drawBitmap (source : Bitmap) (destination : Bitmap) (pixelSize : float) =
     use graphics = Graphics.FromImage(destination)
     use brush = new SolidBrush(Color.Black)    
