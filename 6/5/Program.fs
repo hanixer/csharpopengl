@@ -15,10 +15,12 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let width = 600
-    let height = 500
+    let width = 512
+    let height = 512
     let zoom = 1.0
     let noiseScale = 2.0
+    let mutable lacunarity = 2.0
+    let mutable gain = 0.5
     let hitable = 
                     [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, Lambertian(NoiseTexture(noiseScale)))
                      Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(NoiseTexture(noiseScale)))
@@ -55,6 +57,22 @@ type Game() =
     
     // let hitable = makeBvh hitable
 
+    let update() =
+        let bitmap = new Drawing.Bitmap(width, height)
+
+        let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
+
+        // Render.mainRender bitmap hitable 90.0
+        NoiseTrain.subMainRender bitmap lacunarity gain
+
+        stopwatch.Stop();
+        Console.WriteLine(stopwatch.ElapsedMilliseconds);
+
+        Render.drawBitmap bitmap canvas zoom
+        bytes <-Rest.getBytesFromBitmap canvas
+        bitmap.RotateFlip(Drawing.RotateFlipType.RotateNoneFlipY)
+        bitmap.Save("test-images/output.png")
+
     do 
         base.VSync <- VSyncMode.On
 
@@ -64,20 +82,7 @@ type Game() =
         base.OnLoad(e)
         GL.ClearColor(0.f, 0.f, 0.f, 0.0f)
         GL.Enable(EnableCap.DepthTest)
-        let bitmap = new Drawing.Bitmap(width, height)
-
-        let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
-
-        // Render.mainRender bitmap hitable 90.0
-        NoiseTrain.subMainRender bitmap
-
-        stopwatch.Stop();
-        Console.WriteLine(stopwatch.ElapsedMilliseconds);
-
-        Render.drawBitmap bitmap canvas zoom
-        bytes <-Rest.getBytesFromBitmap canvas
-        bitmap.RotateFlip(Drawing.RotateFlipType.RotateNoneFlipY)
-        bitmap.Save("test-images/output.png")
+        update()
 
     /// <summary>
     /// Called when your window is resized. Set your viewport here. It is also
@@ -100,6 +105,22 @@ type Game() =
     override o.OnUpdateFrame e =
         base.OnUpdateFrame e       
         if base.Keyboard.[Key.Escape] then base.Close()
+        elif base.Keyboard.[Key.Number1] then
+            lacunarity <- lacunarity * 2.0
+            update()
+        elif base.Keyboard.[Key.Number2] then
+            lacunarity <- lacunarity * 0.5
+            update()
+        elif base.Keyboard.[Key.Number3] then
+            gain <- gain * 2.0
+            update()
+        elif base.Keyboard.[Key.Number4] then
+            gain <- gain * 0.5
+            update()
+        elif base.Keyboard.[Key.R] then
+            lacunarity <- 2.0
+            gain <- 0.5
+            update()
 
     /// <summary>
     /// Called when it is time to render the next frame. Add your rendering code here.
