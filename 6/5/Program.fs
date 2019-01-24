@@ -15,8 +15,8 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let width = 400
-    let height = 200
+    let width = 600
+    let height = 500
     let zoom = 1.0
     let noiseScale = 2.0
     let hitable = 
@@ -68,8 +68,8 @@ type Game() =
 
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
 
-        Render.mainRender bitmap hitable 90.0
-        // subMainRender bitmap
+        // Render.mainRender bitmap hitable 90.0
+        NoiseTrain.subMainRender bitmap
 
         stopwatch.Stop();
         Console.WriteLine(stopwatch.ElapsedMilliseconds);

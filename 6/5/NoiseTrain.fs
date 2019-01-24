@@ -8,6 +8,7 @@ let random = new Random()
 let tableSize = 256
 let maxTableIndex = 256 - 1
 let frequency = 0.1
+let numLayers = 7
 let randoms =
     Array2D.init tableSize tableSize (fun _ _ -> 
         random.NextDouble())
@@ -38,8 +39,24 @@ let generateNoiseMap width height frequency =
     Array2D.init height width <| fun r c ->
         computeNoise (Vector2d(float c, float r) * frequency)
 
+let makeFractal width height frequency numLayers = 
+    let mutable maxVal = Double.MinValue
+    let rec loop (point : Vector2d) i accum weight scale =
+        if i < numLayers then
+            let accum = (accum + (weight * computeNoise (scale * point)))
+            loop point (i + 1) accum (weight * 0.5) (scale * 2.0)
+        else
+            accum
+
+    Array2D.init height width <| fun r c ->
+        let point = Vector2d(float c, float r) * frequency
+        let result = loop point 0 0.0 1.0 1.0
+        maxVal <- Math.Max(result, maxVal)
+        result
+    |> Array2D.map (fun t -> t / maxVal)
+
 let subMainRender (bitmap : Bitmap) =
-    generateNoiseMap bitmap.Width bitmap.Height frequency
+    makeFractal bitmap.Width bitmap.Height frequency numLayers
     |> Array2D.iteri (fun c r t ->
         let tt = int (t * 255.0)
         bitmap.SetPixel(r, c, Color.FromArgb(tt, tt, tt)))
