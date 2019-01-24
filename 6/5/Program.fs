@@ -68,8 +68,8 @@ type Game() =
 
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
 
-        // Render.mainRender bitmap hitable 90.0
-        subMainRender bitmap
+        Render.mainRender bitmap hitable 90.0
+        // subMainRender bitmap
 
         stopwatch.Stop();
         Console.WriteLine(stopwatch.ElapsedMilliseconds);

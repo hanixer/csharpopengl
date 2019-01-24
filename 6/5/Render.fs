@@ -30,7 +30,7 @@ type Hitable =
 
 let nearZ = 0.1
 let aperture = 0.05
-let samples = 10
+let samples = 1
 let lookFrom = Vector3d(13.0, 2.0, 3.0) / 2.0
 let lookAt = Vector3d(0.0, 0.0, 0.0)    
 let up = Vector3d(0.0, 1.0, 0.0)
