@@ -60,8 +60,49 @@ let makeFractal width height (lacunarity : float) (gain : float) (numLayers : in
         result
     |> Array2D.map (fun t -> t / maxVal)
 
+let makeTurbulence width height (lacunarity : float) (gain : float) (numLayers : int) = 
+    let mutable maxVal = Double.MinValue
+    let rec loop (point : Vector2d) i accum amplitude =
+        if i < numLayers then
+            let noise = Math.Abs(2.0 * computeNoise (point) - 1.0)            
+            let accum = (accum + (amplitude * noise))
+            let point = point * lacunarity
+            let amplitude = amplitude * gain
+            loop point (i + 1) accum amplitude
+        else
+            accum
+
+    Array2D.init height width <| fun r c ->
+        let point = Vector2d(float c, float r) * frequency
+        let result = loop point 0 0.0 1.0
+        maxVal <- Math.Max(result, maxVal)
+        result
+    |> Array2D.map (fun t -> t / maxVal)
+
+let makeMarble width height (lacunarity : float) (gain : float) (numLayers : int) = 
+    let mutable maxVal = Double.MinValue
+    let rec loop (point : Vector2d) i accum amplitude =
+        if i < numLayers then
+            let noise = Math.Abs(2.0 * computeNoise (point) - 1.0)            
+            let accum = (accum + (amplitude * noise))
+            let point = point * lacunarity
+            let amplitude = amplitude * gain
+            loop point (i + 1) accum amplitude
+        else
+            accum
+
+    Array2D.init height width <| fun r c ->
+        let point = Vector2d(float c, float r) * frequency
+        let result = loop point 0 0.0 1.0
+        maxVal <- 1.0
+        let sin = Math.Sin(result * 100.0 + point.X) 
+        (sin + 1.0) / 2.0
+    |> Array2D.map (fun t -> t / maxVal)
+
 let subMainRender (bitmap : Bitmap) lacunarity (gain : float) =
-    makeFractal bitmap.Width bitmap.Height lacunarity gain numLayers
+    makeMarble bitmap.Width bitmap.Height lacunarity gain numLayers
+    // makeTurbulence bitmap.Width bitmap.Height lacunarity gain numLayers
+    // makeFractal bitmap.Width bitmap.Height lacunarity gain numLayers
     // generateNoiseMap bitmap.Width bitmap.Height frequency amplitude
     |> Array2D.iteri (fun c r t ->
         let tt = int (t * 255.0)

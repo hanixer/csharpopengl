@@ -19,8 +19,8 @@ type Game() =
     let height = 512
     let zoom = 1.0
     let noiseScale = 2.0
-    let mutable lacunarity = 2.0
-    let mutable gain = 0.5
+    let mutable lacunarity = 1.4
+    let mutable gain = 0.2
     let hitable = 
                     [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, Lambertian(NoiseTexture(noiseScale)))
                      Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(NoiseTexture(noiseScale)))
