@@ -19,6 +19,7 @@ type Material =
     | Lambertian of Texture
     | Metal of Texture * float
     | Dielectric of float
+    | DiffuseLight of Texture
 type HitRecord =
     { T : float             // parameter used to determine point from ray
       Point : Vector3d
@@ -32,10 +33,8 @@ type Hitable =
 
 let nearZ = 0.1
 let aperture = 0.05
-let samples = 1
-// let lookFrom = Vector3d(13.0, 5.0, 3.0) / 2.0
-// let lookFrom = Vector3d(3.0, 5.0, 13.0) / 2.0
-let lookFrom = Vector3d(-13.0, 5.0, 3.0) / 2.0
+let samples = 100
+let lookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
 let lookAt = Vector3d(0.0, 0.0, 0.0)    
 let up = Vector3d(0.0, 1.0, 0.0)
 let farZ = (lookFrom - lookAt).Length
@@ -186,15 +185,15 @@ let textureFromBitmap (bitmap : Bitmap) =
     let bytes = Rest.getBytesFromBitmapRgb bitmap
     ImageTexture (bytes, bitmap.Width, bitmap.Height)
 
-let rec textureValue texture u v (p : Vector3d) =
+let rec textureValue texture (texCoord : Vector2d) (p : Vector3d) =
     match texture with
     | ConstantTexture(color) -> color
     | CheckerTexture(one, two) ->
         let sin = Math.Sin(p.X * 10.0) * Math.Sin(p.Y * 10.0) * Math.Sin(p.Z * 10.0)
         if sin < 0.0 then
-            textureValue one u v p
+            textureValue one texCoord p
         else        
-            textureValue two u v p
+            textureValue two texCoord p
     | NoiseTexture(scale) ->
         let ppp = Vector2d(scale * p.X, scale * p.Y)
         // NoiseTrain.computeNoise3 (scale * p) * Vector3d.One
@@ -203,8 +202,8 @@ let rec textureValue texture u v (p : Vector3d) =
     | ImageTexture(bytes, width, height) ->
         let w = float width
         let h = float height
-        let i = int (u * (w - 1.0))
-        let j = int (v * (h - 1.0))
+        let i = int (texCoord.X * (w - 1.0))
+        let j = int (texCoord.Y * (h - 1.0))
         let index = j * width * 3 + i * 3
         let r = float bytes.[index ] / 255.0
         let g = float bytes.[j * width * 3 + i * 3 + 1 ] / 255.0
@@ -243,13 +242,15 @@ let scatter material rayIn hitRec =
         let randPoint = randomInUnitSphere()
         let target = hitRec.Point + hitRec.Normal + randPoint
         let scattered = {Origin = hitRec.Point; Direction = target - hitRec.Point}
-        textureValue albedo hitRec.TexCoord.X hitRec.TexCoord.Y hitRec.Point, scattered
+        let attenuation = textureValue albedo hitRec.TexCoord hitRec.Point
+        Some (attenuation, scattered)
     | Metal(albedo, fuzzy) ->
         let fuzzy = if fuzzy < 1.0 then fuzzy else 1.0
         let reflected = reflect rayIn.Direction hitRec.Normal
         let randPoint = randomInUnitSphere() * fuzzy
         let scattered = {Origin = hitRec.Point; Direction = reflected + randPoint}
-        textureValue albedo hitRec.TexCoord.X hitRec.TexCoord.Y hitRec.Point, scattered
+        let attenuation = textureValue albedo hitRec.TexCoord hitRec.Point
+        Some(attenuation, scattered)
     | Dielectric(index) ->
         let refrRelation, outwardNormal, cosine = refractiveRelation rayIn.Direction hitRec.Normal index
         let attenuation = Vector3d(1.0)
@@ -259,28 +260,32 @@ let scatter material rayIn hitRec =
             let reflectProb = schlick cosine index
             if random.NextDouble() < reflectProb then
                 let scattered = {Origin = hitRec.Point; Direction = reflected}
-                attenuation, scattered
+                Some(attenuation, scattered)
             else
                 let scattered = {Origin = hitRec.Point; Direction = refracted}
-                attenuation, scattered
+                Some(attenuation, scattered)
         | None ->
             let scattered = {Origin = hitRec.Point; Direction = reflected}
-            attenuation, scattered
+            Some(attenuation, scattered)
+    | DiffuseLight _ -> None
+
+let emitLight material texCoord p =
+    match material with
+    | DiffuseLight texture ->
+        textureValue texture texCoord p
+    | _ -> Vector3d.Zero
 
 let rec colorIt ray hitable depth : Vector3d =
     match hit hitable ray 0.0001 Double.PositiveInfinity with
     | Some record ->
-        if depth < 50 then
-            let attenuation, scattered = scatter record.Material ray record
-            attenuation * colorIt scattered hitable (depth + 1)
-        else
-            Vector3d(0.0)
+        let emitted = emitLight record.Material record.TexCoord record.Point
+        match scatter record.Material ray record with
+        | Some (attenuation, scattered) when depth < 50 ->
+            emitted + attenuation * colorIt scattered hitable (depth + 1)
+        | _ ->        
+            emitted
     | None ->
-        let dir = ray.Direction.Normalized()
-        let t = (dir.Y + 1.0) / 2.0
-        let c1 = (Rest.colorToVector Drawing.Color.White) 
-        let c2 = Vector3d(0.5, 0.7, 1.0)
-        t * c2 + (1.0 - t) * c1
+        Vector3d.Zero
 
 let mainRender (bitmap : Bitmap) hitable fov =
     let camera = Camera.Camera(lookFrom, lookAt, up, fov, bitmap.Width, bitmap.Height, nearZ, farZ, aperture)
@@ -291,10 +296,14 @@ let mainRender (bitmap : Bitmap) hitable fov =
             sampling c r (s + 1) (color + colorIt ray hitable 0)
         else
             color / (float samples)
+            
 
     for r = 0 to bitmap.Height-1 do
         for c = 0 to bitmap.Width - 1 do
             let color = sampling c r 0 Vector3d.Zero
+            let color = Vector3d(Math.Sqrt(color.X), Math.Sqrt(color.Y), Math.Sqrt(color.Z))
+            let color = Vector3d(Math.Min(color.X, 1.0), Math.Min(color.Y, 1.0), Math.Min(color.Z, 1.0))
+
             setPixel bitmap c r color
 
 let drawBitmapTwo (source : Bitmap) (destination : Bitmap) (pixelSize : float) offsetX offsetY =

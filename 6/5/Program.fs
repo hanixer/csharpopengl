@@ -15,25 +15,28 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let width = 512
-    let height = 512
+    let width = 200
+    let height = 200
     let zoom = 1.0
     let noiseScale = 1.0
     let mutable lacunarity = 1.4
     let mutable gain = 0.2
     let texBitmap = new Bitmap("earth.jpg")
     let materialBitmap = Lambertian(textureFromBitmap texBitmap)
+    let simpleMat = Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.0)))
+    let noiseMat = Lambertian(NoiseTexture(noiseScale))
     let iii =
         [for x = 0 to 5 do
-                yield Sphere(Vector3d(float x, 1.0, 0.0), 0.5, materialBitmap)
+                yield Sphere(Vector3d(float x, 1.0, 0.0), 0.5, simpleMat)
          for z = 0 to 5 do
-                yield Sphere(Vector3d(0.0, 1.0, float z), 0.5, materialBitmap)]
+                yield Sphere(Vector3d(0.0, 1.0, float z), 0.5, simpleMat)]
     let hitable = 
-                    [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, materialBitmap)
+                    [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, noiseMat)
                      Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.3))))
-
+                     Sphere(Vector3d(0.0, 6007.0, 0.0), 1000.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
+                     Sphere(Vector3d(3.0, 3.0, 0.0), 0.5, DiffuseLight(ConstantTexture(Vector3d(0.5, 0.3, 0.5))))
                     ]
-                    @ iii
+                    // @ iii
                     |> Seq.ofList
                     |> HitableList 
     let randomScene() =
