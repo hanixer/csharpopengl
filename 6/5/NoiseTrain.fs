@@ -72,6 +72,24 @@ let computeNoise3 (p : Vector3d) =
     // nx0
     // lerp c000 c100 sx
 
+let computeMarble (p : Vector3d) (numLayers : int) = 
+    let lacunarity = 2.0
+    let gain = 0.5
+
+    let rec loop (point : Vector3d) i accum amplitude =
+        if i < numLayers then
+            let noise = Math.Abs(2.0 * computeNoise3 (point) - 1.0)            
+            let accum = (accum + (amplitude * noise))
+            let point = point * lacunarity
+            let amplitude = amplitude * gain
+            loop point (i + 1) accum amplitude
+        else
+            accum
+
+    let result = loop p 0 0.0 1.0
+    let sin = Math.Sin(result * 2.0 + p.Z * 2.0)
+    (sin + 1.0) / 2.0
+    
 let generateNoiseMap width height (frequency : float) (amplitude : float) = 
     Array2D.init height width <| fun r c ->
         computeNoise (Vector2d(float c, float r) * frequency)

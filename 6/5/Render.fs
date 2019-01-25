@@ -188,7 +188,8 @@ let rec textureValue texture u v (p : Vector3d) =
             textureValue two u v p
     | NoiseTexture(scale) ->
         let ppp = Vector2d(scale * p.X, scale * p.Y)
-        NoiseTrain.computeNoise3 (scale * p) * Vector3d.One
+        // NoiseTrain.computeNoise3 (scale * p) * Vector3d.One
+        NoiseTrain.computeMarble (scale * p) 5 * Vector3d.One
         // (noise (scale * p)) * Vector3d.One
 
 let refract (rayDir : Vector3d) (normal : Vector3d) niOverNt =
