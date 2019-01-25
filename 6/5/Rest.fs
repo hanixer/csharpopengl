@@ -28,6 +28,14 @@ let getBytesFromBitmap (bitmap: System.Drawing.Bitmap) =
   bitmap.UnlockBits(data)
   bytes
 
+let getBytesFromBitmapRgb (bitmap: System.Drawing.Bitmap) =
+  let rect = System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height)
+  let newBitmap = new System.Drawing.Bitmap(bitmap.Width, bitmap.Height, Drawing.Imaging.PixelFormat.Format24bppRgb)
+  use graph = Drawing.Graphics.FromImage(newBitmap)
+  graph.DrawImage(bitmap, rect)
+  graph.Flush()
+  getBytesFromBitmap newBitmap
+
 let colorToVector (color : Drawing.Color) =
   Vector3d(float color.R / 255.0, float color.G / 255.0, float color.B / 255.0)
 
@@ -45,3 +53,15 @@ let hitBbox ((box1, box2) : Bbox) ray tmin tmax =
    let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y) 
    let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y) 
    t1 < t2 && t2 > 0.0
+
+let getSphericalTexCoord (p : Vector3d) =
+   let theta = Math.Acos(p.Y) // [0; pi]
+   let phi = Math.Atan2(-p.Z, p.X) // [-pi; pi]
+   let v = theta / Math.PI
+   let u = (phi + Math.PI) / (2.0 * Math.PI)
+   Vector2d(u, v)
+Math.Acos(3.0)
+Math.Abs(Math.Atan2(1.0, 1.0) - (Math.PI / 4.0)) < 0.0001
+Math.Atan2(1.0, 1.0) // 0.7853981634 Math.PI / 4.0
+Math.Abs(Math.Atan2(1.0, -1.0) - (3.0 * Math.PI / 4.0)) < 0.0001
+Math.Abs(Math.Atan2(-1.0, -1.0) - (-3.0 * Math.PI / 4.0)) < 0.0001

@@ -21,16 +21,19 @@ type Game() =
     let noiseScale = 1.0
     let mutable lacunarity = 1.4
     let mutable gain = 0.2
+    let texBitmap = new Bitmap("earth.jpg")
+    let materialBitmap = Lambertian(textureFromBitmap texBitmap)
     let iii =
-        [for x = -5 to 4 do
-            for z = -5 to 4 do
-                yield Sphere(Vector3d(float x, 0.5, float z), 1.0, Lambertian(NoiseTexture(noiseScale)))] 
+        [for x = 0 to 5 do
+                yield Sphere(Vector3d(float x, 1.0, 0.0), 0.5, materialBitmap)
+         for z = 0 to 5 do
+                yield Sphere(Vector3d(0.0, 1.0, float z), 0.5, materialBitmap)]
     let hitable = 
-                    [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, Lambertian(NoiseTexture(noiseScale)))
-                     Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(NoiseTexture(noiseScale)))
+                    [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, materialBitmap)
+                     Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.3))))
 
                     ]
-                    // @ iii
+                    @ iii
                     |> Seq.ofList
                     |> HitableList 
     let randomScene() =
@@ -148,7 +151,6 @@ type Game() =
 
 [<EntryPoint>]
 let main argv =
-    printfn "Hello World from F#!"
     let win = new Game()
     win.Run()
     

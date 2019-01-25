@@ -14,6 +14,7 @@ type Texture =
     | ConstantTexture of Vector3d
     | CheckerTexture of Texture * Texture
     | NoiseTexture of float
+    | ImageTexture of byte[] * int * int
 type Material =
     | Lambertian of Texture
     | Metal of Texture * float
@@ -22,7 +23,8 @@ type HitRecord =
     { T : float             // parameter used to determine point from ray
       Point : Vector3d
       Normal : Vector3d
-      Material : Material }
+      Material : Material
+      TexCoord : Vector2d }
 type Hitable = 
     | Sphere of Vector3d * float * Material
     | HitableList of Hitable seq
@@ -31,7 +33,9 @@ type Hitable =
 let nearZ = 0.1
 let aperture = 0.05
 let samples = 1
-let lookFrom = Vector3d(13.0, 5.0, 3.0) / 2.0
+// let lookFrom = Vector3d(13.0, 5.0, 3.0) / 2.0
+// let lookFrom = Vector3d(3.0, 5.0, 13.0) / 2.0
+let lookFrom = Vector3d(-13.0, 5.0, 3.0) / 2.0
 let lookAt = Vector3d(0.0, 0.0, 0.0)    
 let up = Vector3d(0.0, 1.0, 0.0)
 let farZ = (lookFrom - lookAt).Length
@@ -71,7 +75,8 @@ let hitSphere ray (center, radius, material) tMin tMax =
     let computeHit t =
         let point = rayPointAtParameter ray t
         let normal = (point - center) / radius
-        Some {T = t; Point = point; Normal = normal; Material = material}
+        let tex = getSphericalTexCoord normal
+        Some {T = t; Point = point; Normal = normal; Material = material; TexCoord = tex}
 
     let offset = ray.Origin - center
     let a = Vector3d.Dot(ray.Direction, ray.Direction)
@@ -177,6 +182,10 @@ let rec makeBvh hitables =
         let right = makeBvh (Seq.skip (length / 2) hitables)
         finishConstruction left right
 
+let textureFromBitmap (bitmap : Bitmap) =
+    let bytes = Rest.getBytesFromBitmapRgb bitmap
+    ImageTexture (bytes, bitmap.Width, bitmap.Height)
+
 let rec textureValue texture u v (p : Vector3d) =
     match texture with
     | ConstantTexture(color) -> color
@@ -191,6 +200,18 @@ let rec textureValue texture u v (p : Vector3d) =
         // NoiseTrain.computeNoise3 (scale * p) * Vector3d.One
         NoiseTrain.computeMarble (scale * p) 5 * Vector3d.One
         // (noise (scale * p)) * Vector3d.One
+    | ImageTexture(bytes, width, height) ->
+        let w = float width
+        let h = float height
+        let i = int (u * (w - 1.0))
+        let j = int (v * (h - 1.0))
+        let index = j * width * 3 + i * 3
+        let r = float bytes.[index ] / 255.0
+        let g = float bytes.[j * width * 3 + i * 3 + 1 ] / 255.0
+        let b = float bytes.[j * width * 3 + i * 3 + 2 ] / 255.0
+        // (u * Vector3d(1.0, 0.0, 0.0) + v * Vector3d(0.0, 1.0, 0.0)) / 2.0
+        Vector3d(b, g, r)
+        // u * Vector3d.One
 
 let refract (rayDir : Vector3d) (normal : Vector3d) niOverNt =
     let rayDir = rayDir.Normalized()
@@ -222,13 +243,13 @@ let scatter material rayIn hitRec =
         let randPoint = randomInUnitSphere()
         let target = hitRec.Point + hitRec.Normal + randPoint
         let scattered = {Origin = hitRec.Point; Direction = target - hitRec.Point}
-        textureValue albedo 0 0 hitRec.Point, scattered
+        textureValue albedo hitRec.TexCoord.X hitRec.TexCoord.Y hitRec.Point, scattered
     | Metal(albedo, fuzzy) ->
         let fuzzy = if fuzzy < 1.0 then fuzzy else 1.0
         let reflected = reflect rayIn.Direction hitRec.Normal
         let randPoint = randomInUnitSphere() * fuzzy
         let scattered = {Origin = hitRec.Point; Direction = reflected + randPoint}
-        textureValue albedo 0 0 hitRec.Point, scattered
+        textureValue albedo hitRec.TexCoord.X hitRec.TexCoord.Y hitRec.Point, scattered
     | Dielectric(index) ->
         let refrRelation, outwardNormal, cosine = refractiveRelation rayIn.Direction hitRec.Normal index
         let attenuation = Vector3d(1.0)
