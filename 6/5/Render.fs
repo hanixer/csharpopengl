@@ -31,7 +31,7 @@ type Hitable =
 let nearZ = 0.1
 let aperture = 0.05
 let samples = 1
-let lookFrom = Vector3d(13.0, 2.0, 3.0) / 2.0
+let lookFrom = Vector3d(13.0, 5.0, 3.0) / 2.0
 let lookAt = Vector3d(0.0, 0.0, 0.0)    
 let up = Vector3d(0.0, 1.0, 0.0)
 let farZ = (lookFrom - lookAt).Length
@@ -187,7 +187,9 @@ let rec textureValue texture u v (p : Vector3d) =
         else        
             textureValue two u v p
     | NoiseTexture(scale) ->
-        (turbulence (scale * p) 1) * Vector3d.One
+        let ppp = Vector2d(scale * p.X, scale * p.Y)
+        NoiseTrain.computeNoise3 (scale * p) * Vector3d.One
+        // (noise (scale * p)) * Vector3d.One
 
 let refract (rayDir : Vector3d) (normal : Vector3d) niOverNt =
     let rayDir = rayDir.Normalized()

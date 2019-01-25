@@ -8,8 +8,8 @@
     <Compile Include="Noise.fs" />
     <Compile Include="Rest.fs" />
     <Compile Include="Camera.fs" />
-    <Compile Include="Render.fs" />
     <Compile Include="NoiseTrain.fs" />
+    <Compile Include="Render.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

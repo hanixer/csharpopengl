@@ -18,13 +18,19 @@ type Game() =
     let width = 512
     let height = 512
     let zoom = 1.0
-    let noiseScale = 2.0
+    let noiseScale = 5.0
     let mutable lacunarity = 1.4
     let mutable gain = 0.2
+    let iii =
+        [for x = -5 to 4 do
+            for z = -5 to 4 do
+                yield Sphere(Vector3d(float x, 0.5, float z), 1.0, Lambertian(NoiseTexture(noiseScale)))] 
     let hitable = 
                     [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, Lambertian(NoiseTexture(noiseScale)))
                      Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(NoiseTexture(noiseScale)))
+
                     ]
+                    // @ iii
                     |> Seq.ofList
                     |> HitableList 
     let randomScene() =
@@ -62,8 +68,8 @@ type Game() =
 
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
 
-        // Render.mainRender bitmap hitable 90.0
-        NoiseTrain.subMainRender bitmap lacunarity gain
+        Render.mainRender bitmap hitable 90.0
+        // NoiseTrain.subMainRender bitmap lacunarity gain
 
         stopwatch.Stop();
         Console.WriteLine(stopwatch.ElapsedMilliseconds);
@@ -71,6 +77,7 @@ type Game() =
         Render.drawBitmap bitmap canvas zoom
         bytes <-Rest.getBytesFromBitmap canvas
         bitmap.RotateFlip(Drawing.RotateFlipType.RotateNoneFlipY)
+        
         bitmap.Save("test-images/output.png")
 
     do 

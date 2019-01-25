@@ -66,8 +66,8 @@ let perlinInterp (array : Vector3d [,,]) u v w =
                 accum <- accum + (a * b * c * dot)
                 Debug.Assert(accum > -1.0 && accum < 1.0)
     // let accum = accum + 1.0
-    accum * 0.5 + 0.5
-    // Math.Abs(accum)
+    // accum * 0.5 + 0.5
+    Math.Abs(accum)
 
 let noise (point : Vector3d) =     
     let v = point.X - Math.Floor(point.X)
@@ -99,4 +99,16 @@ let turbulence (point : Vector3d) depth =
     let accum, maxVal = loop 0 0.0 1.0 1.0 Double.MinValue
     Debug.Assert(accum / maxVal <= 1.0)
     accum / maxVal
+
+let marble (point : Vector3d) depth scaleFactor =
+    let rec loop i accum weight scale maxVal =
+        if i < depth then
+            let accum = (accum + (weight * noise (scale * point)))
+            let maxVal = Math.Max(accum, maxVal)
+            loop (i + 1) accum (weight * 0.5) (scale * 2.0) maxVal
+        else
+            accum, maxVal
+    let accum, maxVal = loop 0 0.0 1.0 1.0 Double.MinValue
+    let sin = Math.Sin(accum * 10.0 + scaleFactor * point.Z)
+    (sin + 1.0) / 2.0
     

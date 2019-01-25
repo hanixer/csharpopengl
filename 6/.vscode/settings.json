@@ -1,4 +1,5 @@
 {
    "editor.tabSize": null,
-   "debug.openDebug": "openOnFirstSessionStart"
+   "debug.openDebug": "openOnFirstSessionStart",
+   "debug.internalConsoleOptions": "openOnSessionStart"
 }
