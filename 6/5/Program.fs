@@ -4,10 +4,10 @@ open System
 open OpenTK
 open OpenTK.Graphics.OpenGL
 open OpenTK.Input
-open OpenTK.Graphics.OpenGL
 open Render
-open System.Threading.Tasks
-
+open Hit
+open Material
+open Texture
 
 type Game() =
     /// <summary>Creates a 800x600 window with the specified title.</summary>
@@ -17,6 +17,12 @@ type Game() =
     let mutable bytes = Array.create 1 (byte 0)
     let width = 200
     let height = 200
+    let settings = { 
+        Samples = 100
+        LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
+        LookAt = Vector3d(0.0)
+        Fov = 90.0
+    }
     let zoom = 1.0
     let noiseScale = 1.0
     let mutable lacunarity = 1.4
@@ -74,14 +80,14 @@ type Game() =
 
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
 
-        Render.mainRender bitmap hitable 90.0
+        Render.mainRender bitmap settings hitable
         // NoiseTrain.subMainRender bitmap lacunarity gain
 
         stopwatch.Stop();
         Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-        Render.drawBitmap bitmap canvas zoom
-        bytes <-Rest.getBytesFromBitmap canvas
+        Common.drawBitmapOnBitmap bitmap canvas zoom
+        bytes <-Common.getBytesFromBitmap canvas
         bitmap.RotateFlip(Drawing.RotateFlipType.RotateNoneFlipY)
         
         bitmap.Save("test-images/output.png")

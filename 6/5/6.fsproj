@@ -5,10 +5,14 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Common.fs" />
     <Compile Include="Noise.fs" />
-    <Compile Include="Rest.fs" />
-    <Compile Include="Camera.fs" />
     <Compile Include="NoiseTrain.fs" />
+    <Compile Include="Texture.fs" />
+    <Compile Include="Material.fs" />
+    <Compile Include="Hit.fs" />
+    <Compile Include="Bvh.fs" />
+    <Compile Include="Camera.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

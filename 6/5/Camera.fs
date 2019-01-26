@@ -2,7 +2,7 @@ module Camera
 
 open OpenTK
 open System
-open Rest
+open Common
 
 let private random = new Random()
 
