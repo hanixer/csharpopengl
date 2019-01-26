@@ -5,6 +5,8 @@ open OpenTK
 open Common
 open Material
 
+type Rotate = RX | RY | RZ
+
 type Hitable = 
     | Sphere of Vector3d * float * Material
     | HitableList of Hitable seq
@@ -13,17 +15,8 @@ type Hitable =
     | XzRect of float * float * float * float * float * Material
     | YzRect of float * float * float * float * float * Material
     | FlipNormals of Hitable
-    | Box of Vector3d * Vector3d * Hitable
-
-
-
-    // list[0] = new xy_rect(p0.x(), p1.x(), p0.y(), p1.y(), p1.z(), ptr);
-    // list[1] = new flip_normals(new xy_rect(p0.x(), p1.x(), p0.y(), p1.y(), p0.z(), ptr));
-    // list[2] = new xz_rect(p0.x(), p1.x(), p0.z(), p1.z(), p1.y(), ptr);
-    // list[3] = new flip_normals(new xz_rect(p0.x(), p1.x(), p0.z(), p1.z(), p0.y(), ptr));
-    // list[4] = new yz_rect(p0.y(), p1.y(), p0.z(), p1.z(), p1.x(), ptr);
-    // list[5] = new flip_normals(new yz_rect(p0.y(), p1.y(), p0.z(), p1.z(), p0.x(), ptr));
-    // list_ptr = new hitable_list(list,6);
+    | BoxHitable of Vector3d * Vector3d * Hitable
+    | Translate of Hitable * Vector3d
 
 let makeBox (p0 : Vector3d) (p1 : Vector3d) material =
     let list = [
@@ -34,7 +27,7 @@ let makeBox (p0 : Vector3d) (p1 : Vector3d) material =
         YzRect(p0.Y, p1.Y, p0.Z, p1.Z, p1.X, material)
         FlipNormals(YzRect(p0.Y, p1.Y, p0.Z, p1.Z, p0.X, material))
     ]
-    Box(p0, p1, HitableList(list))
+    BoxHitable(p0, p1, HitableList(list))
 
 let hitSphere ray (center, radius, material) tMin tMax =
     let computeHit (t : float) =
@@ -105,6 +98,9 @@ let hitYzRect ray (y0, y1, z0, z1, k, material) tMin tMax =
         else
             None
 
+let hitRotateY (hitable, angle) ray tMin tMax =
+    failwith ""
+
 let rec hit hitable ray tMin tMax =
     match hitable with
     | Sphere (center, radius, material) ->
@@ -122,8 +118,12 @@ let rec hit hitable ray tMin tMax =
     | FlipNormals(hitable) ->
         hit hitable ray tMin tMax
         |> Option.map (fun record -> {record with Normal = -record.Normal})
-    | Box(pmin, pmax, list) ->
+    | BoxHitable(pmin, pmax, list) ->
         hit list ray tMin tMax
+    | Translate(hitable, offset) ->
+        let ray = {ray with Origin = ray.Origin - offset}
+        hit hitable ray tMin tMax
+        |> Option.map (fun record -> {record with Point = record.Point + offset})
 
 and hitList ray hitables tMin tMax =
     let fold (closest, result : HitRecord option) hitable =
@@ -178,4 +178,8 @@ let rec boundingBox = function
     | YzRect(y0, y1, z0, z1, k, material) ->
         Vector3d(k - littleNum, y0, z0), Vector3d(k + littleNum, y1, z1)
     | FlipNormals(hitable) -> boundingBox hitable
-    | Box(pmin, pmax, _) -> pmin, pmax
+    | BoxHitable(pmin, pmax, _) -> pmin, pmax
+    // | Translate(h, _) -> boundingBox h
+    // | RotateY(h, _) -> boundingBox h
+    | _ -> 
+        failwith "Not implemented BBx"

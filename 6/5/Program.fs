@@ -9,20 +9,6 @@ open Hit
 open Material
 open Texture
 
-
-    // material *red = new lambertian( new constant_texture(vec3(0.65, 0.05, 0.05)) );
-    // material *white = new lambertian( new constant_texture(vec3(0.73, 0.73, 0.73)) );
-    // material *green = new lambertian( new constant_texture(vec3(0.12, 0.45, 0.15)) );
-    // material *light = new diffuse_light( new constant_texture(vec3(15, 15, 15)) );
-    // list[i++] = new flip_normals(new yz_rect(0, 555, 0, 555, 555, green));
-    // list[i++] = new yz_rect(0, 555, 0, 555, 0, red);
-    // list[i++] = new xz_rect(213, 343, 227, 332, 554, light);
-    // list[i++] = new flip_normals(new xz_rect(0, 555, 0, 555, 555, white));
-    // list[i++] = new xz_rect(0, 555, 0, 555, 0, white);
-    // list[i++] = new flip_normals(new xy_rect(0, 555, 0, 555, 555, white));
-    // list[i++] = new translate(new rotate_y(new box(vec3(0, 0, 0), vec3(165, 165, 165), white), -18), vec3(130,0,65));
-    // list[i++] = new translate(new rotate_y(new box(vec3(0, 0, 0), vec3(165, 330, 165), white),  15), vec3(265,0,295));
-
 let cornellBox =
     let red = Lambertian(ConstantTexture(Vector3d(0.65, 0.05, 0.05)))
     let white = Lambertian(ConstantTexture(Vector3d(0.73)))
@@ -35,8 +21,32 @@ let cornellBox =
         FlipNormals(XzRect(0.0, 555.0, -555.0, 0.0, 555.0, white))
         XzRect(0.0, 555.0, -555.0, 0.0, 0.0, white)
         XyRect(0.0, 555.0, 0.0, 555.0, -555.0, white)
-        makeBox Vector3d.Zero (Vector3d(165.0)) white
+        // makeBox Vector3d.Zero (Vector3d(165.0)) white
+        Translate(makeBox Vector3d.Zero (Vector3d(165.0)) white, Vector3d(265.0, 0.0, -260.0))
+        Translate(makeBox Vector3d.Zero (Vector3d(165.0, 330.0, -165.0)) white, Vector3d(126.0, 0.0, -295.0))
     ]
+
+let standardScene = 
+    let texBitmap = new Bitmap("earth.jpg")
+    let materialBitmap = Lambertian(textureFromBitmap texBitmap)
+    let simpleMat = Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.0)))
+    let iii = [
+        for x = 0 to 5 do
+                yield Sphere(Vector3d(float x, 1.0, 0.0), 0.5, simpleMat)
+        for z = 0 to 5 do
+                yield Sphere(Vector3d(0.0, 1.0, float z), 0.5, simpleMat)
+    ]
+    let noiseScale = 1.0
+    let noiseMat = Lambertian(NoiseTexture(noiseScale))
+    [
+        Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, noiseMat)
+        Sphere(Vector3d(0.0, 7.0, 0.0), 1.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
+        XyRect(3.0, 5.0, 1.0, 3.0, -2.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
+        XzRect(-100.0, 100.0, -100.0, 100.0, 0.0, Lambertian(ConstantTexture(Vector3d(1.0, 1.0, 0.0))))
+        Sphere(Vector3d(2.0, 0.5, 2.0), 0.5, Lambertian(ConstantTexture(Vector3d(1.0, 0.0, 0.0))))
+        Translate(Sphere(Vector3d(2.0, 0.5, 2.0), 0.5, Lambertian(ConstantTexture(Vector3d(0.0, 1.0, 0.0)))), Vector3d(1.0))
+        Translate(Sphere(Vector3d(2.0, 0.5, 2.0), 0.5, Lambertian(ConstantTexture(Vector3d(0.0, 0.0, 1.0)))), Vector3d(1.0, 1.0, -1.0))
+    ] |> Seq.ofList
 
 let randomScene() =
     let n = 3
@@ -82,38 +92,17 @@ type Game() =
         // LookAt = Vector3d(0.0)
         LookAt = Vector3d(278.0, 278.0, 0.0)
         Fov = 40.0
+        // Fov = 90.0
     }
     let zoom = 1.0
-    let noiseScale = 1.0
     let mutable lacunarity = 1.4
     let mutable gain = 0.2
-    let texBitmap = new Bitmap("earth.jpg")
-    let materialBitmap = Lambertian(textureFromBitmap texBitmap)
-    let simpleMat = Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.0)))
-    let noiseMat = Lambertian(NoiseTexture(noiseScale))
-    let iii =
-        [for x = 0 to 5 do
-                yield Sphere(Vector3d(float x, 1.0, 0.0), 0.5, simpleMat)
-         for z = 0 to 5 do
-                yield Sphere(Vector3d(0.0, 1.0, float z), 0.5, simpleMat)]
-    let hitableSeq = 
-                    [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, noiseMat)
-                    //  Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.3))))
-                    //  Sphere(Vector3d(0.0, 6007.0, 0.0), 1000.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
-                     Sphere(Vector3d(0.0, 7.0, 0.0), 1.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
-                    //  Sphere(Vector3d(3.0, 3.0, 0.0), 0.5, DiffuseLight(ConstantTexture(Vector3d(0.5, 0.3, 0.5))))
-                     XyRect(3.0, 5.0, 1.0, 3.0, -2.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
-                     XzRect(-100.0, 100.0, -100.0, 100.0, 0.0, Lambertian(ConstantTexture(Vector3d(1.0, 1.0, 0.0))))
-                     
-                    ]
-                    // @ iii
-                    |> Seq.ofList
-                    // |> HitableList 
     
     // let hitable : Hitable = Bvh.makeBvh hitableSeq
     // let hitable = HitableList hitableSeq
-    // let hitable = HitableList cornellBox
-    let hitable = Bvh.makeBvh cornellBox
+    let hitable = HitableList cornellBox
+    // let hitable = Bvh.makeBvh cornellBox
+    // let hitable = HitableList standardScene
 
     let update() =
         let bitmap = new Drawing.Bitmap(width, height)
