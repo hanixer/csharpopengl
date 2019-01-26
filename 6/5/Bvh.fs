@@ -7,22 +7,6 @@ open Common
 
 let private random = new Random()
 
-let surroundingBox (box1 : Bbox) (box2 : Bbox) =
-    let (box1Min, box1Max) = box1
-    let (box2Min, box2Max) = box2
-    Vector3d(Math.Min(box1Min.X, box2Min.X), Math.Min(box1Min.Y, box2Min.Y), Math.Min(box1Min.Z, box2Min.Z)),
-    Vector3d(Math.Max(box1Max.X, box2Max.X), Math.Max(box1Max.Y, box2Max.Y), Math.Max(box1Max.Z, box2Max.Z))
-
-let rec boundingBox = function
-    | Sphere(center, radius, _) ->
-        center - Vector3d(radius), center + Vector3d(radius)
-    | HitableList(hitables) ->
-        let boxInit = Vector3d(Double.MaxValue), Vector3d(Double.MinValue)
-        let fold box hitable =
-            surroundingBox box <| boundingBox hitable
-        Seq.fold fold boxInit hitables
-    | BvhNode(_, _, box) -> box
-
 let rec makeBvh hitables =
     let sort axis hitable1 hitable2 =
         let (box1, _) = boundingBox hitable1

@@ -30,16 +30,12 @@ let cornellBox =
     let light = DiffuseLight(ConstantTexture(Vector3d(15.0)))
     [
         YzRect(0.0, 555.0, -555.0, 0.0, 0.0, red)
-        YzRect(0.0, 555.0, -555.0, 0.0, 555.0, green)
-        Sphere(Vector3d(555.0, 555.0, -555.0), 100.0, red)
-        XzRect(213.0, 343.0, -332.0, 227.0, 554.0, light)
-        XzRect(0.0, 555.0, -555.0, 0.0, 555.0, white)
+        FlipNormals(YzRect(0.0, 555.0, -555.0, 0.0, 555.0, green))
+        XzRect(213.0, 343.0, -332.0, -227.0, 554.0, light)
+        FlipNormals(XzRect(0.0, 555.0, -555.0, 0.0, 555.0, white))
         XzRect(0.0, 555.0, -555.0, 0.0, 0.0, white)
-        // XzRect(0.0, 555.0, 0.0, -555.0, 0.0, white)
-        // XzRect(0.0, 555.0, 0.0, 555.0, -555.0, white)
         XyRect(0.0, 555.0, 0.0, 555.0, -555.0, white)
-        //////////////////////////////////////////////
-        Sphere(Vector3d(278.0, 278.0, 0.0), 100.0, red)
+        makeBox Vector3d.Zero (Vector3d(165.0)) white
     ]
 
 let randomScene() =
@@ -82,10 +78,10 @@ type Game() =
         Samples = 100
         // LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
         // LookFrom = Vector3d(13.0, 5.0, 3.0) * 0.5
-        LookFrom = Vector3d(278.0, 278.0, 1.0)
+        LookFrom = Vector3d(278.0, 278.0, 800.0)
         // LookAt = Vector3d(0.0)
         LookAt = Vector3d(278.0, 278.0, 0.0)
-        Fov = 90.0
+        Fov = 40.0
     }
     let zoom = 1.0
     let noiseScale = 1.0
@@ -116,7 +112,8 @@ type Game() =
     
     // let hitable : Hitable = Bvh.makeBvh hitableSeq
     // let hitable = HitableList hitableSeq
-    let hitable = HitableList cornellBox
+    // let hitable = HitableList cornellBox
+    let hitable = Bvh.makeBvh cornellBox
 
     let update() =
         let bitmap = new Drawing.Bitmap(width, height)

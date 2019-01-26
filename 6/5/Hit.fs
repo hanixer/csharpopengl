@@ -12,6 +12,29 @@ type Hitable =
     | XyRect of float * float * float * float * float * Material
     | XzRect of float * float * float * float * float * Material
     | YzRect of float * float * float * float * float * Material
+    | FlipNormals of Hitable
+    | Box of Vector3d * Vector3d * Hitable
+
+
+
+    // list[0] = new xy_rect(p0.x(), p1.x(), p0.y(), p1.y(), p1.z(), ptr);
+    // list[1] = new flip_normals(new xy_rect(p0.x(), p1.x(), p0.y(), p1.y(), p0.z(), ptr));
+    // list[2] = new xz_rect(p0.x(), p1.x(), p0.z(), p1.z(), p1.y(), ptr);
+    // list[3] = new flip_normals(new xz_rect(p0.x(), p1.x(), p0.z(), p1.z(), p0.y(), ptr));
+    // list[4] = new yz_rect(p0.y(), p1.y(), p0.z(), p1.z(), p1.x(), ptr);
+    // list[5] = new flip_normals(new yz_rect(p0.y(), p1.y(), p0.z(), p1.z(), p0.x(), ptr));
+    // list_ptr = new hitable_list(list,6);
+
+let makeBox (p0 : Vector3d) (p1 : Vector3d) material =
+    let list = [
+        XyRect(p0.X, p1.X, p0.Y, p1.Y, p1.Z, material)
+        FlipNormals(XyRect(p0.X, p1.X, p0.Y, p1.Y, p0.Z, material))
+        XzRect(p0.X, p1.X, p0.Z, p1.Z, p1.Y, material)
+        FlipNormals(XzRect(p0.X, p1.X, p0.Z, p1.Z, p0.Y, material))
+        YzRect(p0.Y, p1.Y, p0.Z, p1.Z, p1.X, material)
+        FlipNormals(YzRect(p0.Y, p1.Y, p0.Z, p1.Z, p0.X, material))
+    ]
+    Box(p0, p1, HitableList(list))
 
 let hitSphere ray (center, radius, material) tMin tMax =
     let computeHit (t : float) =
@@ -96,6 +119,11 @@ let rec hit hitable ray tMin tMax =
         hitXzRect ray (x0, x1, z0, z1, k, material) tMin tMax
     | YzRect(y0, y1, z0, z1, k, material) ->
         hitYzRect ray (y0, y1, z0, z1, k, material) tMin tMax
+    | FlipNormals(hitable) ->
+        hit hitable ray tMin tMax
+        |> Option.map (fun record -> {record with Normal = -record.Normal})
+    | Box(pmin, pmax, list) ->
+        hit list ray tMin tMax
 
 and hitList ray hitables tMin tMax =
     let fold (closest, result : HitRecord option) hitable =
@@ -125,3 +153,29 @@ and hitBvhNode ray (left, right, box) tMin tMax =
         | _ -> None
     else    
         None
+
+let surroundingBox (box1 : Bbox) (box2 : Bbox) =
+    let (box1Min, box1Max) = box1
+    let (box2Min, box2Max) = box2
+    Vector3d(Math.Min(box1Min.X, box2Min.X), Math.Min(box1Min.Y, box2Min.Y), Math.Min(box1Min.Z, box2Min.Z)),
+    Vector3d(Math.Max(box1Max.X, box2Max.X), Math.Max(box1Max.Y, box2Max.Y), Math.Max(box1Max.Z, box2Max.Z))
+
+let littleNum = 0.00001
+
+let rec boundingBox = function
+    | Sphere(center, radius, _) ->
+        center - Vector3d(radius), center + Vector3d(radius)
+    | HitableList(hitables) ->
+        let boxInit = Vector3d(Double.MaxValue), Vector3d(Double.MinValue)
+        let fold box hitable =
+            surroundingBox box <| boundingBox hitable
+        Seq.fold fold boxInit hitables
+    | BvhNode(_, _, box) -> box
+    | XyRect(x0, x1, y0, y1, k, material) ->
+        Vector3d(x0, y0, k - littleNum), Vector3d(x1, y1, k + littleNum)
+    | XzRect(x0, x1, z0, z1, k, material) ->
+        Vector3d(x0, k - littleNum, z0), Vector3d(x1, k + littleNum, z1)
+    | YzRect(y0, y1, z0, z1, k, material) ->
+        Vector3d(k - littleNum, y0, z0), Vector3d(k + littleNum, y1, z1)
+    | FlipNormals(hitable) -> boundingBox hitable
+    | Box(pmin, pmax, _) -> pmin, pmax
