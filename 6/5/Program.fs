@@ -9,6 +9,67 @@ open Hit
 open Material
 open Texture
 
+
+    // material *red = new lambertian( new constant_texture(vec3(0.65, 0.05, 0.05)) );
+    // material *white = new lambertian( new constant_texture(vec3(0.73, 0.73, 0.73)) );
+    // material *green = new lambertian( new constant_texture(vec3(0.12, 0.45, 0.15)) );
+    // material *light = new diffuse_light( new constant_texture(vec3(15, 15, 15)) );
+    // list[i++] = new flip_normals(new yz_rect(0, 555, 0, 555, 555, green));
+    // list[i++] = new yz_rect(0, 555, 0, 555, 0, red);
+    // list[i++] = new xz_rect(213, 343, 227, 332, 554, light);
+    // list[i++] = new flip_normals(new xz_rect(0, 555, 0, 555, 555, white));
+    // list[i++] = new xz_rect(0, 555, 0, 555, 0, white);
+    // list[i++] = new flip_normals(new xy_rect(0, 555, 0, 555, 555, white));
+    // list[i++] = new translate(new rotate_y(new box(vec3(0, 0, 0), vec3(165, 165, 165), white), -18), vec3(130,0,65));
+    // list[i++] = new translate(new rotate_y(new box(vec3(0, 0, 0), vec3(165, 330, 165), white),  15), vec3(265,0,295));
+
+let cornellBox =
+    let red = Lambertian(ConstantTexture(Vector3d(0.65, 0.05, 0.05)))
+    let white = Lambertian(ConstantTexture(Vector3d(0.73)))
+    let green = Lambertian(ConstantTexture(Vector3d(0.12, 0.45, 0.15)))
+    let light = DiffuseLight(ConstantTexture(Vector3d(15.0)))
+    [
+        YzRect(0.0, 555.0, -555.0, 0.0, 0.0, red)
+        YzRect(0.0, 555.0, -555.0, 0.0, 555.0, green)
+        Sphere(Vector3d(555.0, 555.0, -555.0), 100.0, red)
+        XzRect(213.0, 343.0, -332.0, 227.0, 554.0, light)
+        XzRect(0.0, 555.0, -555.0, 0.0, 555.0, white)
+        XzRect(0.0, 555.0, -555.0, 0.0, 0.0, white)
+        // XzRect(0.0, 555.0, 0.0, -555.0, 0.0, white)
+        // XzRect(0.0, 555.0, 0.0, 555.0, -555.0, white)
+        XyRect(0.0, 555.0, 0.0, 555.0, -555.0, white)
+        //////////////////////////////////////////////
+        Sphere(Vector3d(278.0, 278.0, 0.0), 100.0, red)
+    ]
+
+let randomScene() =
+    let n = 3
+    let random = Random()
+    [ for a = -11 to 10 do
+        for b = -11 to 10 do
+            let choose = random.NextDouble()
+            let z = (float b) + 0.9 * (random.NextDouble())
+            let center = Vector3d(float a + 0.9 * random.NextDouble(), 0.2, z)
+            if ((center - Vector3d(4.0, 0.2, 0.0)).Length > 0.9) then
+                if choose < 0.8 then
+                    let r = random.NextDouble() * random.NextDouble()
+                    let g = random.NextDouble() * random.NextDouble()
+                    let b = random.NextDouble() * random.NextDouble()
+                    yield Sphere(center, 0.2, Lambertian(ConstantTexture(Vector3d(r, g, b))))
+                else if choose < 0.95 then
+                    let r = 0.5 *(1.0 + random.NextDouble())
+                    let g = 0.5 *(1.0 + random.NextDouble())
+                    let b = 0.5 *(1.0 + random.NextDouble())
+                    let fuzzy = 0.5 *(1.0 + random.NextDouble())
+                    yield Sphere(center, 0.2, Metal(ConstantTexture(Vector3d(r, g, b)), fuzzy))
+                else
+                    yield Sphere(center, 0.2, Dielectric(1.5)) ]
+    @ [ Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(CheckerTexture((ConstantTexture(Vector3d(0.0, 0.0, 0.0))), ConstantTexture(Vector3d(0.5, 0.5, 0.5)))))
+        Sphere(Vector3d(0.0, 1.0, 0.0), 1.0, Dielectric(1.5))
+        Sphere(Vector3d(-4.0, 1.0, 0.0), 1.0, Lambertian(ConstantTexture(Vector3d(0.4, 0.2, 0.1))))
+        Sphere(Vector3d(4.0, 1.0, 0.0), 1.0, Metal(ConstantTexture(Vector3d(0.7, 0.6, 0.5)), 0.0)) ]
+    |> Seq.ofList
+
 type Game() =
     /// <summary>Creates a 800x600 window with the specified title.</summary>
     inherit GameWindow(800, 600)
@@ -19,8 +80,11 @@ type Game() =
     let height = 200
     let settings = { 
         Samples = 100
-        LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
-        LookAt = Vector3d(0.0)
+        // LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
+        // LookFrom = Vector3d(13.0, 5.0, 3.0) * 0.5
+        LookFrom = Vector3d(278.0, 278.0, 1.0)
+        // LookAt = Vector3d(0.0)
+        LookAt = Vector3d(278.0, 278.0, 0.0)
         Fov = 90.0
     }
     let zoom = 1.0
@@ -36,44 +100,23 @@ type Game() =
                 yield Sphere(Vector3d(float x, 1.0, 0.0), 0.5, simpleMat)
          for z = 0 to 5 do
                 yield Sphere(Vector3d(0.0, 1.0, float z), 0.5, simpleMat)]
-    let hitable = 
+    let hitableSeq = 
                     [Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, noiseMat)
-                     Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.3))))
-                     Sphere(Vector3d(0.0, 6007.0, 0.0), 1000.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
-                     Sphere(Vector3d(3.0, 3.0, 0.0), 0.5, DiffuseLight(ConstantTexture(Vector3d(0.5, 0.3, 0.5))))
+                    //  Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.3))))
+                    //  Sphere(Vector3d(0.0, 6007.0, 0.0), 1000.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
+                     Sphere(Vector3d(0.0, 7.0, 0.0), 1.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
+                    //  Sphere(Vector3d(3.0, 3.0, 0.0), 0.5, DiffuseLight(ConstantTexture(Vector3d(0.5, 0.3, 0.5))))
+                     XyRect(3.0, 5.0, 1.0, 3.0, -2.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
+                     XzRect(-100.0, 100.0, -100.0, 100.0, 0.0, Lambertian(ConstantTexture(Vector3d(1.0, 1.0, 0.0))))
+                     
                     ]
                     // @ iii
                     |> Seq.ofList
-                    |> HitableList 
-    let randomScene() =
-        let n = 3
-        let random = Random()
-        [ for a = -11 to 10 do
-            for b = -11 to 10 do
-                let choose = random.NextDouble()
-                let z = (float b) + 0.9 * (random.NextDouble())
-                let center = Vector3d(float a + 0.9 * random.NextDouble(), 0.2, z)
-                if ((center - Vector3d(4.0, 0.2, 0.0)).Length > 0.9) then
-                    if choose < 0.8 then
-                        let r = random.NextDouble() * random.NextDouble()
-                        let g = random.NextDouble() * random.NextDouble()
-                        let b = random.NextDouble() * random.NextDouble()
-                        yield Sphere(center, 0.2, Lambertian(ConstantTexture(Vector3d(r, g, b))))
-                    else if choose < 0.95 then
-                        let r = 0.5 *(1.0 + random.NextDouble())
-                        let g = 0.5 *(1.0 + random.NextDouble())
-                        let b = 0.5 *(1.0 + random.NextDouble())
-                        let fuzzy = 0.5 *(1.0 + random.NextDouble())
-                        yield Sphere(center, 0.2, Metal(ConstantTexture(Vector3d(r, g, b)), fuzzy))
-                    else
-                        yield Sphere(center, 0.2, Dielectric(1.5)) ]
-        @ [ Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, Lambertian(CheckerTexture((ConstantTexture(Vector3d(0.0, 0.0, 0.0))), ConstantTexture(Vector3d(0.5, 0.5, 0.5)))))
-            Sphere(Vector3d(0.0, 1.0, 0.0), 1.0, Dielectric(1.5))
-            Sphere(Vector3d(-4.0, 1.0, 0.0), 1.0, Lambertian(ConstantTexture(Vector3d(0.4, 0.2, 0.1))))
-            Sphere(Vector3d(4.0, 1.0, 0.0), 1.0, Metal(ConstantTexture(Vector3d(0.7, 0.6, 0.5)), 0.0)) ]
-        |> Seq.ofList
+                    // |> HitableList 
     
-    // let hitable = makeBvh hitable
+    // let hitable : Hitable = Bvh.makeBvh hitableSeq
+    // let hitable = HitableList hitableSeq
+    let hitable = HitableList cornellBox
 
     let update() =
         let bitmap = new Drawing.Bitmap(width, height)

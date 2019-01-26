@@ -40,5 +40,6 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, up : Vector3d,
         let pointNear = Vector3d(x, y, -nearZ)
         let pointFar = pointNear * -far / -nearZ
         let pointLens = randomInUnitDisk() * lensRadius
+        let pointLens = Vector3d.Zero
         let direction = (pointFar - pointLens).Normalized() |> transform
         {Origin = pointLens + lookFrom; Direction = direction}

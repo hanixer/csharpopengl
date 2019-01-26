@@ -12,12 +12,12 @@ open Hit
 
 type Bitmap = System.Drawing.Bitmap
 type Color = System.Drawing.Color
-type RenderSettings =
-    { Samples : int
-      LookFrom : Vector3d
-      LookAt : Vector3d 
-      Fov : float
-      }
+type RenderSettings ={ 
+    Samples : int
+    LookFrom : Vector3d
+    LookAt : Vector3d 
+    Fov : float
+}
 let nearZ = 0.1
 let aperture = 0.05
 let up = Vector3d(0.0, 1.0, 0.0)
@@ -39,6 +39,7 @@ let rec colorIt ray hitable depth : Vector3d =
         | _ ->        
             emitted
     | None ->
+        Vector3d(0.1, 0.1, 0.0)
         Vector3d.Zero
 
 let mainRender (bitmap : Bitmap) settings hitable =
