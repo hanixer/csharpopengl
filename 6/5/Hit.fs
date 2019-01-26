@@ -4,6 +4,8 @@ open System
 open OpenTK
 open Common
 open Material
+open Transform
+open OpenTK
 
 type Rotate = RX | RY | RZ
 
@@ -17,6 +19,7 @@ type Hitable =
     | FlipNormals of Hitable
     | BoxHitable of Vector3d * Vector3d * Hitable
     | Translate of Hitable * Vector3d
+    | Rotate of Hitable * Transform
 
 let makeBox (p0 : Vector3d) (p1 : Vector3d) material =
     let list = [
@@ -28,6 +31,14 @@ let makeBox (p0 : Vector3d) (p1 : Vector3d) material =
         FlipNormals(YzRect(p0.Y, p1.Y, p0.Z, p1.Z, p0.X, material))
     ]
     BoxHitable(p0, p1, HitableList(list))
+
+let makeRotate hitable rotate (theta : float) =
+    let theta = MathHelper.DegreesToRadians theta
+    match rotate with
+    | RY -> 
+        let trans = rotateY theta
+        Rotate(hitable, trans)
+    | _ -> failwith "not implementate other rotations"
 
 let hitSphere ray (center, radius, material) tMin tMax =
     let computeHit (t : float) =
@@ -124,6 +135,15 @@ let rec hit hitable ray tMin tMax =
         let ray = {ray with Origin = ray.Origin - offset}
         hit hitable ray tMin tMax
         |> Option.map (fun record -> {record with Point = record.Point + offset})
+    | Rotate(hitable, transform) ->
+        let origin = transformPoint transform ray.Origin
+        let d = transformPoint transform ray.Direction
+        let ray = { ray with Origin = origin; Direction = d }
+        hit hitable ray tMin tMax
+        |> Option.map (fun record ->
+            let p = transformPoint transform record.Point
+            let n = transformNormal transform record.Normal
+            {record with Point = p; Normal = n})
 
 and hitList ray hitables tMin tMax =
     let fold (closest, result : HitRecord option) hitable =

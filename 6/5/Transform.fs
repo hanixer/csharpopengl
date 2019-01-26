@@ -3,7 +3,7 @@ module Transform
 open OpenTK
 open System
 
-type Transform4 = {
+type Transform = {
     M : Matrix4d
     Inv : Matrix4d
 }
@@ -17,7 +17,7 @@ let transpose (m : Matrix4d) =
         m.Column3
     )
 
-let rotateX theta =
+let rotateY theta =
     let cosTheta = Math.Cos(theta)
     let sinTheta = Math.Sin(theta)    
     let r0 = Vector4d(cosTheta, 0.0, -sinTheta, 0.0)
@@ -28,7 +28,7 @@ let rotateX theta =
     let inv = transpose m
     {M = m; Inv = inv}
 
-let transformPoint (transform : Transform4) (point : Vector3d) =
+let transformPoint (transform : Transform) (point : Vector3d) =
     let point4 = Vector4d(point, 1.0)
     let x = Vector4d.Dot(point4, transform.M.Row0)
     let y = Vector4d.Dot(point4, transform.M.Row1)
@@ -36,7 +36,16 @@ let transformPoint (transform : Transform4) (point : Vector3d) =
     let w = Vector4d.Dot(point4, transform.M.Row3)
     Vector3d(x / w, y / w, z / w)
 
-let transformNormal (transform : Transform4) (n : Vector3d) =
+let transformPointInv (transform : Transform) (point : Vector3d) =
+    let m = transform.Inv
+    let point4 = Vector4d(point, 1.0)
+    let x = Vector4d.Dot(point4, m.Row0)
+    let y = Vector4d.Dot(point4, m.Row1)
+    let z = Vector4d.Dot(point4, m.Row2)
+    let w = Vector4d.Dot(point4, m.Row3)
+    Vector3d(x / w, y / w, z / w)
+
+let transformNormal (transform : Transform) (n : Vector3d) =
     let m = transform.Inv
     Vector3d (
         m.M11 * n.X + m.M21 * n.Y + m.M31 + n.Z,

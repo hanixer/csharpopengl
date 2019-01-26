@@ -14,6 +14,8 @@ let cornellBox =
     let white = Lambertian(ConstantTexture(Vector3d(0.73)))
     let green = Lambertian(ConstantTexture(Vector3d(0.12, 0.45, 0.15)))
     let light = DiffuseLight(ConstantTexture(Vector3d(15.0)))
+    let box1 = makeBox Vector3d.Zero (Vector3d(165.0)) white
+    let box2 = makeBox Vector3d.Zero (Vector3d(165.0, 330.0, -165.0)) white
     [
         YzRect(0.0, 555.0, -555.0, 0.0, 0.0, red)
         FlipNormals(YzRect(0.0, 555.0, -555.0, 0.0, 555.0, green))
@@ -22,8 +24,8 @@ let cornellBox =
         XzRect(0.0, 555.0, -555.0, 0.0, 0.0, white)
         XyRect(0.0, 555.0, 0.0, 555.0, -555.0, white)
         // makeBox Vector3d.Zero (Vector3d(165.0)) white
-        Translate(makeBox Vector3d.Zero (Vector3d(165.0)) white, Vector3d(265.0, 0.0, -260.0))
-        Translate(makeBox Vector3d.Zero (Vector3d(165.0, 330.0, -165.0)) white, Vector3d(126.0, 0.0, -295.0))
+        Translate(box1, Vector3d(265.0, 0.0, -260.0))
+        makeRotate box2 RY 30.0
     ]
 
 let standardScene = 
@@ -41,12 +43,30 @@ let standardScene =
     [
         Sphere(Vector3d(0.0, 2.0, 0.0), 2.0, noiseMat)
         Sphere(Vector3d(0.0, 7.0, 0.0), 1.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
-        XyRect(3.0, 5.0, 1.0, 3.0, -2.0, DiffuseLight(ConstantTexture(Vector3d(4.0))))
-        XzRect(-100.0, 100.0, -100.0, 100.0, 0.0, Lambertian(ConstantTexture(Vector3d(1.0, 1.0, 0.0))))
         Sphere(Vector3d(2.0, 0.5, 2.0), 0.5, Lambertian(ConstantTexture(Vector3d(1.0, 0.0, 0.0))))
         Translate(Sphere(Vector3d(2.0, 0.5, 2.0), 0.5, Lambertian(ConstantTexture(Vector3d(0.0, 1.0, 0.0)))), Vector3d(1.0))
         Translate(Sphere(Vector3d(2.0, 0.5, 2.0), 0.5, Lambertian(ConstantTexture(Vector3d(0.0, 0.0, 1.0)))), Vector3d(1.0, 1.0, -1.0))
     ] |> Seq.ofList
+
+let oneBox =
+    let simpleMat = Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.0)))
+    let light = DiffuseLight(ConstantTexture(Vector3d(15.0)))
+    let box = makeBox (Vector3d(-2.0, 0.0, 2.0)) (Vector3d(2.0, 2.0, -2.0)) (Lambertian(ConstantTexture(Vector3d(0.0, 0.5, 0.2))))
+    let iii = [
+        for x = 0 to 5 do
+                yield Sphere(Vector3d(float x, 1.0, 0.0), 0.5, simpleMat)
+        for z = 0 to 5 do
+                yield Sphere(Vector3d(0.0, 1.0, float z), 0.5, simpleMat)
+    ]
+    [
+        Sphere(Vector3d(0.0, 507.0, 0.0), 100.0, light)
+        XzRect(-100.0, 100.0, -100.0, 100.0, -1.0, Lambertian(ConstantTexture(Vector3d(0.0, 0.2, 0.0))))
+        (XyRect(0.0, 3.0, 0.0, 3.0, 0.0, Lambertian(ConstantTexture(Vector3d(0.2, 0.2, 0.8)))))
+        
+        // makeRotate (XyRect(0.0, 3.0, 0.0, 3.0, 0.0, Lambertian(ConstantTexture(Vector3d(0.2, 0.2, 0.8))))) RY 30.0
+        // makeRotate box RY 30.0
+    ]
+    // @ iii
 
 let randomScene() =
     let n = 3
@@ -87,12 +107,12 @@ type Game() =
     let settings = { 
         Samples = 100
         // LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
-        // LookFrom = Vector3d(13.0, 5.0, 3.0) * 0.5
-        LookFrom = Vector3d(278.0, 278.0, 800.0)
-        // LookAt = Vector3d(0.0)
-        LookAt = Vector3d(278.0, 278.0, 0.0)
-        Fov = 40.0
-        // Fov = 90.0
+        LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
+        // LookFrom = Vector3d(278.0, 278.0, 800.0)
+        LookAt = Vector3d(0.0)
+        // LookAt = Vector3d(278.0, 278.0, 0.0)
+        // Fov = 40.0
+        Fov = 90.0
     }
     let zoom = 1.0
     let mutable lacunarity = 1.4
@@ -100,9 +120,10 @@ type Game() =
     
     // let hitable : Hitable = Bvh.makeBvh hitableSeq
     // let hitable = HitableList hitableSeq
-    let hitable = HitableList cornellBox
+    // let hitable = HitableList cornellBox
     // let hitable = Bvh.makeBvh cornellBox
     // let hitable = HitableList standardScene
+    let hitable = HitableList oneBox
 
     let update() =
         let bitmap = new Drawing.Bitmap(width, height)
