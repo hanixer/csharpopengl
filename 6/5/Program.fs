@@ -16,6 +16,7 @@ let cornellBox =
     let light = DiffuseLight(ConstantTexture(Vector3d(15.0)))
     let box1 = makeBox Vector3d.Zero (Vector3d(165.0)) white
     let box2 = makeBox Vector3d.Zero (Vector3d(165.0, 330.0, -165.0)) white
+    let earth = textureFromBitmap 
     [
         YzRect(0.0, 555.0, -555.0, 0.0, 0.0, red)
         FlipNormals(YzRect(0.0, 555.0, -555.0, 0.0, 555.0, green))
@@ -24,13 +25,13 @@ let cornellBox =
         XzRect(0.0, 555.0, -555.0, 0.0, 0.0, white)
         XyRect(0.0, 555.0, 0.0, 555.0, -555.0, white)
         // makeBox Vector3d.Zero (Vector3d(165.0)) white
-        Translate(makeRotate box1 RY -30.0, Vector3d(310.0, 0.0, -260.0))
-        Translate(makeRotate box2 RY 30.0, Vector3d(130.0, 0.0, -260.0))        
+        Translate(makeRotate box1 RY -30.0, Vector3d(350.0, 0.0, -260.0))
+        Translate(makeRotate box2 RY 30.0, Vector3d(130.0, 0.0, -260.0))    
+        // Translate(box1, Vector3d(350.0, 0.0, -260.0))
+        // Translate(box2, Vector3d(130.0, 0.0, -260.0))        
     ]
 
 let standardScene = 
-    let texBitmap = new Bitmap("earth.jpg")
-    let materialBitmap = Lambertian(textureFromBitmap texBitmap)
     let simpleMat = Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.0)))
     let iii = [
         for x = 0 to 5 do
@@ -54,7 +55,7 @@ let oneBox =
     let green = Lambertian(ConstantTexture(Vector3d(0.12, 0.45, 0.15)))
     let simpleMat = Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.0)))
     let light = DiffuseLight(ConstantTexture(Vector3d(0.5))) 
-    let box = makeBox Vector3d.Zero (Vector3d(2.0, 2.0, 2.0)) white
+    let box = makeBox Vector3d.Zero (Vector3d(1.0)) white
     let box2 = makeBox Vector3d.Zero (Vector3d(2.0, 2.0, -2.0)) (Lambertian(ConstantTexture(Vector3d(0.5, 0.5, 0.2))))
     let iii = [
         for x = 0 to 5 do
@@ -63,15 +64,40 @@ let oneBox =
                 yield Sphere(Vector3d(0.0, 1.0, float z), 0.5, simpleMat)
     ]
     [
-        Sphere(Vector3d(0.0, 507.0, 0.0), 100.0, light)
         XzRect(0.0, 5.0, 0.0, 5.0, 0.0, Lambertian(ConstantTexture(Vector3d(1.0))))
         XzRect(0.0, 5.0, 0.0, 5.0, 5.0, light)
         XyRect(0.0, 5.0, 0.0, 5.0, 0.0, red)
         YzRect(0.0, 5.0, 0.0, 5.0, 0.0, green)
-        Translate( box, Vector3d(2.0, 0.0, 2.0))
-        // Translate(makeRotate box RY 10.0, Vector3d(2.0, 0.0, 2.0))
+        Translate(makeRotate box RY 45.0, Vector3d(2.0, 0.0, 0.5))
+        Translate( box, Vector3d(0.5, 0.0, 2.0))
+        box
+        Sphere(Vector3d(2.0, 1.0, 0.0), 0.5, light)
     ]
     // @ iii
+
+let otherScene =
+    let light = DiffuseLight(ConstantTexture(Vector3d(15.5))) 
+    let green = Lambertian(ConstantTexture(Vector3d(0.12, 0.45, 0.15)))
+    let red = Lambertian(ConstantTexture(Vector3d(0.65, 0.05, 0.05)))
+    let glass = Dielectric(1.5)
+    let noiseMat = Lambertian(NoiseTexture(1.5))
+    let metal = Metal(ConstantTexture(Vector3d(0.1, 0.1, 0.3)), 0.9)
+    let texBitmap = new Bitmap("mars.jpg")
+    let textured = Lambertian(textureFromBitmap texBitmap)
+    let white = Lambertian(ConstantTexture(Vector3d(0.73)))
+    let box = makeBox (Vector3d.Zero) (Vector3d(2.0, 3.0, 2.0)) white
+    let sphereOnBox = Sphere(Vector3d(1.0, 4.0, 1.0), 1.0, noiseMat)    
+    [
+        XzRect(-1000.0, 1000.0, -1000.0, 1000.0, 0.0, white)
+        Translate(XzRect(0.0, 5.0, 0.0, 5.0, 0.0, light), Vector3d(2.5, 10.0, 2.5))
+        Sphere(Vector3d(1.0, 1.0, 1.0), 0.5, noiseMat)
+        Sphere(Vector3d(5.0, 1.0, 5.0), 0.5, metal)
+        Sphere(Vector3d(3.0, 3.0, 3.0), 1.0, glass)
+        Sphere(Vector3d(7.0, 3.0, 3.0), 1.0, textured)
+        Sphere(Vector3d(5.0, 15.0, -50.0), 1.0, DiffuseLight(ConstantTexture(Vector3d(0.7, 0.2, 0.2))))
+        Translate(HitableList[box; sphereOnBox], Vector3d(4.0, 0.0, 0.0))
+    ]
+
 
 let randomScene() =
     let n = 3
@@ -107,16 +133,14 @@ type Game() =
 
     let canvas = new System.Drawing.Bitmap(800, 600, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create 1 (byte 0)
-    let width = 200
-    let height = 200
+    let width = 500
+    let height = 500
     let settings = { 
-        Samples = 100
-        LookFrom = Vector3d(5.0, 2.0, 5.0)
-        LookAt = Vector3d(0.0)
+        Samples = 1000
+        LookFrom = Vector3d(5.0, 2.0, 8.0)
+        LookAt = Vector3d(5.0, 0.0, 0.0)
         Fov = 90.0
-        // LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
-        // LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
-        // LookFrom = Vector3d(278.0, 278.0, 200.0)
+        // LookFrom = Vector3d(278.0, 278.0, 800.0)
         // LookAt = Vector3d(278.0, 278.0, 0.0)
         // Fov = 40.0
     }
@@ -129,7 +153,8 @@ type Game() =
     // let hitable = HitableList cornellBox
     // let hitable = Bvh.makeBvh cornellBox
     // let hitable = HitableList standardScene
-    let hitable = HitableList oneBox
+    // let hitable = HitableList oneBox
+    let hitable = HitableList otherScene
 
     let update() =
         let bitmap = new Drawing.Bitmap(width, height)

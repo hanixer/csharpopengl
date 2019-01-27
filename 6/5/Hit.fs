@@ -136,13 +136,13 @@ let rec hit hitable ray tMin tMax =
         hit hitable ray tMin tMax
         |> Option.map (fun record -> {record with Point = record.Point + offset})
     | Rotate(hitable, transform) ->
-        let origin = transformPoint transform ray.Origin
-        let d = transformPoint transform ray.Direction
+        let origin = transformPointInv transform ray.Origin
+        let d = (transformPointInv transform ray.Direction).Normalized()
         let ray = { ray with Origin = origin; Direction = d }
         hit hitable ray tMin tMax
         |> Option.map (fun record ->
             let p = transformPoint transform record.Point
-            let n = transformNormal transform record.Normal
+            let n = (transformPoint transform record.Normal).Normalized()
             {record with Point = p; Normal = n})
 
 and hitList ray hitables tMin tMax =
