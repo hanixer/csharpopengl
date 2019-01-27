@@ -24,8 +24,8 @@ let cornellBox =
         XzRect(0.0, 555.0, -555.0, 0.0, 0.0, white)
         XyRect(0.0, 555.0, 0.0, 555.0, -555.0, white)
         // makeBox Vector3d.Zero (Vector3d(165.0)) white
-        Translate(box1, Vector3d(265.0, 0.0, -260.0))
-        makeRotate box2 RY 30.0
+        Translate(makeRotate box1 RY -30.0, Vector3d(310.0, 0.0, -260.0))
+        Translate(makeRotate box2 RY 30.0, Vector3d(130.0, 0.0, -260.0))        
     ]
 
 let standardScene = 
@@ -49,9 +49,13 @@ let standardScene =
     ] |> Seq.ofList
 
 let oneBox =
+    let red = Lambertian(ConstantTexture(Vector3d(0.65, 0.05, 0.05)))
+    let white = Lambertian(ConstantTexture(Vector3d(0.73)))
+    let green = Lambertian(ConstantTexture(Vector3d(0.12, 0.45, 0.15)))
     let simpleMat = Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.0)))
-    let light = DiffuseLight(ConstantTexture(Vector3d(15.0)))
-    let box = makeBox (Vector3d(-2.0, 0.0, 2.0)) (Vector3d(2.0, 2.0, -2.0)) (Lambertian(ConstantTexture(Vector3d(0.0, 0.5, 0.2))))
+    let light = DiffuseLight(ConstantTexture(Vector3d(0.5))) 
+    let box = makeBox Vector3d.Zero (Vector3d(2.0, 2.0, 2.0)) white
+    let box2 = makeBox Vector3d.Zero (Vector3d(2.0, 2.0, -2.0)) (Lambertian(ConstantTexture(Vector3d(0.5, 0.5, 0.2))))
     let iii = [
         for x = 0 to 5 do
                 yield Sphere(Vector3d(float x, 1.0, 0.0), 0.5, simpleMat)
@@ -60,11 +64,12 @@ let oneBox =
     ]
     [
         Sphere(Vector3d(0.0, 507.0, 0.0), 100.0, light)
-        XzRect(-100.0, 100.0, -100.0, 100.0, -1.0, Lambertian(ConstantTexture(Vector3d(0.0, 0.2, 0.0))))
-        (XyRect(0.0, 3.0, 0.0, 3.0, 0.0, Lambertian(ConstantTexture(Vector3d(0.2, 0.2, 0.8)))))
-        
-        // makeRotate (XyRect(0.0, 3.0, 0.0, 3.0, 0.0, Lambertian(ConstantTexture(Vector3d(0.2, 0.2, 0.8))))) RY 30.0
-        // makeRotate box RY 30.0
+        XzRect(0.0, 5.0, 0.0, 5.0, 0.0, Lambertian(ConstantTexture(Vector3d(1.0))))
+        XzRect(0.0, 5.0, 0.0, 5.0, 5.0, light)
+        XyRect(0.0, 5.0, 0.0, 5.0, 0.0, red)
+        YzRect(0.0, 5.0, 0.0, 5.0, 0.0, green)
+        Translate( box, Vector3d(2.0, 0.0, 2.0))
+        // Translate(makeRotate box RY 10.0, Vector3d(2.0, 0.0, 2.0))
     ]
     // @ iii
 
@@ -106,13 +111,14 @@ type Game() =
     let height = 200
     let settings = { 
         Samples = 100
-        // LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
-        LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
-        // LookFrom = Vector3d(278.0, 278.0, 800.0)
+        LookFrom = Vector3d(5.0, 2.0, 5.0)
         LookAt = Vector3d(0.0)
+        Fov = 90.0
+        // LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
+        // LookFrom = Vector3d(3.0, 5.0, 13.0) * 0.5
+        // LookFrom = Vector3d(278.0, 278.0, 200.0)
         // LookAt = Vector3d(278.0, 278.0, 0.0)
         // Fov = 40.0
-        Fov = 90.0
     }
     let zoom = 1.0
     let mutable lacunarity = 1.4
