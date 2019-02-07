@@ -29,7 +29,7 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, up : Vector3d,
     let mat3 = Matrix3d(right, upVector, towardViwer)
 
     let transform vec3 =
-        Vector3d(Vector3d.Dot(vec3, mat3.Row0),Vector3d.Dot(vec3 , mat3.Row1),Vector3d.Dot(vec3 , mat3.Row2)).Normalized()
+        Vector3d(Vector3d.Dot(vec3, mat3.Row0), Vector3d.Dot(vec3, mat3.Row1), Vector3d.Dot(vec3, mat3.Row2)).Normalized()
 
     do  
         mat3.Transpose()

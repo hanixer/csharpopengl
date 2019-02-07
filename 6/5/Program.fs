@@ -136,13 +136,13 @@ type Game() =
     let width = 500
     let height = 500
     let settings = { 
-        Samples = 1000
-        LookFrom = Vector3d(5.0, 2.0, 8.0)
-        LookAt = Vector3d(5.0, 0.0, 0.0)
-        Fov = 90.0
-        // LookFrom = Vector3d(278.0, 278.0, 800.0)
-        // LookAt = Vector3d(278.0, 278.0, 0.0)
-        // Fov = 40.0
+        Samples = 2
+        // LookFrom = Vector3d(5.0, 2.0, 8.0)
+        // LookAt = Vector3d(5.0, 0.0, 0.0)
+        // Fov = 90.0
+        LookFrom = Vector3d(278.0, 278.0, 800.0)
+        LookAt = Vector3d(278.0, 278.0, 0.0)
+        Fov = 40.0
     }
     let zoom = 1.0
     let mutable lacunarity = 1.4
@@ -150,11 +150,11 @@ type Game() =
     
     // let hitable : Hitable = Bvh.makeBvh hitableSeq
     // let hitable = HitableList hitableSeq
-    // let hitable = HitableList cornellBox
+    let hitable = HitableList cornellBox
     // let hitable = Bvh.makeBvh cornellBox
     // let hitable = HitableList standardScene
     // let hitable = HitableList oneBox
-    let hitable = HitableList otherScene
+    // let hitable = HitableList otherScene
 
     let update() =
         let bitmap = new Drawing.Bitmap(width, height)

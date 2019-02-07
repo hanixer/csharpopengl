@@ -60,8 +60,7 @@ let loadTexture (bitmap : System.Drawing.Bitmap) =
    let id = GL.GenTexture()
    GL.BindTexture(TextureTarget.Texture2D, id)
    let data = bitmap.LockBits(Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), Drawing.Imaging.ImageLockMode.ReadOnly, Drawing.Imaging.PixelFormat.Format32bppArgb)
-   GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-      OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+   GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
    bitmap.UnlockBits(data)
    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear);
    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear);
@@ -96,3 +95,14 @@ let drawBitmapOnBitmap (source : System.Drawing.Bitmap) (destination : System.Dr
             brush.Color <- color
             let rect = Drawing.RectangleF(float32 x, float32 y, float32 pixelSize, float32 pixelSize)
             graphics.FillRectangle(brush, rect)
+
+let n = 10000000
+let rand = Random()
+let sume =
+   Seq.init n (fun _ -> 
+      let x = rand.NextDouble() * 2.0
+      x * x
+      )
+   |> Seq.sum
+let answer  = 2.0 * sume / float n
+8.0 / 3.0
