@@ -15,13 +15,13 @@ type Window1(width, height) =
 
 [<EntryPoint>]
 let main argv =
-    let scene = loadSceneFromFile "test.xml"    
+    let scene = loadSceneFromFile "test2.xml"    
     let bitmap = new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
     let zbuffer = Array2D.create scene.Camera.Height scene.Camera.Width 0.0
     render bitmap zbuffer scene
     let zbitmap = drawZBuffer zbuffer
     let va = zbuffer.[300, 400]
     let win = new Window(800, 600)
-    win.DrawBitmapAndSave zbitmap
+    win.DrawBitmapAndSave bitmap
     win.Run()
     0 // return an integer exit code

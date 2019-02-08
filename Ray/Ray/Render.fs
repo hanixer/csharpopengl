@@ -90,14 +90,16 @@ let drawZBuffer zbuffer =
     let w = Array2D.length2 zbuffer
     let bitmap = new Bitmap(w, h)
     let seq = Seq.cast<float> zbuffer |> Seq.filter (Double.IsInfinity >> not)
-    let min = Seq.min seq
-    let max = Seq.max seq
-    Array2D.iteri (fun row column z ->
-        let f = 
-            if Double.IsInfinity z
-            then 0.0
-            else 1.0 - (z - min) / (max - min)
-        setPixel bitmap column row <| Vector3d(f)) 
-        zbuffer
+    if not (Seq.isEmpty seq) then
+        let min = Seq.min seq
+        let max = Seq.max seq
+        Array2D.iteri (fun row column z ->
+            let f = 
+                if Double.IsInfinity z
+                then 0.0
+                else (max - z) / (max - min)
+                // else 1.0 - (z - min) / (max - min)
+            setPixel bitmap column row <| Vector3d(f)) 
+            zbuffer
     bitmap
     
