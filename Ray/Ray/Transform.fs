@@ -16,7 +16,7 @@ let transpose (m : Matrix4d) =
     )
 
 let compose tm1 tm2 =
-    {M = Matrix4d.Mult(tm1.M, tm2.M); Inv = Matrix4d.Mult(tm1.Inv, tm2.Inv)}
+    {M = Matrix4d.Mult(tm1.M, tm2.M); Inv = Matrix4d.Mult(tm2.Inv, tm1.Inv)}
 
 let rotateY theta =
     let cosTheta = Math.Cos(theta)
@@ -61,6 +61,14 @@ let transformPoint (transform : Transform) (point : Vector3d) =
 let transformPointInv (transform : Transform) (point : Vector3d) =
     transformPointHelper transform.Inv point
 
+let transformVector (m : Matrix4d) (vector : Vector3d) =
+    let point4 = Vector4d(vector, 0.0)
+    let x = Vector4d.Dot(point4, m.Row0)
+    let y = Vector4d.Dot(point4, m.Row1)
+    let z = Vector4d.Dot(point4, m.Row2)
+    Vector3d(x, y, z)
+
+
 // let transformNormal (transform : Transform) (n : Vector3d) =
 //     let m = transform.Inv
 //     Vector3d (
@@ -68,7 +76,3 @@ let transformPointInv (transform : Transform) (point : Vector3d) =
 //         m.M12 * n.X + m.M22 * n.Y + m.M32 + n.Z,
 //         m.M13 * n.X + m.M23 * n.Y + m.M33 + n.Z
 //     )
-
-let t = scale (Vector3d(2.0))
-
-transformPoint t (Vector3d(5.0, 6.0, 7.0))

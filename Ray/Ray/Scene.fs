@@ -66,7 +66,7 @@ let loadTransform (xml : XmlElement) level =
     |> Seq.filter (fun child -> child.NodeType = XmlNodeType.Element)
     |> Seq.cast<XmlElement>
     |> Seq.choose chooseTransform
-    |> Seq.fold compose identityTransform
+    |> Seq.fold (fun a b -> compose b a) identityTransform
 
 let rec loadObject (xml : XmlNode) level =
     let xml = xml :?> XmlElement
@@ -84,7 +84,7 @@ let rec loadObject (xml : XmlNode) level =
     |> Option.map (fun object ->
         let tm = loadTransform xml level
         let children = loadChildren xml level
-        {Object = object; Children = children; Transform = tm}
+        {Name = name; Object = object; Children = children; Transform = tm}
         )
 
 and loadChildren (xml : XmlElement) level =
@@ -112,7 +112,7 @@ let loadCamera (xml : XmlElement) =
     let fov =  select "./fov" (fun elem -> readFloating elem "value" defCameraFov) defCameraFov
     let width =  select "./width" (fun elem -> readFloating elem "value" defCameraWidth) defCameraWidth
     let height =  select "./height" (fun elem -> readFloating elem "value" defCameraHeight) defCameraHeight
-    Camera(pos, target, up, fov, width, height)
+    Camera(pos, target, up, fov, int width, int height)
 
 let loadScene (xml : XmlDocument) =
     let xml = xml.Item "xml"    

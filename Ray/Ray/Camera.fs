@@ -1,10 +1,31 @@
 module Camera
 
+open System
 open OpenTK
+open Common
 
-type Camera(lookFrom : Vector3d, lookAt : Vector3d, up : Vector3d, fov, width, height) =
-    let dir = (lookAt - lookFrom).Normalized()
-    member this.Nothing x = 0
+type Camera(lookFrom : Vector3d, lookAt : Vector3d, up : Vector3d, fov : float, width, height) =
+    let towardViwer = (lookFrom - lookAt).Normalized()
+    let right = Vector3d.Cross(up.Normalized(), towardViwer)
+    let up = Vector3d.Cross(towardViwer, right)
+    let fov = OpenTK.MathHelper.DegreesToRadians fov
+    let widthf = float width
+    let heightf = float height
+    let aspect = heightf / widthf
+    let scale = Math.Tan fov
+    let mat3 = Matrix3d(right, up, towardViwer)
+
+    let transformToWorld vec3 =
+        Vector3d(Vector3d.Dot(vec3, mat3.Row0), Vector3d.Dot(vec3, mat3.Row1), Vector3d.Dot(vec3, mat3.Row2)).Normalized()
+    
+    member this.Width = width
+    member this.Height = height
+
+    member this.Ray column row =
+        let x = (float column / widthf - 0.5) * scale
+        let y = (float row / heightf - 0.5) * scale * aspect
+        let dir = Vector3d(x, y, -1.0) |> transformToWorld
+        {Origin = lookFrom; Direction = dir.Normalized()}
 
 let defCameraPos = Vector3d.Zero
 let defCameraTarget = Vector3d(0.0, 0.0, -1.0)
