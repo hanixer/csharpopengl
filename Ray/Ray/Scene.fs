@@ -99,18 +99,41 @@ and loadChildren (xml : XmlElement) level =
 let loadSceneObjects (xml : XmlElement) =   
     loadChildren xml 0     
 
+let loadCamera (xml : XmlElement) =
+    let select name selector defaultV =
+        xml.SelectNodes name
+        |> Seq.cast<XmlElement>
+        |> Seq.tryHead
+        |> Option.map selector
+        |> Option.defaultValue defaultV
+    let pos = select "./position" (fun elem -> readVector elem defCameraPos) defCameraPos
+    let target = select "./target" (fun elem -> readVector elem defCameraPos) defCameraPos
+    let up = select "./up" (fun elem -> readVector elem defCameraPos) defCameraPos
+    let fov =  select "./fov" (fun elem -> readFloating elem "value" defCameraFov) defCameraFov
+    let width =  select "./width" (fun elem -> readFloating elem "value" defCameraWidth) defCameraWidth
+    let height =  select "./height" (fun elem -> readFloating elem "value" defCameraHeight) defCameraHeight
+    Camera(pos, target, up, fov, width, height)
+
 let loadScene (xml : XmlDocument) =
     let xml = xml.Item "xml"    
     if not (isNull xml) then
-        printfn "xml is here"    
-        let sceneXml = xml.Item "scene"    
-        if not (isNull sceneXml) then
-            loadSceneObjects sceneXml
-            ()
-    1
+        let nodes = 
+            let sceneXml = xml.Item "scene"    
+            if not (isNull sceneXml) then
+                loadSceneObjects sceneXml
+            else        
+                failwith "scene tag not found"
+        let camera = 
+            let cameraXml = xml.Item "camera" 
+            if not (isNull cameraXml) then
+                loadCamera cameraXml
+            else        
+                failwith "camera tag not found"
+        {Nodes = nodes; Camera = camera}
+    else
+        failwith "xml tag not found"
 
 let loadSceneFromFile (filename : string) =
     let xml = XmlDocument()
-    xml.Load(filename)
-    
+    xml.Load(filename)    
     loadScene xml
