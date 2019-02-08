@@ -5,7 +5,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Object.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="Transform.fs" />
     <Compile Include="Node.fs" />
+    <Compile Include="Camera.fs" />
+    <Compile Include="Scene.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="OpenTK.NETCore" Version="1.1.2749.6433" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
   </ItemGroup>
 </Project>

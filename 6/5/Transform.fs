@@ -11,10 +11,7 @@ type Transform = {
 
 let transpose (m : Matrix4d) =
     Matrix4d (
-        m.Column0, 
-        m.Column1,
-        m.Column2,
-        m.Column3
+        m.Column0, m.Column1, m.Column2, m.Column3
     )
 
 let rotateY theta =
