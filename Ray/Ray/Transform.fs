@@ -8,11 +8,15 @@ type Transform = {
     Inv : Matrix4d
 }
 
+let identityTransform = {M = Matrix4d.Identity; Inv = Matrix4d.Identity}
 
 let transpose (m : Matrix4d) =
     Matrix4d (
         m.Column0, m.Column1, m.Column2, m.Column3
     )
+
+let compose tm1 tm2 =
+    {M = Matrix4d.Mult(tm1.M, tm2.M); Inv = Matrix4d.Mult(tm1.Inv, tm2.Inv)}
 
 let rotateY theta =
     let cosTheta = Math.Cos(theta)

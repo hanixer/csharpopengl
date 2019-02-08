@@ -2,7 +2,10 @@
 
 open System
 
+open System.Xml
+open Scene
+
 [<EntryPoint>]
 let main argv =
-    printfn "Hello World from F#!"
+    loadSceneFromFile "test2.xml"    
     0 // return an integer exit code
