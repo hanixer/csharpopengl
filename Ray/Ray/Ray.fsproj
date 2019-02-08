@@ -9,8 +9,10 @@
     <Compile Include="Transform.fs" />
     <Compile Include="Node.fs" />
     <Compile Include="Camera.fs" />
-    <Compile Include="Scene.fs" />
+    <Compile Include="Light.fs" />
+    <Compile Include="Material.fs" />
     <Compile Include="Window.fs" />
+    <Compile Include="Scene.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
