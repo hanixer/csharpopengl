@@ -8,4 +8,5 @@ type Node = {
     Object : Object
     Children : Node list
     Transform : Transform
+    Material : string
 }

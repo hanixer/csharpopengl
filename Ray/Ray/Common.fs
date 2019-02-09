@@ -6,6 +6,13 @@ open OpenTK
 
 type Ray = {Origin : Vector3d; Direction : Vector3d}
 
+type HitInfo = {
+    T : float
+    Point : Vector3d
+    Normal : Vector3d
+    Material : string
+}
+
 let private random = Random()
 
 let pointOnRay ray (t : float) =

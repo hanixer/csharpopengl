@@ -8,13 +8,9 @@ open Object
 open Node
 open Transform
 open System.Diagnostics
+open Material
 
 type Bitmap = System.Drawing.Bitmap
-
-type HitInfo = {
-    T : float
-    Point : Vector3d
-}
 
 let setPixel (bitmap : Bitmap) x y (color : Vector3d) =    
     let r = int(Math.Sqrt(color.X) * 255.0)
@@ -23,15 +19,18 @@ let setPixel (bitmap : Bitmap) x y (color : Vector3d) =
     let color = Drawing.Color.FromArgb(r, g, b)
     bitmap.SetPixel(x, y, color)
 
-let shootRay ray nodes =
-    1
+let clamp (color : Vector3d) =
+    if color.X > 1.0 || color.Y > 1.0 || color.Z > 1.0 then
+        let max = Math.Max(color.X, Math.Max(color.Y, color.Z))
+        color / max
+    else
+        color
 
-
-let intersect ray object tMin =
+let intersect ray object tMin material =
     let computeHit (t : float) =
         let point = pointOnRay ray t
-        let normal = point
-        Some {T = t; Point = point}
+        let normal = point.Normalized()
+        Some {T = t; Point = point; Normal = normal; Material = material}
 
     match object with
     | Sphere ->
@@ -55,11 +54,11 @@ let intersect ray object tMin =
 let tryFindBestHitInfo hitInfos =
     let fold best hitInfo =
         match (best, hitInfo) with
-        | Some b, Some h when h.T < b.T -> hitInfo
+        | Some b, Some h ->  if h.T < b.T then hitInfo else best
         | _, Some _ -> hitInfo       
         | _ -> best
-
-    Seq.fold fold None hitInfos
+    let result = Seq.fold fold None hitInfos
+    result    
 
 let rec intersectNodes ray nodes tMin =
     Seq.map (fun node -> intersectNode ray node tMin) nodes
@@ -69,8 +68,12 @@ and intersectNode ray node tMin =
     let rayLocal = {Origin = transformPointInv node.Transform ray.Origin; Direction = (transformVector node.Transform.Inv ray.Direction).Normalized()}
     tryFindBestHitInfo [
         intersectNodes rayLocal node.Children tMin
-        intersect rayLocal node.Object tMin
-    ]
+        intersect rayLocal node.Object tMin node.Material ]
+    |> Option.map (fun hitInfo ->
+        let point = transformPoint node.Transform hitInfo.Point
+        let normal = transformVector node.Transform.M hitInfo.Normal
+        let t = (point - ray.Origin).Length
+        {hitInfo with Point = point; Normal = normal.Normalized(); T = t})    
 
 let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     for r = 0 to bitmap.Height - 1 do
@@ -79,11 +82,14 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
             let t, color = 
                 match intersectNodes ray scene.Nodes 0.00001 with
                 | Some hitInfo ->
-                    (hitInfo.T, Vector3d.One)
+                    let material = scene.Materials.[hitInfo.Material]
+                    let color = shade material hitInfo (scene.Lights |> Map.toSeq |> Seq.map snd) 
+                    Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
+                    (hitInfo.T, color)
                 | _ -> 
                     (Double.PositiveInfinity, Vector3d.Zero)
             zbuffer.[r, c] <- t
-            setPixel bitmap c r color
+            setPixel bitmap c r (clamp color)
 
 let drawZBuffer zbuffer =
     let h = Array2D.length1 zbuffer

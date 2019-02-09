@@ -17,6 +17,8 @@ type Scene = {
     Lights : Map<string, Light>
 }
 
+let getMaterial scene name = Map.find name scene.Materials
+
 let printIdent level =
     for i = 1 to level do 
         printf " "
@@ -167,14 +169,17 @@ let getObjectFromType (typeAttr : XmlAttribute) =
             None
     else None
 
+let readStrAttribute (xml : XmlElement) (name : string) =
+    let nameAttr = xml.Attributes.[name]
+    if not (isNull nameAttr) then
+        nameAttr.InnerText
+    else
+        ""
+
 let rec loadObject (xml : XmlNode) level =
     let xml = xml :?> XmlElement
-    let name =
-        let nameAttr = xml.Attributes.["name"]
-        if not (isNull nameAttr) then
-            nameAttr.InnerText
-        else
-            ""
+    let name = readStrAttribute xml "name"
+    let material = readStrAttribute xml "material"
     printIdent level
     printf "object [%s]" name
     let object = getObjectFromType xml.Attributes.["type"]
@@ -183,7 +188,7 @@ let rec loadObject (xml : XmlNode) level =
     |> Option.map (fun object ->
         let tm = loadTransform xml level
         let children = loadChildren xml level
-        {Name = name; Object = object; Children = children; Transform = tm}
+        {Name = name; Object = object; Children = children; Transform = tm; Material = material}
         )
 
 and loadChildren (xml : XmlElement) level =
