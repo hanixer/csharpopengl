@@ -9,6 +9,7 @@ open Node
 open Transform
 open System.Diagnostics
 open Material
+open System.Threading.Tasks
 
 type Bitmap = System.Drawing.Bitmap
 
@@ -81,7 +82,8 @@ and intersectNode ray node tMin =
         {hitInfo with Point = point; Normal = normal.Normalized(); T = t})    
 
 let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
-    for r = 0 to bitmap.Height - 1 do
+    let buf = Array2D.create bitmap.Height bitmap.Width Vector3d.Zero
+    Parallel.For(0, bitmap.Height, fun r ->
         for c = 0 to bitmap.Width - 1 do
             let ray = scene.Camera.Ray c r
             let t, color = 
@@ -89,13 +91,14 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
                 | Some hitInfo ->
                     let material = scene.Materials.[hitInfo.Material]
                     let color = shade ray material hitInfo (scene.Lights |> Map.toSeq |> Seq.map snd) 
-                    // let color = hitInfo.Normal * 0.5 + Vector3d(0.5)
                     Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
                     (hitInfo.T, color)
                 | _ -> 
                     (Double.PositiveInfinity, Vector3d.Zero)
             zbuffer.[r, c] <- t
-            setPixel bitmap c r (clamp color)
+            buf.[r, c] <- color
+    ) |> ignore
+    Array2D.iteri (fun r c x -> setPixel bitmap c r (clamp x)) buf
 
 let drawZBuffer zbuffer =
     let h = Array2D.length1 zbuffer
