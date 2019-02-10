@@ -68,11 +68,10 @@ let transformVector (m : Matrix4d) (vector : Vector3d) =
     let z = Vector4d.Dot(point4, m.Row2)
     Vector3d(x, y, z)
 
-
-// let transformNormal (transform : Transform) (n : Vector3d) =
-//     let m = transform.Inv
-//     Vector3d (
-//         m.M11 * n.X + m.M21 * n.Y + m.M31 + n.Z,
-//         m.M12 * n.X + m.M22 * n.Y + m.M32 + n.Z,
-//         m.M13 * n.X + m.M23 * n.Y + m.M33 + n.Z
-//     )
+let transformNormal (transform : Transform) (n : Vector3d) =
+    let m = transform.Inv
+    let point4 = Vector4d(n, 0.0)
+    let x = Vector4d.Dot(point4, m.Column0)
+    let y = Vector4d.Dot(point4, m.Column1)
+    let z = Vector4d.Dot(point4, m.Column2)
+    Vector3d(x, y, z)    

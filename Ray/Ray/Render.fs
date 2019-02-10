@@ -16,6 +16,9 @@ let setPixel (bitmap : Bitmap) x y (color : Vector3d) =
     let r = int(Math.Sqrt(color.X) * 255.0)
     let g = int(Math.Sqrt(color.Y) * 255.0)
     let b = int(Math.Sqrt(color.Z) * 255.0)
+    let r = int((color.X) * 255.0)
+    let g = int((color.Y) * 255.0)
+    let b = int((color.Z) * 255.0)
     let color = Drawing.Color.FromArgb(r, g, b)
     bitmap.SetPixel(x, y, color)
 
@@ -71,7 +74,9 @@ and intersectNode ray node tMin =
         intersect rayLocal node.Object tMin node.Material ]
     |> Option.map (fun hitInfo ->
         let point = transformPoint node.Transform hitInfo.Point
-        let normal = transformVector node.Transform.M hitInfo.Normal
+        let normal = transformNormal node.Transform hitInfo.Normal
+        // let normal = hitInfo.Normal
+        // let normal = transformVector node.Transform.M hitInfo.Normal
         let t = (point - ray.Origin).Length
         {hitInfo with Point = point; Normal = normal.Normalized(); T = t})    
 
@@ -83,7 +88,8 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
                 match intersectNodes ray scene.Nodes 0.00001 with
                 | Some hitInfo ->
                     let material = scene.Materials.[hitInfo.Material]
-                    let color = shade material hitInfo (scene.Lights |> Map.toSeq |> Seq.map snd) 
+                    let color = shade ray material hitInfo (scene.Lights |> Map.toSeq |> Seq.map snd) 
+                    // let color = hitInfo.Normal * 0.5 + Vector3d(0.5)
                     Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
                     (hitInfo.T, color)
                 | _ -> 

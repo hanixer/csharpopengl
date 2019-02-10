@@ -2,30 +2,38 @@ module Material
 open OpenTK
 open Light
 open Common
+open System
 
 type Material =
     | Blinn of Vector3d * Vector3d * float // diffuse, specular, glossy
     
-let shade material hitInfo lights =
+let shade ray material hitInfo lights =
     match material with
-    | Blinn(diffuse, specular, glossiness) ->
+    | Blinn(diffuseColor, specularColor, glossiness) ->
         let ambient = Seq.tryFind isAmbient lights
         let lights = Seq.filter (isAmbient >> not) lights
-        let initial = 
+        let ambComponent = 
             ambient
             |> Option.map (fun light -> illuminate light hitInfo.Point hitInfo.Normal)
             |> Option.defaultValue Vector3d.Zero
+        let initial = ambComponent * diffuseColor
         lights
         |> Seq.fold (fun result light ->
             let wi = -(lightDir light hitInfo.Point)
             let lightColor = illuminate light hitInfo.Point hitInfo.Normal
-            let nDotWi = Vector3d.Dot(hitInfo.Normal, wi)
-            if nDotWi > 0.0 then
-                result + nDotWi * lightColor * diffuse
-            else
-            // (hitInfo.Normal + Vector3d(1.0)) * 0.5
-                result
-            ) (initial * diffuse)
+            let nDotWi = Math.Max(Vector3d.Dot(hitInfo.Normal, wi), 0.0)
+            let lambertian =
+                nDotWi * lightColor * diffuseColor
+            let specularCoef = 
+                if nDotWi > 0.0 then
+                    let halfDir = (wi - ray.Direction).Normalized()
+                    let specAngle = Math.Max(Vector3d.Dot(halfDir, hitInfo.Normal), 0.0)
+                    Math.Pow(specAngle, glossiness)
+                else
+                    0.0
+            result + lambertian + specularColor * specularCoef * lightColor
+            // result
+            ) initial
 
 let defBlinnDiffuse = Vector3d(0.5)
 let defBlinnSpecular = Vector3d(0.7)
