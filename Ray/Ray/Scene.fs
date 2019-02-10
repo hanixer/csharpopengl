@@ -75,6 +75,13 @@ let loadTransform (xml : XmlElement) level =
             let tm = scale v
             printfn "  scale %A" v
             Some tm
+        | "rotate" ->
+            printIdent level
+            let axis = readVector xml Vector3d.Zero
+            let angle = readFloating xml "angle" 0.0
+            let tm = rotate axis angle
+            printfn "  rotate %A, %A" axis angle
+            Some tm
         | _ ->
             None
     getChildElements xml

@@ -83,8 +83,9 @@ and intersectNode ray node tMin =
 
 let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     let buf = Array2D.create bitmap.Height bitmap.Width Vector3d.Zero
+    let w = bitmap.Width
     Parallel.For(0, bitmap.Height, fun r ->
-        for c = 0 to bitmap.Width - 1 do
+        for c = 0 to w - 1 do
             let ray = scene.Camera.Ray c r
             let t, color = 
                 match intersectNodes ray scene.Nodes 0.00001 with
