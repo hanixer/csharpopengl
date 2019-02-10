@@ -8,12 +8,7 @@ open Window
 open Render
 open System
 open OpenTK
-
-type Window1(width, height) =
-    inherit Window(width, height)
-
-    override o.OnUpdateFrame e =
-        base.OnUpdateFrame e
+open OpenTK.Input
 
 let drawLine (g : Drawing.Graphics) (p1 : Vector2) (p2 : Vector2) =
     g.DrawLine(Drawing.Pens.White, new Drawing.PointF(p1.X, p1.Y), new Drawing.PointF(p2.X, p2.Y))    
@@ -42,15 +37,38 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
+let file = "box.xml"
+
+type Window1(width, height) =
+    inherit Window(width, height)
+
+    let mutable (x, y, z) = 1, 2, 3
+
+    let mutable bitmap : Drawing.Bitmap = null
+    let mutable zbitmap : Drawing.Bitmap = null
+    let mutable isZ = false
+
+    member this.Update() = 
+        let scene = loadSceneFromFile file    
+        let zbuffer =  Array2D.create scene.Camera.Height scene.Camera.Width 0.0
+        bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
+        async { render bitmap zbuffer scene } |> measure
+        zbitmap <- drawZBuffer zbuffer
+        isZ <- false
+        this.DrawBitmapAndSave bitmap
+
+    override this.OnUpdateFrame e =
+        base.OnUpdateFrame e
+        if base.Keyboard.[Key.Z] then 
+            this.DrawBitmapAndSave (if isZ then bitmap else zbitmap)
+            isZ <- not isZ
+        if base.Keyboard.[Key.F5] then 
+            this.Update()
+           
+
 [<EntryPoint>]
 let main argv =
-    let scene = loadSceneFromFile "test3.xml"    
-    let bitmap = new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
-    let zbuffer = Array2D.create scene.Camera.Height scene.Camera.Width 0.0
-    async { render bitmap zbuffer scene } |> measure
-    let zbitmap = drawZBuffer zbuffer
-    let va = zbuffer.[300, 400]
-    let win = new Window(800, 600)
-    win.DrawBitmapAndSave bitmap
+    let win = new Window1(800, 600)
+    win.Update()
     win.Run()
     0 // return an integer exit code

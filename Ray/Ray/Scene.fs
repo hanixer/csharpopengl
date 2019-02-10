@@ -191,20 +191,15 @@ let rec loadObject (xml : XmlNode) level =
     printf "object [%s]" name
     let object = getObjectFromType xml.Attributes.["type"]
     printfn ""
-    object
-    |> Option.map (fun object ->
-        let tm = loadTransform xml level
-        let children = loadChildren xml level
-        {Name = name; Object = object; Children = children; Transform = tm; Material = material}
-        )
+    let tm = loadTransform xml level
+    let children = loadChildren xml level
+    {Name = name; Object = object; Children = children; Transform = tm; Material = material}
 
 and loadChildren (xml : XmlElement) level =
     xml.ChildNodes    
     |> Seq.cast<XmlNode>
     |> Seq.filter (fun child -> child.Name = "object" && child.NodeType = XmlNodeType.Element)
     |> Seq.map (fun child -> loadObject child (level + 1))
-    |> Seq.filter Option.isSome
-    |> Seq.map Option.get
     |> Seq.toList
 
 let loadSceneObjects (xml : XmlElement) =   

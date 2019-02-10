@@ -5,7 +5,7 @@ open Transform
 
 type Node = {
     Name : string
-    Object : Object
+    Object : Object option
     Children : Node list
     Transform : Transform
     Material : string

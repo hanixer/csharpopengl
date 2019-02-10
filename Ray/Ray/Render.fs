@@ -70,9 +70,14 @@ let rec intersectNodes ray nodes tMin =
     
 and intersectNode ray node tMin =
     let rayLocal = {Origin = transformPointInv node.Transform ray.Origin; Direction = (transformVector node.Transform.Inv ray.Direction).Normalized()}
-    tryFindBestHitInfo [
-        intersectNodes rayLocal node.Children tMin
-        intersect rayLocal node.Object tMin node.Material ]
+    let hitInfo =
+        if Option.isSome node.Object then
+            tryFindBestHitInfo [
+                intersectNodes rayLocal node.Children tMin
+                intersect rayLocal node.Object.Value tMin node.Material ]
+        else
+            intersectNodes rayLocal node.Children tMin
+    hitInfo
     |> Option.map (fun hitInfo ->
         let point = transformPoint node.Transform hitInfo.Point
         let normal = transformNormal node.Transform hitInfo.Normal
