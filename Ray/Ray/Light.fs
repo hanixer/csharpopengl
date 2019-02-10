@@ -20,7 +20,7 @@ let lightDir light point =
     match light with
     | AmbientLight _ -> Vector3d.Zero
     | DirectLight(_, direction) -> direction
-    | PointLight(_, position) -> point - position
+    | PointLight(_, position) -> (point - position).Normalized()
 
 let isAmbient l = 
     match l with

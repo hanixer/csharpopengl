@@ -36,12 +36,18 @@ let drawnBitmap =
     g.Flush()
     bmp
 
+let measure task =
+    let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
+    Async.RunSynchronously task
+    stopwatch.Stop();
+    Console.WriteLine(stopwatch.ElapsedMilliseconds);
+
 [<EntryPoint>]
 let main argv =
     let scene = loadSceneFromFile "test3.xml"    
     let bitmap = new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
     let zbuffer = Array2D.create scene.Camera.Height scene.Camera.Width 0.0
-    render bitmap zbuffer scene
+    async { render bitmap zbuffer scene } |> measure
     let zbitmap = drawZBuffer zbuffer
     let va = zbuffer.[300, 400]
     let win = new Window(800, 600)
