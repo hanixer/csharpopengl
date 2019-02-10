@@ -31,24 +31,30 @@ let rotateY theta =
 
 let rotate (axis : Vector3d) (theta : float) =
     let a = axis.Normalized()    
-    let th = OpenTK.MathHelper.DegreesToRadians theta
-    let cosTheta = Math.Cos th
-    let sinTheta = Math.Sin th
-    let m00 = a.X * a.X + (1.0 - a.X * a.X) * cosTheta
-    let m01 = a.X * a.Y + (1.0 - cosTheta) - a.Z * sinTheta
-    let m02 = a.X * a.Z * (1.0 - cosTheta) + a.Y * sinTheta
-    let r0 = Vector4d(m00, m01, m02, 0.0)
-    let m10 = a.X * a.Y * (1.0 - cosTheta) + a.Z * sinTheta;
-    let m11 = a.Y * a.Y + (1.0 - a.Y * a.Y) * cosTheta;
-    let m12 = a.Y * a.Z * (1.0 - cosTheta) - a.X * sinTheta; 
-    let r1 = Vector4d(m10, m11, m12, 0.0)
-    let m20 = a.X * a.Z * (1.0 - cosTheta) - a.Y * sinTheta
-    let m21 = a.Y * a.Z * (1.0 - cosTheta) + a.X * sinTheta
-    let m22 = a.Z * a.Z + (1.0 - a.Z * a.Z) * cosTheta
-    let r2 = Vector4d(m20, m21, m22, 0.0)
-    let r3 = Vector4d(0.0, 0.0, 0.0, 1.0)
-    let m = Matrix4d(r0, r1, r2, r3)
-    let inv = Matrix4d.Transpose(m)
+    let helper (theta : float) = 
+        let th = OpenTK.MathHelper.DegreesToRadians theta
+        let cosTheta = Math.Cos th
+        let sinTheta = Math.Sin th
+        let m00 = a.X * a.X + (1.0 - a.X * a.X) * cosTheta
+        let m01 = a.X * a.Y + (1.0 - cosTheta) - a.Z * sinTheta
+        let m02 = a.X * a.Z * (1.0 - cosTheta) + a.Y * sinTheta
+        let r0 = Vector4d(m00, m01, m02, 0.0)
+        let m10 = a.X * a.Y * (1.0 - cosTheta) + a.Z * sinTheta;
+        let m11 = a.Y * a.Y + (1.0 - a.Y * a.Y) * cosTheta;
+        let m12 = a.Y * a.Z * (1.0 - cosTheta) - a.X * sinTheta; 
+        let r1 = Vector4d(m10, m11, m12, 0.0)
+        let m20 = a.X * a.Z * (1.0 - cosTheta) - a.Y * sinTheta
+        let m21 = a.Y * a.Z * (1.0 - cosTheta) + a.X * sinTheta
+        let m22 = a.Z * a.Z + (1.0 - a.Z * a.Z) * cosTheta
+        let r2 = Vector4d(m20, m21, m22, 0.0)
+        let r3 = Vector4d(0.0, 0.0, 0.0, 1.0)
+        let m = Matrix4d(r0, r1, r2, r3)
+        m
+    let m = helper theta
+    let inv = helper -theta
+    {M = m; Inv = inv}
+    let inv = Matrix4d.Rotate(axis, theta)
+    let m = Matrix4d.Transpose(inv)
     {M = m; Inv = inv}
 
 let translate delta =

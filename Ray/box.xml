@@ -31,7 +31,7 @@
     <object type="sphere" name="sphere2" material="mtl2">
       <scale value="6"/>
       <rotate angle="30" y="1"/>
-      <translate x="7" y="-5" z="6.5"/>
+      <translate x="-4" y="-0" z="2.5"/>
     </object>
 
     <!-- Materials -->
@@ -64,7 +64,7 @@
     </light>
     <light type="point" name="pointLight">
       <intensity value="1"/>
-      <position x="0" y="0" z="22"/>
+      <position x="0" y="0" z="15"/>
     </light>
   </scene>
 

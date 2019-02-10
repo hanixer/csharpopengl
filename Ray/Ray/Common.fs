@@ -13,6 +13,8 @@ type HitInfo = {
     Material : string
 }
 
+let epsilon = 0.00001
+
 let private random = Random()
 
 let pointOnRay ray (t : float) =

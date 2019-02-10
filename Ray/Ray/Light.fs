@@ -1,5 +1,7 @@
 module Light
 open OpenTK
+open Common
+open Node
 
 type Light =
     | AmbientLight of Vector3d
@@ -27,6 +29,38 @@ let isAmbient l =
     | AmbientLight _ -> true
     | _ -> false
 
+let isInShadow light hitInfo nodes shouldOutput =     
+    let direction = -(lightDir light hitInfo.Point)
+    let shadowRay = {Origin = hitInfo.Point ; Direction = direction}    
+    let shadowHit = intersectNodes shadowRay nodes epsilon
+    if shouldOutput then 
+        printfn "isinshadow"
+        printfn "direction %A " direction
+        printfn "shadow ray %A " shadowRay
+        printfn "shadowhit %A" shadowHit
+    match (shadowHit, light) with
+    | Some shadowHitInfo, PointLight(_, lightPos) ->
+        if shouldOutput then
+            printfn "1 length %A, 2 leength %A" (shadowHitInfo.Point - hitInfo.Point).Length (lightPos - hitInfo.Point).Length
+        (shadowHitInfo.Point - hitInfo.Point).Length < (lightPos - hitInfo.Point).Length
+    | _ -> Option.isSome shadowHit
+
+let isInShadowDebug light hitInfo nodes shouldOutput =     
+    let direction = -(lightDir light hitInfo.Point)
+    let shadowRay = {Origin = hitInfo.Point ; Direction = direction}    
+    let shadowHit = intersectNodes shadowRay nodes epsilon
+    if shouldOutput then 
+        printfn "isinshadow"
+        printfn "direction %A " direction
+        printfn "shadow ray %A " shadowRay
+        printfn "shadowhit %A" shadowHit
+    match (shadowHit, light) with
+    | Some shadowHitInfo, PointLight(_, lightPos) ->
+        if shouldOutput then
+            printfn "1 length %A, 2 leength %A" (shadowHitInfo.Point - hitInfo.Point).Length (lightPos - hitInfo.Point).Length
+        (shadowHitInfo.Point - hitInfo.Point).Length < (lightPos - hitInfo.Point).Length
+    | _ -> Option.isSome shadowHit
+    
 // let illuminate light point normal =
 //     match light with
 //     | AmbientLight intens -> intens

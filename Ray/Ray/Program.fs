@@ -9,6 +9,7 @@ open Render
 open System
 open OpenTK
 open OpenTK.Input
+open GlmNet
 
 let drawLine (g : Drawing.Graphics) (p1 : Vector2) (p2 : Vector2) =
     g.DrawLine(Drawing.Pens.White, new Drawing.PointF(p1.X, p1.Y), new Drawing.PointF(p2.X, p2.Y))    
@@ -42,8 +43,6 @@ let file = "box.xml"
 type Window1(width, height) =
     inherit Window(width, height)
 
-    let mutable (x, y, z) = 1, 2, 3
-
     let mutable bitmap : Drawing.Bitmap = null
     let mutable zbitmap : Drawing.Bitmap = null
     let mutable isZ = false
@@ -71,4 +70,6 @@ let main argv =
     let win = new Window1(800, 600)
     win.Update()
     win.Run()
+    GlmNet.mat4.identity
+    GlmNet.glm.rotate(30.0f, GlmNet.vec3(0.0f, 0.0f, 1.0f))
     0 // return an integer exit code
