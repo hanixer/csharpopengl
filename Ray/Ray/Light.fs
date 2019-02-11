@@ -29,7 +29,7 @@ let isAmbient l =
     | AmbientLight _ -> true
     | _ -> false
 
-let isInShadow light hitInfo nodes shouldOutput =     
+let isInShadow light hitInfo nodes =     
     let direction = -(lightDir light hitInfo.Point)
     let shadowRay = {Origin = hitInfo.Point ; Direction = direction}    
     let shadowHit = intersectNodes shadowRay nodes epsilon

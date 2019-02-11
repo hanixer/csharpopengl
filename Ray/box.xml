@@ -31,9 +31,9 @@
     <object type="sphere" name="sphere2" material="mtl2">
       <scale value="6"/>
       <rotate angle="30" y="1"/>
-      <translate x="-4" y="-0" z="2.5"/>
+      <translate x="7" y="-5" z="6.5"/>
     </object>
-
+ 
     <!-- Materials -->
     <material type="blinn" name="wall">
       <diffuse  value="0.7" r="1" g="1" b="1"/>
@@ -57,17 +57,17 @@
       <specular r="0.9" g="0.9" b="1.0" value="0.8"/>
       <glossiness value="10"/>
     </material>
-
+ 
     <!-- Lights -->
     <light type="ambient" name="ambientLight">
       <intensity value="0.1"/>
     </light>
     <light type="point" name="pointLight">
       <intensity value="1"/>
-      <position x="0" y="0" z="15"/>
+      <position x="0" y="0" z="22"/>
     </light>
   </scene>
-
+ 
   <camera>
     <position x="0" y="-60" z="12"/>
     <target x="0" y="0" z="12"/>

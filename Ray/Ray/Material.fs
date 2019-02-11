@@ -7,7 +7,7 @@ open System
 type Material =
     | Blinn of Vector3d * Vector3d * float // diffuse, specular, glossy
     
-let shade ray material hitInfo lights nodes shouldOutput =
+let shade ray material hitInfo lights nodes =
     match material with
     | Blinn(diffuseColor, specularColor, glossiness) ->
         let ambient = Seq.tryFind isAmbient lights
@@ -19,7 +19,7 @@ let shade ray material hitInfo lights nodes shouldOutput =
         let initial = ambComponent * diffuseColor
         lights
         |> Seq.fold (fun result light ->
-            if isInShadow light hitInfo nodes shouldOutput then
+            if isInShadow light hitInfo nodes then
                 result
             else
                 let wi = -(lightDir light hitInfo.Point)
@@ -28,14 +28,14 @@ let shade ray material hitInfo lights nodes shouldOutput =
                 let lambertian =
                     nDotWi * lightColor * diffuseColor
                 let specularCoef = 
-                    // if nDotWi > 0.0 then
-                        let halfDir = (wi - ray.Direction).Normalized()
+                    if nDotWi > 0.0 then
+                        let viewDir = - ray.Direction
+                        let halfDir = (wi + viewDir).Normalized()
                         let specAngle = Math.Max(Vector3d.Dot(halfDir, hitInfo.Normal), 0.0)
-                        // let specAngle = Math.Abs(Vector3d.Dot(halfDir, hitInfo.Normal))
                         Math.Pow(specAngle, glossiness)
-                    // else
-                        // 0.0
-                result + lambertian + specularColor * specularCoef * lightColor
+                    else
+                        0.0
+                result + lambertian + specularColor * specularCoef * lightColor * nDotWi
             ) initial
 
 let defBlinnDiffuse = Vector3d(0.5)
