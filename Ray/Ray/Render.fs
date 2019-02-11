@@ -45,8 +45,6 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
                     let material = scene.Materials.[hitInfo.Material]
                     // Debug.Assert(c <> 364 || r <> 159)
                     let color = shade ray material hitInfo (scene.Lights |> Map.toSeq |> Seq.map snd) scene.Nodes
-                    if not ((c <> 364 || r <> 159)) then
-                        printfn "the color is %A" color
                     Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
                     (hitInfo.T, color)
                 | _ -> 

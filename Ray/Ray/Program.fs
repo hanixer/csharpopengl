@@ -10,6 +10,8 @@ open System
 open OpenTK
 open OpenTK.Input
 open GlmNet
+open Object
+open Transform
 
 let drawLine (g : Drawing.Graphics) (p1 : Vector2) (p2 : Vector2) =
     g.DrawLine(Drawing.Pens.White, Drawing.PointF(p1.X, p1.Y), Drawing.PointF(p2.X, p2.Y))    
@@ -38,7 +40,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "box.xml"
+let file = "oneSphereWithLight.xml"
 
 type Window1(width, height) =
     inherit Window(width, height)
@@ -49,6 +51,7 @@ type Window1(width, height) =
 
     member this.Update() = 
         let scene = loadSceneFromFile file    
+        let scene = {scene with Nodes = [{Name = "me"; Object = Some(RectXYWithHoles(1.0, 3.0, 0.1)); Children = []; Transform = identityTransform; Material = "mtl1" }]}
         let zbuffer =  Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap zbuffer scene } |> measure
