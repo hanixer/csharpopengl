@@ -13,6 +13,8 @@ type HitInfo = {
     Material : string
 }
 
+let mutable debugFlag = false
+
 let epsilon = 0.00001
 
 let private random = Random()

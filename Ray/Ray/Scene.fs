@@ -171,6 +171,9 @@ let getObjectFromType (typeAttr : XmlAttribute) =
         | "sphere" -> 
             printf " - Sphere"
             Some Object.Sphere
+        | "cylinder" -> 
+            printf " - Cylinder"
+            Some Object.Cylinder
         | _ -> 
             printf " - UNKNOWN TYPE"
             None

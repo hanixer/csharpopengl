@@ -38,7 +38,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "box.xml"
+let file = "oneSphereWithLight.xml"
 
 type Window1(width, height) =
     inherit Window(width, height)

@@ -33,10 +33,12 @@ let clamp (color : Vector3d) =
 let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     let buf = Array2D.create bitmap.Height bitmap.Width Vector3d.Zero
     let w = bitmap.Width
+    let h = bitmap.Height
     Parallel.For(0, bitmap.Height, fun r ->
     // for r = 0 to bitmap.Height - 1 do
         for c = 0 to w - 1 do
             let ray = scene.Camera.Ray c r
+            debugFlag <- c = w / 2 && r = h / 2
             let t, color = 
                 match intersectNodes ray scene.Nodes epsilon with
                 | Some hitInfo ->

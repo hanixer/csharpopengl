@@ -20,7 +20,6 @@ let shade ray material hitInfo lights nodes shouldOutput =
         lights
         |> Seq.fold (fun result light ->
             if isInShadow light hitInfo nodes shouldOutput then
-                if shouldOutput then printfn "in shadow result = %A" result
                 result
             else
                 let wi = -(lightDir light hitInfo.Point)
@@ -36,13 +35,6 @@ let shade ray material hitInfo lights nodes shouldOutput =
                         Math.Pow(specAngle, glossiness)
                     // else
                         // 0.0
-                if  shouldOutput then
-                    printfn "result %A " result
-                    printfn "wi %A" wi
-                    printfn "lightColor %A" lightColor
-                    printfn "ndotwi %A " nDotWi
-                    printfn "lasmbertian %A"                 lambertian
-                    printfn "spcCoef %A" specularCoef
                 result + lambertian + specularColor * specularCoef * lightColor
             ) initial
 
