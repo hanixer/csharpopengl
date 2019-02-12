@@ -48,6 +48,22 @@ let randomInUnitSphere () =
         2.0 * Vector3d(x, y, z) - Vector3d(1.0, 1.0, 1.0))
     Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
 
+let randomInHemisphere () =
+    let r1 = random.NextDouble()
+    let r2 = random.NextDouble()
+    let phi = 2.0 * Math.PI * r1
+    let theta = Math.Acos(1.0 - r2)
+    let x  = Math.Sin theta * Math.Cos phi
+    let y = Math.Sin theta * Math.Sin phi
+    let z = Math.Cos theta
+    let points = Seq.initInfinite (fun _ -> 
+        let x = random.NextDouble()
+        let y = random.NextDouble()
+        let z = random.NextDouble() * 0.5
+        2.0 * Vector3d(x, y, z) - Vector3d.One)
+    // Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
+    Vector3d(x, z, y)
+
 let colorToVector (color : Drawing.Color) =
   Vector3d(float color.R / 255.0, float color.G / 255.0, float color.B / 255.0)
 

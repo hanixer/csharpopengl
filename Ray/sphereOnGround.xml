@@ -1,0 +1,40 @@
+<xml>
+  <scene>
+    <object type="sphere" name="WallBottom" material="wall">
+      <scale value="1000"/>
+      <translate y="-1000"/>
+    </object>
+    <object type="sphere" name="sphere1" material="mtl1">
+      <translate x="0" y="1" z="0"/>
+    </object>
+  </scene>
+
+  <material type="blinn" name="wall">
+    <diffuse value="1" /> 
+    <specular value="0"/>
+  </material>
+
+  <material type="blinn" name="mtl1">
+    <diffuse r="1" g="1" b="0"/>
+    <specular r="1.0" g="1.0" b="1.0" value="0.7"/>
+    <glossiness value="20"/>
+  </material>
+
+
+  <light type="ambient" name="ambientLight">
+    <intensity value="0.9"/>
+  </light>
+  <!-- <light type="direct" name="directionalLight">
+    <intensity value="0.5"/>
+    <direction x="0" y="-1" z="-1"/>
+  </light> -->
+
+  <camera>
+    <position x="5" y="5" z="10"/>
+    <target x="0" y="0" z="0"/>
+    <up x="0" y="1" z="0"/>
+    <fov value="40"/>
+    <width value="800"/>
+    <height value="600"/>
+  </camera>
+</xml>

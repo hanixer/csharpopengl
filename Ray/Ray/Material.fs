@@ -10,12 +10,12 @@ type Material =
 let shade ray material hitInfo lights nodes =
     match material with
     | Blinn(diffuseColor, specularColor, glossiness) ->
-        let ambient = Seq.tryFind isAmbient lights
-        let lights = Seq.filter (isAmbient >> not) lights
         let ambComponent = 
-            ambient
-            |> Option.map (fun light -> illuminate light hitInfo.Point hitInfo.Normal)
+            Seq.tryFind isAmbient lights
+            |> Option.map (fun light -> 
+                illuminate light hitInfo.Point hitInfo.Normal nodes)
             |> Option.defaultValue Vector3d.Zero
+        let lights = Seq.filter (isAmbient >> not) lights
         let initial = ambComponent * diffuseColor
         lights
         |> Seq.fold (fun result light ->
@@ -23,7 +23,7 @@ let shade ray material hitInfo lights nodes =
                 result
             else
                 let wi = -(lightDir light hitInfo.Point)
-                let lightColor = illuminate light hitInfo.Point hitInfo.Normal
+                let lightColor = illuminate light hitInfo.Point hitInfo.Normal nodes
                 let nDotWi = Math.Max(Vector3d.Dot(hitInfo.Normal, wi), 0.0)
                 let lambertian =
                     nDotWi * lightColor * diffuseColor

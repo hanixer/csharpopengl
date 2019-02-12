@@ -2,27 +2,37 @@ module Light
 open OpenTK
 open Common
 open Node
+open System
 
 type Light =
     | AmbientLight of Vector3d
     | DirectLight of Vector3d * Vector3d // intensity, direction
     | PointLight of Vector3d * Vector3d // intensity, position
+    | AmbientOccluder of Vector3d * float // intensity, min amount
 
-// virtual Color	Illuminate(const Point3 &p, const Point3 &N) const=0;
-// virtual Point3	Direction (const Point3 &p) const=0;
-// virtual bool	IsAmbient () const { return false; }
+let private random = Random()
 
-let illuminate light point normal =
+let illuminate light hitPoint normal nodes =
     match light with
     | AmbientLight intens -> intens
     | DirectLight(intens, _) -> intens
     | PointLight(intens, _) -> intens
+    | AmbientOccluder(intensity, minAmount) ->
+        let direction = randomInHemisphere ()
+        let shadowRay = {Origin = hitPoint; Direction = direction}
+        let shadowHit = intersectNodes shadowRay nodes epsilon
+        match shadowHit with
+        | Some shadowHitInfo ->
+            minAmount * Vector3d.Zero
+        | None ->
+            intensity
 
 let lightDir light point =
     match light with
     | AmbientLight _ -> Vector3d.Zero
     | DirectLight(_, direction) -> direction
     | PointLight(_, position) -> (point - position).Normalized()
+    | AmbientOccluder(_) -> randomInHemisphere()
 
 let isAmbient l = 
     match l with
