@@ -51,7 +51,6 @@ type Window1(width, height) =
 
     member this.Update() = 
         let scene = loadSceneFromFile file    
-        let scene = {scene with Nodes = [{Name = "me"; Object = Some(RectXYWithHoles(1.0, 3.0, 0.1)); Children = []; Transform = identityTransform; Material = "mtl1" }]}
         let zbuffer =  Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap zbuffer scene } |> measure

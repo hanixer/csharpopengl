@@ -165,7 +165,8 @@ let loadLight (xml : XmlNode) =
     | _ -> None
     |> Option.map (fun light -> (name, light))
 
-let getObjectFromType (typeAttr : XmlAttribute) = 
+let getObjectFromType (xml : XmlElement) = 
+    let typeAttr = xml.Attributes.["type"]
     if not (isNull typeAttr) then
         match typeAttr.InnerText with
         | "sphere" -> 
@@ -174,6 +175,10 @@ let getObjectFromType (typeAttr : XmlAttribute) =
         | "cylinder" -> 
             printf " - Cylinder"
             Some Object.Cylinder
+        | "rectWithHoles" ->
+            printf " - rect with holes"
+            let radius = readFloating xml "radius" 0.1
+            Some(Object.RectXYWithHoles(1.0, radius))
         | _ -> 
             printf " - UNKNOWN TYPE"
             None
@@ -192,7 +197,7 @@ let rec loadObject (xml : XmlNode) level =
     let material = readStrAttribute xml "material"
     printIdent level
     printf "object [%s]" name
-    let object = getObjectFromType xml.Attributes.["type"]
+    let object = getObjectFromType xml
     printfn ""
     let tm = loadTransform xml level
     let children = loadChildren xml level

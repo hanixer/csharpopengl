@@ -7,7 +7,7 @@ open Common
 type Object = 
     | Sphere
     | Cylinder
-    | RectXYWithHoles of float * float * float // width, height, radius
+    | RectXYWithHoles of float * float // width, radius
 
 let quadratic a b c =
     let discrim = b * b - 4.0 * a * c
@@ -66,7 +66,7 @@ let intersect ray object tMin material =
             computeHit t1
         | _ -> 
             None
-    | RectXYWithHoles(width, height, radius) ->    
+    | RectXYWithHoles(width, radius) ->    
         let t = (- ray.Origin.Z) / ray.Direction.Z
         if t < tMin then
             None
@@ -87,12 +87,8 @@ let intersect ray object tMin material =
                 else
                     let center = Vector3d((float c + 0.5) / ration, (float r + 0.5) / ration, 0.0)
                     if isInsideDisk point center radius then
-                        printfn "c = %A; r = %A; point = %A; center = %A; radius = %A => inside" c r point center radius
-                        printfn ""
                         None
                     else
-                        printfn "c = %A; r = %A; point = %A; center = %A; radius = %A => outside" c r point center radius
-                        printfn ""
                         let normal = Vector3d(0.0, 0.0, 1.0)
                         Some {T = t; Point = point; Normal = normal; Material = material;}
 
