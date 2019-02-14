@@ -42,7 +42,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "sphereOnGround.xml"
+let file = "box.xml"
 
 let manySpheres =
     let makeSphereNode () =
