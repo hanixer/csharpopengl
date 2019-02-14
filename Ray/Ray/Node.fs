@@ -14,6 +14,8 @@ type Node = {
     Material : string
 }
 
+let maxDepth = 10
+
 let tryFindBestHitInfo hitInfos =
     let fold best hitInfo =
         match (best, hitInfo) with
@@ -23,19 +25,24 @@ let tryFindBestHitInfo hitInfos =
     let result = Seq.fold fold None hitInfos
     result    
 
-let hitInfoToWorld ray node hitInfo =
+let hitInfoToWorld ray node depth hitInfo =
     let point = transformPoint node.Transform hitInfo.Point
     let normal = transformNormal node.Transform hitInfo.Normal
     let t = (point - ray.Origin).Length
-    {hitInfo with Point = point; Normal = normal.Normalized(); T = t}
+    let mat = if hitInfo.Material.Length > 0 then hitInfo.Material else node.Material
+    {hitInfo with Point = point; Normal = normal.Normalized(); T = t; Material = mat; Depth = depth}
 
-let rec intersectNodes ray nodes tMin =
-    Seq.map (fun node -> intersectNode ray node tMin) nodes
-    |> tryFindBestHitInfo
+let rec intersectNodes ray nodes tMin depth =
+    printfn "depth: %d" depth
+    if depth > maxDepth then
+        None
+    else
+        Seq.map (fun node -> intersectNode ray node tMin depth) nodes
+        |> tryFindBestHitInfo
     
-and intersectNode ray node tMin =
+and intersectNode ray node tMin depth =
     let rayLocal = {Origin = transformPointInv node.Transform ray.Origin; Direction = (transformVector node.Transform.Inv ray.Direction).Normalized()}
-    let hitInfoChilds = intersectNodes rayLocal node.Children tMin
+    let hitInfoChilds = intersectNodes rayLocal node.Children tMin depth
     let hitInfo =
         if Option.isSome node.Object then
             tryFindBestHitInfo [
@@ -44,4 +51,4 @@ and intersectNode ray node tMin =
             ]
         else
             hitInfoChilds
-    Option.map (hitInfoToWorld ray node) hitInfo
+    Option.map (hitInfoToWorld ray node depth) hitInfo

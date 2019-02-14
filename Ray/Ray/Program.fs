@@ -42,16 +42,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "box.xml"
-
-let manySpheres =
-    let makeSphereNode () =
-        let mat = Blinn(Vector3d(1.0, 1.0, 0.0), Vector3d.Zero, 0.0)
-        let pos = randomInHemisphere()
-        let tm = compose (translate pos) (scale (Vector3d(0.01)))
-        {Node.Children = []; Node.Material = "mtl1"; Node.Name = "thinge"; Node.Object = Some Sphere; Node.Transform = tm }
-    Seq.init 200 (fun _ -> makeSphereNode())
-    |> Seq.toList
+let file = "boxWithRefl.xml"
 
 type Window1(width, height) =
     inherit Window(width, height)
@@ -62,8 +53,6 @@ type Window1(width, height) =
 
     member this.Update() = 
         let scene = loadSceneFromFile file    
-        // let scene = {scene with Lights = ["thing", AmbientOccluder(Vector3d.One, 0.1)] |> Map.ofList}
-        // let scene = {scene with Nodes = manySpheres}
         let zbuffer =  Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap zbuffer scene } |> measure

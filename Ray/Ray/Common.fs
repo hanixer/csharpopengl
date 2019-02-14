@@ -11,6 +11,7 @@ type HitInfo = {
     Point : Vector3d
     Normal : Vector3d
     Material : string
+    Depth : int
 }
 
 let mutable debugFlag = false

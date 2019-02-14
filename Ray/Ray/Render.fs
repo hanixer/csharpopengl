@@ -40,7 +40,7 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
             let ray = scene.Camera.Ray c r
             debugFlag <- c = w / 2 && r = h / 2
             let t, color = 
-                match intersectNodes ray scene.Nodes epsilon with
+                match intersectNodes ray scene.Nodes epsilon 0 with
                 | Some hitInfo ->
                     let material = scene.Materials.[hitInfo.Material]
                     // Debug.Assert(c <> 364 || r <> 159)

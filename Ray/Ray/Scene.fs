@@ -89,22 +89,26 @@ let loadTransform (xml : XmlElement) level =
     |> Seq.fold (fun a b -> compose b a) identityTransform
 
 let loadMaterial (xml : XmlNode) =
-    let chooseMaterial (diffuse, specular, glossy as acc) (xml : XmlElement) =
+    let chooseMaterial blinn (xml : XmlElement) =
         match xml.Name with
         | "diffuse" ->
             let c = readColor xml Vector3d.One
             printfn "  diffuse %A" c
-            (c, specular, glossy)
+            {blinn with DiffuseColor = c}
         | "specular" ->
             let c = readColor xml Vector3d.One
             printfn "  specular %A" c
-            (diffuse, c, glossy)
+            {blinn with SpecularColor = c}
         | "glossiness" ->
             let glos = readFloating xml "value" 1.0
             printfn "  glossiness %A" glos
-            (diffuse, specular, glos)
+            {blinn with Glossiness = glos}
+        | "reflection" ->
+            let v = readColor xml Vector3d.One
+            printfn "  reflection %A" v
+            {blinn with Reflection = v}
         | _ ->
-            acc
+            blinn
     let xml = xml :?> XmlElement
     let name =
         let nameAttr = xml.Attributes.["name"]
@@ -118,7 +122,7 @@ let loadMaterial (xml : XmlNode) =
         | "blinn" ->
             printf " - Blinn"
             getChildElements xml
-            |> Seq.fold chooseMaterial (defBlinnDiffuse, defBlinnSpecular, defBlinnGlossiness)
+            |> Seq.fold chooseMaterial defaultBlinn
             |> Blinn
             |> Some
         | _ -> None

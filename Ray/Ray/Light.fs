@@ -18,14 +18,7 @@ let illuminate light hitPoint normal nodes =
     | DirectLight(intens, _) -> intens
     | PointLight(intens, _) -> intens
     | AmbientOccluder(intensity, minAmount) ->
-        let direction = randomInHemisphere ()
-        let shadowRay = {Origin = hitPoint; Direction = direction}
-        let shadowHit = intersectNodes shadowRay nodes epsilon
-        match shadowHit with
-        | Some shadowHitInfo ->
-            minAmount * Vector3d.Zero
-        | None ->
-            intensity
+        intensity
 
 let lightDir light point =
     match light with
@@ -42,7 +35,7 @@ let isAmbient l =
 let isInShadow light hitInfo nodes =     
     let direction = -(lightDir light hitInfo.Point)
     let shadowRay = {Origin = hitInfo.Point ; Direction = direction}    
-    let shadowHit = intersectNodes shadowRay nodes epsilon
+    let shadowHit = intersectNodes shadowRay nodes epsilon (hitInfo.Depth + 1)
     match (shadowHit, light) with
     | Some shadowHitInfo, PointLight(_, lightPos) ->
         (shadowHitInfo.Point - hitInfo.Point).Length < (lightPos - hitInfo.Point).Length

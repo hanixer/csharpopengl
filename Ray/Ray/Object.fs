@@ -25,11 +25,19 @@ let quadratic a b c =
 let isInsideDisk (point : Vector3d) (center : Vector3d) radius = 
     (point - center).Length * (point - center).Length < radius * radius
 
+let defaultHitInfo = {
+    T = 0.0
+    Point = Vector3d.Zero
+    Normal = Vector3d.Zero
+    Material = ""
+    Depth = 0
+}
+
 let intersect ray object tMin material =
     let computeHit (t : float) =
         let point = pointOnRay ray t
         let normal = point.Normalized()
-        Some {T = t; Point = point; Normal = normal; Material = material}
+        Some {defaultHitInfo with T = t; Point = point; Normal = normal}
 
     match object with
     | Sphere ->
@@ -49,7 +57,7 @@ let intersect ray object tMin material =
             let point = pointOnRay ray t
             let normal = Vector3d(point.X, 0.0, point.Z).Normalized()
             if point.Y <= 1.0 && point.Y >= -1.0 then
-                Some {T = t; Point = point; Normal = normal; Material = material}
+                Some {defaultHitInfo with T = t; Point = point; Normal = normal}
             else
                 None            
 
@@ -83,14 +91,14 @@ let intersect ray object tMin material =
                 let holeEnabled = (r % 2 = 0 && c % 2 = 0 || r % 2 <> 0 && c % 2 <> 0)
                 if not holeEnabled then
                     let normal = Vector3d(0.0, 0.0, 1.0)
-                    Some {T = t; Point = point; Normal = normal; Material = material;}
+                    Some {defaultHitInfo with T = t; Point = point; Normal = normal}
                 else
                     let center = Vector3d((float c + 0.5) / ration, (float r + 0.5) / ration, 0.0)
                     if isInsideDisk point center radius then
                         None
                     else
                         let normal = Vector3d(0.0, 0.0, 1.0)
-                        Some {T = t; Point = point; Normal = normal; Material = material;}
+                        Some {defaultHitInfo with T = t; Point = point; Normal = normal}
 
             else
                 None
