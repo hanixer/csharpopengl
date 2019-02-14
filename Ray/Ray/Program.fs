@@ -9,7 +9,6 @@ open Render
 open System
 open OpenTK
 open OpenTK.Input
-open GlmNet
 open Object
 open Transform
 open Light
@@ -64,7 +63,7 @@ type Window1(width, height) =
     member this.Update() = 
         let scene = loadSceneFromFile file    
         // let scene = {scene with Lights = ["thing", AmbientOccluder(Vector3d.One, 0.1)] |> Map.ofList}
-        let scene = {scene with Nodes = manySpheres}
+        // let scene = {scene with Nodes = manySpheres}
         let zbuffer =  Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap zbuffer scene } |> measure
