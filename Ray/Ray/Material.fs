@@ -40,17 +40,21 @@ let shade ray material hitInfo lights nodes =
         //     ) initial
         let light = Seq.head lights
         let lightColor = illuminate light hitInfo.Point hitInfo.Normal nodes
-        let v = hitInfo.Normal
-        let u = Vector3d.Cross(v, Vector3d(v.X, 0.0, v.Z))
+        let v = hitInfo.Normal        
+        let u = Vector3d.Cross(v, Vector3d(0.16571, 1.0, 0.8391827)).Normalized()
+        let u = Vector3d.Cross(v, Vector3d(1.0, 0.0, 0.0)).Normalized()
         let w = Vector3d.Cross(u, v)
         let sample = randomInHemisphere()
         let direction = Vector3d(Vector3d.Dot(u, sample), Vector3d.Dot(v, sample), Vector3d.Dot(w, sample))
+        let direction = sample.X * u + sample.Y * v + sample.Z * w
         let newRay = {Origin = hitInfo.Point; Direction = direction.Normalized()}
         match intersectNodes newRay nodes epsilon with
         | Some hitInfo2 ->
             lightColor * diffuseColor
         | None ->
-            0.1 * lightColor * diffuseColor
+            0.5 * lightColor * diffuseColor
+
+        // newRay.Direction * 0.5 + Vector3d(0.5)
 
 let defBlinnDiffuse = Vector3d(0.5)
 let defBlinnSpecular = Vector3d(0.7)
