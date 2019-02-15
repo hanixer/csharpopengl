@@ -107,6 +107,11 @@ let loadMaterial (xml : XmlNode) =
             let v = readColor xml Vector3d.One
             printfn "  reflection %A" v
             {blinn with Reflection = v}
+        | "refraction" ->
+            let v = readColor xml Vector3d.One
+            let ior = readFloating xml "index" 1.0            
+            printfn "  reflection %A, index %A" v ior
+            {blinn with Refraction = v; Ior = ior}
         | _ ->
             blinn
     let xml = xml :?> XmlElement

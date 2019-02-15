@@ -24,6 +24,32 @@ let reflect (rayDir : Vector3d) (normal : Vector3d) =
     let proj = normal * Vector3d.Dot(-rayDir, normal)
     (rayDir + 2.0 * proj).Normalized()
     
+let refract (rayDir : Vector3d) (normal : Vector3d) ior =
+    let rayDir = rayDir.Normalized()
+    let dot = Vector3d.Dot(rayDir, normal)
+    let ior, cosThetaI, n = if dot < 0.0 then (ior, -dot, normal) else (1.0 / ior, dot, -normal)
+    let projected = cosThetaI * n
+    let vecDiff = rayDir + projected    
+    let component1 = vecDiff / ior
+    let sinThetaI = vecDiff.Length
+    let sinThetaT = sinThetaI / ior 
+    let cosThetaT = Math.Sqrt(1.0 - sinThetaT * sinThetaT)
+    let component2 = -n * cosThetaT
+    let result = component1 + component2
+    // printfn "%A" dot
+    // printfn "%A" ior
+    // printfn "%A" cosThetaI
+    // printfn "%A" n
+    // printfn "%A" projected
+    // printfn "%A" vecDiff
+    // printfn "%A" component1
+    // printfn "%A" sinThetaI
+    // printfn "%A" sinThetaT
+    // printfn "%A" cosThetaT
+    // printfn "%A" component2
+    result.Normalize()
+    result
+
 let rec shade ray material hitInfo lights nodes =
     match material with
     | Blinn b ->
@@ -56,10 +82,14 @@ let rec shade ray material hitInfo lights nodes =
                     result + lambertian + b.SpecularColor * specularCoef * lightColor * nDotWi
                 ) initial
         let isReflectionPresent = b.Reflection.X > epsilon && b.Reflection.Y > epsilon && b.Reflection.Z > epsilon
+        let isRefractionPresent = b.Refraction.X > epsilon && b.Refraction.Y > epsilon && b.Refraction.Z > epsilon
         let scattered = 
             if isReflectionPresent then
                 let reflectedDir = reflect ray.Direction hitInfo.Normal
                 Some {Origin = hitInfo.Point; Direction = reflectedDir}
+            else if isRefractionPresent then
+                let refractedDir = refract ray.Direction hitInfo.Normal b.Ior
+                Some {Origin = hitInfo.Point; Direction = refractedDir}
             else None
         (directColor, scattered)
     | ReflectMaterial(reflectColor) ->

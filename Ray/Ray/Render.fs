@@ -30,7 +30,7 @@ let clamp (color : Vector3d) =
     else
         color
 
-let maxDepth = 20
+let maxDepth = 5
 
 let rec traceRay ray scene depth = 
     let defaultRes = (Double.PositiveInfinity, Vector3d.Zero)
