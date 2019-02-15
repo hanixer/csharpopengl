@@ -30,28 +30,40 @@ let clamp (color : Vector3d) =
     else
         color
 
-let traceRay ray scene = 
-    match intersectNodes ray scene.Nodes epsilon 0 with
-    | Some hitInfo ->
-        let material = scene.Materials.[hitInfo.Material]
-        let color = shade ray material hitInfo (scene.Lights |> Map.toSeq |> Seq.map snd) scene.Nodes
-        Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
-        (hitInfo.T, color)
-    | _ -> 
-        (Double.PositiveInfinity, Vector3d.Zero)
+let maxDepth = 20
+
+let rec traceRay ray scene depth = 
+    let defaultRes = (Double.PositiveInfinity, Vector3d.Zero)
+    if depth > maxDepth then
+        defaultRes
+    else
+        match intersectNodes ray scene.Nodes epsilon with
+        | Some hitInfo ->
+            let material = scene.Materials.[hitInfo.Material]
+            let lights = (scene.Lights |> Map.toSeq |> Seq.map snd)
+            let shadedColor, scattered = shade ray material hitInfo lights scene.Nodes
+            match scattered with
+            | Some scatRay ->
+                let _, scatColor = traceRay scatRay scene (depth + 1)
+                let color = shadedColor + scatColor
+                Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
+                (hitInfo.T, color)
+            | _ ->
+                (hitInfo.T, shadedColor)
+        | _ -> defaultRes
 
 let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     let buf = Array2D.create bitmap.Height bitmap.Width Vector3d.Zero
     let w = bitmap.Width
     let h = bitmap.Height
-    // Parallel.For(0, bitmap.Height, fun r ->
-    for r = 0 to bitmap.Height - 1 do
+    Parallel.For(0, bitmap.Height, fun r ->
+    // for r = 0 to bitmap.Height - 1 do
         for c = 0 to w - 1 do
             let ray = scene.Camera.Ray c r
-            let t, color = traceRay ray scene
+            let t, color = traceRay ray scene 0
             zbuffer.[r, c] <- t
             buf.[r, c] <- color
-    // ) |> ignore
+    ) |> ignore
     Array2D.iteri (fun r c x -> setPixel bitmap c r (clamp x)) buf
 
 let drawZBuffer zbuffer =

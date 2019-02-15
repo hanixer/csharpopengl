@@ -33,6 +33,20 @@
       <rotate angle="30" y="1"/>
       <translate x="7" y="-5" z="6.5"/>
     </object>
+    <object type="sphere" name="sphere3" material="mtl3">
+      <scale value="1"/>
+      <rotate angle="45" y="1"/>
+      <rotate angle="45" z="1"/>
+      <!-- <rotate angle="90" x="1"/> -->
+      <translate x="7" y="-5" z="15.5"/>
+    </object>
+    <object type="sphere" name="sphere4" material="mtl3">
+      <scale value="1"/>
+      <rotate angle="45" y="1"/>
+      <rotate angle="45" z="1"/>
+      <!-- <rotate angle="90" x="1"/> -->
+      <translate x="4" y="-5" z="15.5"/>
+    </object>
 
     <!-- Materials -->
     <material type="blinn" name="wall">
@@ -59,6 +73,12 @@
       <glossiness value="10"/>
       <refraction value="0.8" index="1.52"/>
       <absorption r="0.01" g="0.001" b="0.0001"/>
+    </material>
+    <material type="blinn" name="mtl3">
+      <diffuse  value="0"/>
+      <specular value="0"/>
+      <glossiness value="20"/>
+      <reflection r="0.8" g="0.5" b="0.5" />
     </material>
 
     <!-- Lights -->

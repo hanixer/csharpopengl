@@ -6,9 +6,9 @@ open System
 
 type Light =
     | AmbientLight of Vector3d
-    | DirectLight of Vector3d * Vector3d // intensity, direction
-    | PointLight of Vector3d * Vector3d // intensity, position
-    | AmbientOccluder of Vector3d * float // intensity, min amount
+    | DirectLight of intensity : Vector3d * direction : Vector3d
+    | PointLight of intensity : Vector3d * position : Vector3d // intensity, position
+    | AmbientOccluder of intensity : Vector3d * minAmount : float // intensity, min amount
 
 let private random = Random()
 
@@ -35,7 +35,7 @@ let isAmbient l =
 let isInShadow light hitInfo nodes =     
     let direction = -(lightDir light hitInfo.Point)
     let shadowRay = {Origin = hitInfo.Point ; Direction = direction}    
-    let shadowHit = intersectNodes shadowRay nodes epsilon (hitInfo.Depth + 1)
+    let shadowHit = intersectNodes shadowRay nodes epsilon
     match (shadowHit, light) with
     | Some shadowHitInfo, PointLight(_, lightPos) ->
         (shadowHitInfo.Point - hitInfo.Point).Length < (lightPos - hitInfo.Point).Length
