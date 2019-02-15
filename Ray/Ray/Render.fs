@@ -30,6 +30,16 @@ let clamp (color : Vector3d) =
     else
         color
 
+let traceRay ray scene = 
+    match intersectNodes ray scene.Nodes epsilon 0 with
+    | Some hitInfo ->
+        let material = scene.Materials.[hitInfo.Material]
+        let color = shade ray material hitInfo (scene.Lights |> Map.toSeq |> Seq.map snd) scene.Nodes
+        Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
+        (hitInfo.T, color)
+    | _ -> 
+        (Double.PositiveInfinity, Vector3d.Zero)
+
 let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     let buf = Array2D.create bitmap.Height bitmap.Width Vector3d.Zero
     let w = bitmap.Width
@@ -38,17 +48,7 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     for r = 0 to bitmap.Height - 1 do
         for c = 0 to w - 1 do
             let ray = scene.Camera.Ray c r
-            debugFlag <- c = w / 2 && r = h / 2
-            let t, color = 
-                match intersectNodes ray scene.Nodes epsilon 0 with
-                | Some hitInfo ->
-                    let material = scene.Materials.[hitInfo.Material]
-                    // Debug.Assert(c <> 364 || r <> 159)
-                    let color = shade ray material hitInfo (scene.Lights |> Map.toSeq |> Seq.map snd) scene.Nodes
-                    Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
-                    (hitInfo.T, color)
-                | _ -> 
-                    (Double.PositiveInfinity, Vector3d.Zero)
+            let t, color = traceRay ray scene
             zbuffer.[r, c] <- t
             buf.[r, c] <- color
     // ) |> ignore

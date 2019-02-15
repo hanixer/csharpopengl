@@ -31,10 +31,10 @@ let rec shade ray material hitInfo lights nodes =
                 |> Option.map (fun light -> 
                     illuminate light hitInfo.Point hitInfo.Normal nodes)
                 |> Option.defaultValue Vector3d.Zero
-            let lights = Seq.filter (isAmbient >> not) lights
+            let lightsOther = Seq.filter (isAmbient >> not) lights
             let initial = ambComponent * b.DiffuseColor
             let directColor =
-                lights
+                lightsOther
                 |> Seq.fold (fun result light ->
                     if isInShadow light hitInfo nodes then
                         result
@@ -54,17 +54,18 @@ let rec shade ray material hitInfo lights nodes =
                                 0.0
                         result + lambertian + b.SpecularColor * specularCoef * lightColor * nDotWi
                     ) initial
+            let isReflectionPresent = b.Reflection.X > epsilon && b.Reflection.Y > epsilon && b.Reflection.Z > epsilon
             let reflectedColor = 
                 if b.Reflection.X > epsilon && b.Reflection.Y > epsilon && b.Reflection.Z > epsilon then
                     let reflectedDir = reflect ray.Direction hitInfo.Normal
                     let reflectedRay = {Origin = hitInfo.Point; Direction = reflectedDir}
                     match intersectNodes reflectedRay nodes epsilon (hitInfo.Depth + 1) with
                     | Some hitInfoRefl when hitInfoRefl.Depth < maxDepth ->
-                        let reshade = shade reflectedRay material hitInfo lights nodes
+                        let reshade = shade reflectedRay material hitInfoRefl lights nodes
                         reshade * b.Reflection
                     | _ -> Vector3d.Zero
                 else Vector3d.Zero
-            directColor + reflectedColor                
+            directColor + reflectedColor
 
 let defaultBlinn = {
     DiffuseColor = Vector3d(0.5)

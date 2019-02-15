@@ -14,7 +14,7 @@ type Node = {
     Material : string
 }
 
-let maxDepth = 10
+let maxDepth = 2
 
 let tryFindBestHitInfo hitInfos =
     let fold best hitInfo =
@@ -33,7 +33,6 @@ let hitInfoToWorld ray node depth hitInfo =
     {hitInfo with Point = point; Normal = normal.Normalized(); T = t; Material = mat; Depth = depth}
 
 let rec intersectNodes ray nodes tMin depth =
-    printfn "depth: %d" depth
     if depth > maxDepth then
         None
     else
