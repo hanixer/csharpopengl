@@ -14,6 +14,28 @@ type HitInfo = {
     Depth : int
 }
 
+type BoundingBox = {
+    PMin : Vector3d
+    PMax : Vector3d
+}
+
+let hitBoundingBox (box : BoundingBox) ray tmin tmax = 
+   let handle (tmin, tmax) (box1, box2, rayOrig, rayDir) =
+      let inv = 1.0 / rayDir
+      let t1 = (box1 - rayOrig) * inv
+      let t2 = (box2 - rayOrig) * inv
+      let t3, t4 =  if rayDir < 0.0 then (t2, t1) else (t1, t2)
+      let t5 = Math.Max(tmin, t3)
+      let t6 = Math.Min(tmax, t4)
+      (t5, t6)
+   
+   let box1 = box.PMin
+   let box2 = box.PMax
+   let t1, t2 = handle (tmin, tmax) (box1.X, box2.X, ray.Origin.X, ray.Direction.X) 
+   let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y) 
+   let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y) 
+   t1 < t2 && t2 > 0.0
+
 let mutable debugFlag = false
 
 let epsilon = 0.00001

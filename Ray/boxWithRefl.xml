@@ -33,6 +33,11 @@
       <rotate angle="30" y="1"/>
       <translate x="7" y="-5" z="6.5"/>
     </object>
+    <object type="sphere" name="glass" material="mtl2">
+      <scale value="3" y="10"/>
+
+      <translate z="10" y="40"/>
+    </object>
     <object type="sphere" name="sphere3" material="mtl3">
       <scale value="1"/>
       <rotate angle="45" y="1"/>
@@ -71,7 +76,7 @@
       <diffuse  r="0.1" g="0.1" b="0.9"/>
       <specular r="0.9" g="0.9" b="1.0" value="0.8"/>
       <glossiness value="10"/>
-      <refraction value="0.8" index="1.52"/>
+      <refraction value="0.8" index="1.9"/>
       <absorption r="0.01" g="0.001" b="0.0001"/>
     </material>
     <material type="blinn" name="mtl3">

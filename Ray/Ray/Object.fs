@@ -8,6 +8,7 @@ type Object =
     | Sphere
     | Cylinder
     | RectXYWithHoles of float * float // width, radius
+    | Triangle of Vector3d * Vector3d * Vector3d
 
 let quadratic a b c =
     let discrim = b * b - 4.0 * a * c
@@ -33,6 +34,48 @@ let defaultHitInfo = {
     Depth = 0
 }
 
+// (1 - beta - gamma) * a + beta * b + gamma * c = o + t * d
+// a + beta * (b - a) + gamma * (c - gamma) = o + t * d
+// beta * (b - a) + gamma * (c - a) - t * d = o - a
+// | a b c | | beta  |   | d | 
+// | e f g | | gamma | = | h |
+// | i j k | | t     |   | l |
+// a = (b.x - a.x)
+// b = ()
+// [a e i] = b - a
+// [b f j] = c - a
+// [c g k] = -d
+// [d h l] = o - a
+let intersectTriangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
+    let aei = p1 - p0
+    let bfj = p2 - p0
+    let cgk = -ray.Direction
+    let dhl = ray.Origin - p0
+    let m : Matrix3d = Matrix3d(aei, bfj, cgk)
+    m.Transpose()
+    let det = m.Determinant
+    if Math.Abs(det) < epsilon then
+        None
+    else
+        let m1 = Matrix3d(dhl, bfj, cgk)
+        m1.Transpose()
+        let beta = m1.Determinant / det
+        let m2 = Matrix3d(aei, dhl, cgk)
+        m2.Transpose()
+        let gamma = m2.Determinant / det
+        let m3 = Matrix3d(aei, bfj, dhl)
+        m3.Transpose()
+        let t = m3.Determinant / det
+        let normal = Vector3d.Cross(p1 - p0, p2 - p0)
+        normal.Normalize()
+        let alpha = 1.0 - beta - gamma
+        let inline inRange r = r > 0.0 && r < 1.0
+        if inRange alpha && inRange beta && inRange gamma && t > epsilon then
+            let point = pointOnRay ray t
+            Some {defaultHitInfo with T = t; Point = point; Normal = normal}
+        else
+            None
+
 let intersect ray object tMin material =
     let computeHit (t : float) =
         let point = pointOnRay ray t
@@ -40,6 +83,8 @@ let intersect ray object tMin material =
         Some {defaultHitInfo with T = t; Point = point; Normal = normal}
 
     match object with
+    | Triangle(a, b, c) ->
+        intersectTriangle ray a b c
     | Sphere ->
         let offset = ray.Origin
         let a = Vector3d.Dot(ray.Direction, ray.Direction)

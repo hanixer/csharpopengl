@@ -96,13 +96,3 @@ let drawBitmapOnBitmap (source : System.Drawing.Bitmap) (destination : System.Dr
             let rect = Drawing.RectangleF(float32 x, float32 y, float32 pixelSize, float32 pixelSize)
             graphics.FillRectangle(brush, rect)
 
-let n = 10000000
-let rand = Random()
-let sume =
-   Seq.init n (fun _ -> 
-      let x = rand.NextDouble() * 2.0
-      x * x
-      )
-   |> Seq.sum
-let answer  = 2.0 * sume / float n
-8.0 / 3.0

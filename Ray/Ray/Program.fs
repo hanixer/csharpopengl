@@ -14,6 +14,7 @@ open Transform
 open Light
 open Common
 open Material
+open Node
 
 let drawLine (g : Drawing.Graphics) (p1 : Vector2) (p2 : Vector2) =
     g.DrawLine(Drawing.Pens.White, Drawing.PointF(p1.X, p1.Y), Drawing.PointF(p2.X, p2.Y))    
@@ -42,7 +43,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "boxWithRefl.xml"
+let file = "triangle.xml"
 
 type Window1(width, height) =
     inherit Window(width, height)
@@ -67,7 +68,6 @@ type Window1(width, height) =
             isZ <- not isZ
         if base.Keyboard.[Key.F5] then 
             this.Update()
-           
 
 [<EntryPoint>]
 let main argv =

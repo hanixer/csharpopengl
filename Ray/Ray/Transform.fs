@@ -30,7 +30,8 @@ let rotateY theta =
     {M = m; Inv = inv}
 
 let rotate (axis : Vector3d) (theta : float) =
-    let inv = Matrix4d.Rotate(axis, theta)
+    let th = OpenTK.MathHelper.DegreesToRadians theta
+    let inv = Matrix4d.Rotate(axis, th)
     let m = Matrix4d.Transpose(inv)
     {M = m; Inv = inv}
 

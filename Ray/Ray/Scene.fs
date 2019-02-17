@@ -54,6 +54,13 @@ let readColor (xml : XmlNode) (defaultVec : Vector3d) =
     else    
         defaultVec
 
+let select (xml : XmlElement) name selector defaultV =
+    xml.SelectNodes name
+    |> Seq.cast<XmlElement>
+    |> Seq.tryHead
+    |> Option.map selector
+    |> Option.defaultValue defaultV
+
 let getChildElements (xml : XmlElement) =
     xml.ChildNodes
     |> Seq.cast<XmlNode>
@@ -181,6 +188,13 @@ let getObjectFromType (xml : XmlElement) =
         | "sphere" -> 
             printf " - Sphere"
             Some Object.Sphere
+        | "triangle" ->
+            printf " - Triangle"
+            let vz = Vector3d.Zero
+            let p0 = select xml "./p0" (fun elem -> readVector elem vz) vz
+            let p1 = select xml "./p1" (fun elem -> readVector elem vz) vz
+            let p2 = select xml "./p2" (fun elem -> readVector elem vz) vz
+            Some(Object.Triangle(p0, p1, p2))
         | "cylinder" -> 
             printf " - Cylinder"
             Some Object.Cylinder
@@ -223,18 +237,12 @@ let loadSceneObjects (xml : XmlElement) =
     loadChildren xml 0     
 
 let loadCamera (xml : XmlElement) =
-    let select name selector defaultV =
-        xml.SelectNodes name
-        |> Seq.cast<XmlElement>
-        |> Seq.tryHead
-        |> Option.map selector
-        |> Option.defaultValue defaultV
-    let pos = select "./position" (fun elem -> readVector elem defCameraPos) defCameraPos
-    let target = select "./target" (fun elem -> readVector elem defCameraPos) defCameraPos
-    let up = select "./up" (fun elem -> readVector elem defCameraPos) defCameraPos
-    let fov =  select "./fov" (fun elem -> readFloating elem "value" defCameraFov) defCameraFov
-    let width =  select "./width" (fun elem -> readFloating elem "value" defCameraWidth) defCameraWidth
-    let height =  select "./height" (fun elem -> readFloating elem "value" defCameraHeight) defCameraHeight
+    let pos = select xml "./position" (fun elem -> readVector elem defCameraPos) defCameraPos
+    let target = select xml "./target" (fun elem -> readVector elem defCameraPos) defCameraPos
+    let up = select xml "./up" (fun elem -> readVector elem defCameraPos) defCameraPos
+    let fov =  select xml "./fov" (fun elem -> readFloating elem "value" defCameraFov) defCameraFov
+    let width =  select xml "./width" (fun elem -> readFloating elem "value" defCameraWidth) defCameraWidth
+    let height =  select xml "./height" (fun elem -> readFloating elem "value" defCameraHeight) defCameraHeight
     Camera(pos, target, up, fov, int width, int height)
 
 let loadScene (xml : XmlDocument) =

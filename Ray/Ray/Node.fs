@@ -46,3 +46,6 @@ and intersectNode ray node tMin =
         else
             hitInfoChilds
     Option.map (hitInfoToWorld ray node) hitInfo
+
+let getBoundingBox node =
+    1

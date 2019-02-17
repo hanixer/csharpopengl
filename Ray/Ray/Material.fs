@@ -19,6 +19,8 @@ type BlinnData = {
 type Material =
     | Blinn of BlinnData
     | ReflectMaterial of Vector3d
+    
+    member this.Number = 23
 
 let reflect (rayDir : Vector3d) (normal : Vector3d) =
     let proj = normal * Vector3d.Dot(-rayDir, normal)
@@ -33,22 +35,26 @@ let refract (rayDir : Vector3d) (normal : Vector3d) ior =
     let component1 = vecDiff / ior
     let sinThetaI = vecDiff.Length
     let sinThetaT = sinThetaI / ior 
-    let cosThetaT = Math.Sqrt(1.0 - sinThetaT * sinThetaT)
-    let component2 = -n * cosThetaT
-    let result = component1 + component2
-    // printfn "%A" dot
-    // printfn "%A" ior
-    // printfn "%A" cosThetaI
-    // printfn "%A" n
-    // printfn "%A" projected
-    // printfn "%A" vecDiff
-    // printfn "%A" component1
-    // printfn "%A" sinThetaI
-    // printfn "%A" sinThetaT
-    // printfn "%A" cosThetaT
-    // printfn "%A" component2
-    result.Normalize()
-    result
+    let sinThetaT2 = sinThetaT * sinThetaT
+    if sinThetaT2 < 0.0 then 
+        Vector3d.Zero
+    else
+        let cosThetaT = Math.Sqrt(1.0 - sinThetaT2)
+        let component2 = -n * cosThetaT
+        let result = component1 + component2
+        // printfn "%A" dot
+        // printfn "%A" ior
+        // printfn "%A" cosThetaI
+        // printfn "%A" n
+        // printfn "%A" projected
+        // printfn "%A" vecDiff
+        // printfn "%A" component1
+        // printfn "%A" sinThetaI
+        // printfn "%A" sinThetaT
+        // printfn "%A" cosThetaT
+        // printfn "%A" component2
+        result.Normalize()
+        result
 
 let rec shade ray material hitInfo lights nodes =
     match material with
