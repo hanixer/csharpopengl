@@ -43,7 +43,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "triangle.xml"
+let file = "cylinder.xml"
 
 type Window1(width, height) =
     inherit Window(width, height)
