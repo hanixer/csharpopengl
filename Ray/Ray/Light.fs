@@ -9,6 +9,7 @@ type Light =
     | DirectLight of intensity : Vector3d * direction : Vector3d
     | PointLight of intensity : Vector3d * position : Vector3d // intensity, position
     | AmbientOccluder of intensity : Vector3d * minAmount : float // intensity, min amount
+    | AreaLight of object : string
 
 let private random = Random()
 

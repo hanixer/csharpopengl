@@ -166,3 +166,4 @@ let intersect ray object tMin material =
         intersectRectWithHoles ray width radius tMin
     | Disk ->
         intersectDisk ray
+

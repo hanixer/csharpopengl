@@ -32,6 +32,22 @@ let clamp (color : Vector3d) =
 
 let maxDepth = 5
 
+let getReflectedForLight ray light hitInfo =
+    let ns = 10
+    failwith ""
+
+let getReflectedTotal ray scene hitInfo =
+    failwith ""
+
+let areaLightTrace ray scene =
+    match intersectNodes ray scene.Nodes epsilon with
+    | Some hitInfo ->
+        let material = scene.Materials.[hitInfo.Material]
+        let emitted = getEmitted material
+        let reflected = getReflectedTotal ray scene hitInfo    
+        failwith ""
+    | _ -> Vector3d.Zero
+
 let rec traceRay ray scene depth = 
     let defaultRes = (Double.PositiveInfinity, Vector3d.Zero)
     if depth > maxDepth then

@@ -19,8 +19,12 @@ type BlinnData = {
 type Material =
     | Blinn of BlinnData
     | ReflectMaterial of Vector3d
-    
-    member this.Number = 23
+    | Emissive of Vector3d
+
+let getEmitted material =
+    match material with
+    | Emissive(color) -> color
+    | _ -> Vector3d.Zero
 
 let reflect (rayDir : Vector3d) (normal : Vector3d) =
     let proj = normal * Vector3d.Dot(-rayDir, normal)
