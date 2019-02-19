@@ -198,6 +198,9 @@ let getObjectFromType (xml : XmlElement) =
         | "cylinder" -> 
             printf " - Cylinder"
             Some Object.Cylinder
+        | "disk" -> 
+            printf " - Disk"
+            Some Object.Disk
         | "rectWithHoles" ->
             printf " - rect with holes"
             let radius = readFloating xml "radius" 0.1

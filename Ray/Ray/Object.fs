@@ -9,6 +9,7 @@ type Object =
     | Cylinder
     | RectXYWithHoles of float * float // width, radius
     | Triangle of Vector3d * Vector3d * Vector3d
+    | Disk
 
 let quadratic a b c =
     let discrim = b * b - 4.0 * a * c
@@ -76,6 +77,48 @@ let intersectTriangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
         else
             None
 
+let intersectDisk ray =
+    let t = (- ray.Origin.Z) / ray.Direction.Z
+    let radius = 1.0
+    if t > epsilon then
+        let point = pointOnRay ray t
+        if point.X * point.X + point.Y * point.Y < radius then
+            let normal = Vector3d(0.0, 0.0, 1.0)
+            Some {defaultHitInfo with T = t; Point = point; Normal = normal}
+        else
+            None
+    else
+        None
+
+let intersectRectWithHoles ray width radius tMin =
+    let t = (- ray.Origin.Z) / ray.Direction.Z
+    if t < tMin then
+        None
+    else
+        let point = pointOnRay ray t
+        let x0 = 0.0
+        let x1 = width
+        let y0 = 0.0
+        let y1 = width
+        if point.X >= x0 && point.X <= x1 && point.Y >= y0 && point.Y <= y1 then
+            let ration = width / (2.0 * radius)
+            let r = int ((point.Y / width) * ration)
+            let c = int ((point.X / width) * ration)
+            let holeEnabled = (r % 2 = 0 && c % 2 = 0 || r % 2 <> 0 && c % 2 <> 0)
+            if not holeEnabled then
+                let normal = Vector3d(0.0, 0.0, 1.0)
+                Some {defaultHitInfo with T = t; Point = point; Normal = normal}
+            else
+                let center = Vector3d((float c + 0.5) / ration, (float r + 0.5) / ration, 0.0)
+                if isInsideDisk point center radius then
+                    None
+                else
+                    let normal = Vector3d(0.0, 0.0, 1.0)
+                    Some {defaultHitInfo with T = t; Point = point; Normal = normal}
+
+        else
+            None
+
 let intersect ray object tMin material =
     let computeHit (t : float) =
         let point = pointOnRay ray t
@@ -120,30 +163,6 @@ let intersect ray object tMin material =
         | _ -> 
             None
     | RectXYWithHoles(width, radius) ->    
-        let t = (- ray.Origin.Z) / ray.Direction.Z
-        if t < tMin then
-            None
-        else
-            let point = pointOnRay ray t
-            let x0 = 0.0
-            let x1 = width
-            let y0 = 0.0
-            let y1 = width
-            if point.X >= x0 && point.X <= x1 && point.Y >= y0 && point.Y <= y1 then
-                let ration = width / (2.0 * radius)
-                let r = int ((point.Y / width) * ration)
-                let c = int ((point.X / width) * ration)
-                let holeEnabled = (r % 2 = 0 && c % 2 = 0 || r % 2 <> 0 && c % 2 <> 0)
-                if not holeEnabled then
-                    let normal = Vector3d(0.0, 0.0, 1.0)
-                    Some {defaultHitInfo with T = t; Point = point; Normal = normal}
-                else
-                    let center = Vector3d((float c + 0.5) / ration, (float r + 0.5) / ration, 0.0)
-                    if isInsideDisk point center radius then
-                        None
-                    else
-                        let normal = Vector3d(0.0, 0.0, 1.0)
-                        Some {defaultHitInfo with T = t; Point = point; Normal = normal}
-
-            else
-                None
+        intersectRectWithHoles ray width radius tMin
+    | Disk ->
+        intersectDisk ray

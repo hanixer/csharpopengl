@@ -1,7 +1,7 @@
 <xml>
   <scene>
-    <object type="cylinder" name="c1" material="mtl1">
-      <scale y="2"/>
+    <object type="disk" name="c1" material="mtl1">
+      <!-- <scale y="2"/> -->
     </object>
   </scene>
   <light type="ambient" name="ambientLight">
