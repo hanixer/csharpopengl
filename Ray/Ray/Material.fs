@@ -21,6 +21,11 @@ type Material =
     | ReflectMaterial of Vector3d
     | Emissive of Vector3d
 
+let getAttenuation material =
+    match material with
+    | Blinn(blinn) -> blinn.DiffuseColor
+    | _ -> Vector3d.Zero
+
 let getEmitted material =
     match material with
     | Emissive(color) -> color
@@ -73,7 +78,7 @@ let rec shade ray material hitInfo lights nodes =
         let directColor =
             lightsOther
             |> Seq.fold (fun result light ->
-                if isInShadow light hitInfo nodes then
+                if isInShadow light hitInfo.Point nodes then
                     result
                 else
                     let wi = -(lightDir light hitInfo.Point)

@@ -20,6 +20,7 @@ let illuminate light hitPoint normal nodes =
     | PointLight(intens, _) -> intens
     | AmbientOccluder(intensity, minAmount) ->
         intensity
+    | AreaLight _ -> Vector3d.One
 
 let lightDir light point =
     match light with
@@ -33,12 +34,25 @@ let isAmbient l =
     | AmbientLight _ -> true
     | _ -> false
 
-let isInShadow light hitInfo nodes =     
-    let direction = -(lightDir light hitInfo.Point)
-    let shadowRay = {Origin = hitInfo.Point ; Direction = direction}    
+let isInShadow light point nodes =     
+    let direction = -(lightDir light point)
+    let shadowRay = {Origin = point ; Direction = direction}    
     let shadowHit = intersectNodes shadowRay nodes epsilon
     match (shadowHit, light) with
     | Some shadowHitInfo, PointLight(_, lightPos) ->
-        (shadowHitInfo.Point - hitInfo.Point).Length < (lightPos - hitInfo.Point).Length
+        (shadowHitInfo.Point - point).Length < (lightPos - point).Length
     | _ -> Option.isSome shadowHit
     
+let samplePointOnLight light nodes =
+    match light with
+    | AreaLight(nodeName) ->
+        let node = Map.find nodeName nodes
+        samplePointOnNode node
+    | _ -> None    
+
+let getAreaOfLight light nodes =
+    match light with
+    | AreaLight(nodeName) ->
+        let node = Map.find nodeName nodes
+        getAreaOfNode node
+    | _ -> 0.0

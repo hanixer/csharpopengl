@@ -47,5 +47,26 @@ and intersectNode ray node tMin =
             hitInfoChilds
     Option.map (hitInfoToWorld ray node) hitInfo
 
+let samplePointOnNode node =
+    match node.Object with
+    | Some(object) ->
+        samplePointOnObject object
+        |> Option.map (transformPoint node.Transform)
+    | _ ->
+        None
+
+let transformArea tm area =
+    let diag = tm.M.Diagonal
+    area * diag.X * diag.Y * diag.Z
+
+let getAreaOfNode node =
+    match node.Object with
+    | Some(object) ->
+        let area = getAreaOfObject object
+        transformArea node.Transform area
+    | _ ->
+        0.0
+
+
 let getBoundingBox node =
     1

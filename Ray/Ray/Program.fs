@@ -44,6 +44,23 @@ let measure task =
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
 let file = "cylinder.xml"
+let iii =
+    for i = 0 to 100 do
+        printfn "%A" (randomInDisk())
+    ()
+
+let changeScene scene =
+    let al = AreaLight("c1")
+    let lightList = (al :: scene.LightsList)
+    let lights = scene.Lights.Add("al", al)
+    {scene with Lights = lights; LightsList = lightList; Materials = scene.Materials.Add("mtl1", Emissive(Vector3d.One))}
+
+let drawDisk (bitmap : Drawing.Bitmap) =
+    for i = 0 to 1000 do
+        let p = randomInHemisphere2()
+        let p = p * 0.5 + (Vector3d(0.5))
+        let p = p * 100.0
+        bitmap.SetPixel(int p.X, int p.Y, Drawing.Color.Aqua)
 
 type Window1(width, height) =
     inherit Window(width, height)
@@ -54,11 +71,13 @@ type Window1(width, height) =
 
     member this.Update() = 
         let scene = loadSceneFromFile file    
+        let scene = changeScene scene        
         let zbuffer =  Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap zbuffer scene } |> measure
-        zbitmap <- drawZBuffer zbuffer
+        // zbitmap <- drawZBuffer zbuffer
         isZ <- false
+        // drawDisk bitmap
         this.DrawBitmapAndSave bitmap
 
     override this.OnUpdateFrame e =

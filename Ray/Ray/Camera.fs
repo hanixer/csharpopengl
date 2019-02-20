@@ -8,7 +8,7 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, upInput : Vector3d, fov : fl
     let towardViwer = (lookFrom - lookAt).Normalized()
     let right = Vector3d.Cross(upInput.Normalized(), towardViwer)
     let up = Vector3d.Cross(towardViwer, right)
-    let fov = OpenTK.MathHelper.DegreesToRadians (fov)
+    let fov = OpenTK.MathHelper.DegreesToRadians (fov / 2.0)
     let widthf = float width
     let heightf = float height
     let aspect = heightf / widthf

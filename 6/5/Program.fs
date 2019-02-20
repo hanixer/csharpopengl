@@ -31,6 +31,20 @@ let cornellBox =
         // Translate(box2, Vector3d(130.0, 0.0, -260.0))        
     ]
 
+let withLight =
+    let light = DiffuseLight(ConstantTexture(Vector3d(15.0)))
+    let green = Lambertian(ConstantTexture(Vector3d(0.12, 0.45, 0.15)))
+    let white = Lambertian(ConstantTexture(Vector3d(1.0)))
+    [
+        XyRect(0.0, 4.0, 1.0, 5.0, 0.0, light)
+        Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, white)
+        Sphere(Vector3d(-2.0, 1.0, 2.0), 1.0, green)
+        Sphere(Vector3d(-6.0, 1.0, 2.0), 1.0, green)
+        Sphere(Vector3d(6.0, 1.0, 2.0), 1.0, green)
+        Sphere(Vector3d(2.0, 1.0, 2.0), 1.0, green)        
+    ]
+
+
 let standardScene = 
     let simpleMat = Lambertian(ConstantTexture(Vector3d(1.0, 0.5, 0.0)))
     let iii = [
@@ -136,13 +150,16 @@ type Game() =
     let width = 500
     let height = 500
     let settings = { 
-        Samples = 2
+        Samples = 10
         // LookFrom = Vector3d(5.0, 2.0, 8.0)
         // LookAt = Vector3d(5.0, 0.0, 0.0)
         // Fov = 90.0
-        LookFrom = Vector3d(278.0, 278.0, 800.0)
-        LookAt = Vector3d(278.0, 278.0, 0.0)
-        Fov = 40.0
+        // LookFrom = Vector3d(278.0, 278.0, 800.0)
+        // LookAt = Vector3d(278.0, 278.0, 0.0)
+        // Fov = 40.0
+        LookFrom = Vector3d(-15.0, 5.0, 10.0)
+        LookAt = Vector3d(0.0)
+        Fov = 90.0
     }
     let zoom = 1.0
     let mutable lacunarity = 1.4
@@ -150,11 +167,13 @@ type Game() =
     
     // let hitable : Hitable = Bvh.makeBvh hitableSeq
     // let hitable = HitableList hitableSeq
-    let hitable = HitableList cornellBox
+    // let hitable = HitableList cornellBox
     // let hitable = Bvh.makeBvh cornellBox
     // let hitable = HitableList standardScene
     // let hitable = HitableList oneBox
     // let hitable = HitableList otherScene
+    let hitable = HitableList withLight
+
 
     let update() =
         let bitmap = new Drawing.Bitmap(width, height)

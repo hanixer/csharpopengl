@@ -167,3 +167,16 @@ let intersect ray object tMin material =
     | Disk ->
         intersectDisk ray
 
+let samplePointOnObject object =
+    match object with
+    | Disk ->
+        Some(randomInDisk())
+    | Sphere ->
+        Some(randomInHemisphere2())
+    | _ -> None
+
+let getAreaOfObject object =
+    match object with
+    | Disk ->
+        2.0 * Math.PI
+    | _ -> 0.0

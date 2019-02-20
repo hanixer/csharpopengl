@@ -12,9 +12,11 @@ open Light
 
 type Scene = {
     Camera : Camera 
-    Nodes : Node list
+    Nodes : Map<string, Node>
+    NodesList : Node list
     Materials : Map<string, Material>
     Lights : Map<string, Light>
+    LightsList : Light list
 }
 
 let getMaterial scene name = Map.find name scene.Materials
@@ -248,6 +250,9 @@ let loadCamera (xml : XmlElement) =
     let height =  select xml "./height" (fun elem -> readFloating elem "value" defCameraHeight) defCameraHeight
     Camera(pos, target, up, fov, int width, int height)
 
+let rec getNodePairs node =
+    (node.Name, node) :: (List.collect getNodePairs node.Children)
+
 let loadScene (xml : XmlDocument) =
     let xml = xml.Item "xml"    
     if not (isNull xml) then
@@ -275,7 +280,9 @@ let loadScene (xml : XmlDocument) =
             |> Seq.map loadLight
             |> Seq.choose id
             |> Map.ofSeq
-        {Nodes = nodes; Camera = camera; Materials = materials; Lights = lights}
+        let lightsList = lights |> Map.toList |> List.map snd
+        let nodesMap = List.collect getNodePairs nodes |> Map.ofList
+        {Nodes = nodesMap; NodesList = nodes; Camera = camera; Materials = materials; Lights = lights; LightsList = lightsList}
     else
         failwith "xml tag not found"
 
