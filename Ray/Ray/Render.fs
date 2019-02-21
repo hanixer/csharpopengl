@@ -47,8 +47,8 @@ let getReflectedForLightSource ray light hitInfo nodes nodesList material =
         Seq.init samples (fun _ ->
         match samplePointOnLight light nodes with
         | Some(point) ->
-            let direction = point - hitInfo.Point
-            direction.Normalize()
+            let directionNonNorm = point - hitInfo.Point
+            let direction = directionNonNorm.Normalized()
             let t = (point - hitInfo.Point).Length / direction.Length
             let isReachable = isReachable hitInfo.Point point t direction nodesList
             if isReachable then
@@ -57,7 +57,7 @@ let getReflectedForLightSource ray light hitInfo nodes nodesList material =
                 let c = illuminate light point direction nodesList
                 let dot = Math.Max(Vector3d.Dot(hitInfo.Normal.Normalized(), direction), 0.0)
                 let attenuation = getAttenuation material
-                c * area * dot * attenuation
+                c * area * dot * attenuation / directionNonNorm.LengthSquared
                 // Vector3d.One
                 // Vector3d(0.0, 0.0, 1.0)
             else

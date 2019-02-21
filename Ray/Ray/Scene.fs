@@ -139,6 +139,10 @@ let loadMaterial (xml : XmlNode) =
             |> Seq.fold chooseMaterial defaultBlinn
             |> Blinn
             |> Some
+        | "emissive" ->
+            printfn " - Emissive"
+            let color = readColor (xml.SelectSingleNode "./color") Vector3d.One
+            Some(Emissive(color))
         | _ -> None
             
     printfn ""
@@ -174,6 +178,11 @@ let loadLight (xml : XmlNode) =
             readVector (xml.SelectSingleNode "./position") Vector3d.Zero
         printfn "  position %A" position
         PointLight(intensity, position) |> Some
+    | "area" ->
+        printfn " - Area"
+        let o = xml.Attributes.["object"].Value
+        printfn "  object %A" o
+        AreaLight(o) |> Some
     | "ambient" ->
         printfn " - Ambient"
         let intensity =
