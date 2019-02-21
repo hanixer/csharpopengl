@@ -102,12 +102,6 @@ let randomInHemisphere2 () =
     let x  = Math.Sin theta * Math.Cos phi
     let y = Math.Sin theta * Math.Sin phi
     let z = Math.Cos theta
-    let points = Seq.initInfinite (fun _ -> 
-        let x = random.NextDouble()
-        let y = random.NextDouble()
-        let z = random.NextDouble() * 0.5
-        2.0 * Vector3d(x, y, z) - Vector3d.One)
-    // Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
     Vector3d(x, z, y)
 
 let colorToVector (color : Drawing.Color) =

@@ -171,12 +171,13 @@ let samplePointOnObject object =
     match object with
     | Disk ->
         Some(randomInDisk())
+        // Some(randomInHemisphere())
     | Sphere ->
         Some(randomInHemisphere2())
     | _ -> None
 
 let getAreaOfObject object =
     match object with
-    | Disk ->
-        2.0 * Math.PI
+    | Disk -> 2.0 * Math.PI
+    | Sphere -> 4.0 * Math.PI
     | _ -> 0.0

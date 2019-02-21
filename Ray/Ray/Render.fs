@@ -36,7 +36,8 @@ let maxDepth = 5
 let isReachable source target t direction nodes =
     let shadowRay = {Origin = source ; Direction = direction}
     match intersectNodes shadowRay nodes epsilon with
-    | Some(hitInfo) -> hitInfo.T >= t
+    | Some(hitInfo) -> 
+        hitInfo.T >= t
     // | Some(hitInfo) -> false
     | None -> true
 
@@ -51,6 +52,7 @@ let getReflectedForLightSource ray light hitInfo nodes nodesList material =
             let t = (point - hitInfo.Point).Length / direction.Length
             let isReachable = isReachable hitInfo.Point point t direction nodesList
             if isReachable then
+                // printfn "yes, reachable"
                 let area = getAreaOfLight light nodes
                 let c = illuminate light point direction nodesList
                 let dot = Math.Max(Vector3d.Dot(hitInfo.Normal.Normalized(), direction), 0.0)

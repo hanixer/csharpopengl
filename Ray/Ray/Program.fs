@@ -43,7 +43,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "cylinder.xml"
+let file = "areaLightTest3.xml"
 let iii =
     for i = 0 to 100 do
         printfn "%A" (randomInDisk())
