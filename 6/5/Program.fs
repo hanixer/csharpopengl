@@ -36,7 +36,7 @@ let withLight =
     let green = Lambertian(ConstantTexture(Vector3d(0.12, 0.45, 0.15)))
     let white = Lambertian(ConstantTexture(Vector3d(1.0)))
     [
-        XyRect(0.0, 4.0, 1.0, 5.0, 0.0, light)
+        XyRect(-100.0, 4.0, 1.0, 50.0, 0.0, light)
         Sphere(Vector3d(0.0, -1000.0, 0.0), 1000.0, white)
         Sphere(Vector3d(-2.0, 1.0, 2.0), 1.0, green)
         Sphere(Vector3d(-6.0, 1.0, 2.0), 1.0, green)

@@ -42,7 +42,7 @@ let isReachable source target t direction nodes =
     | None -> true
 
 let getReflectedForLightSource ray light hitInfo nodes nodesList material =
-    let samples = 10
+    let samples = 100
     let sum = 
         Seq.init samples (fun _ ->
         match samplePointOnLight light nodes with
@@ -54,10 +54,11 @@ let getReflectedForLightSource ray light hitInfo nodes nodesList material =
             if isReachable then
                 // printfn "yes, reachable"
                 let area = getAreaOfLight light nodes
+                // let area = 1.0
                 let c = illuminate light point direction nodesList
                 let dot = Math.Max(Vector3d.Dot(hitInfo.Normal.Normalized(), direction), 0.0)
                 let attenuation = getAttenuation material
-                c * area * dot * attenuation / directionNonNorm.LengthSquared
+                c// * area * dot * attenuation / directionNonNorm.LengthSquared
                 // Vector3d.One
                 // Vector3d(0.0, 0.0, 1.0)
             else
@@ -134,3 +135,15 @@ let drawZBuffer zbuffer =
             zbuffer
     bitmap
     
+
+
+
+
+
+
+
+
+
+
+
+

@@ -44,10 +44,6 @@ let measure task =
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
 let file = "areaLightTest3.xml"
-let iii =
-    for i = 0 to 100 do
-        printfn "%A" (randomInDisk())
-    ()
 
 type Window1(width, height) =
     inherit Window(width, height)

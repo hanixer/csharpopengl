@@ -1,19 +1,22 @@
 <xml>
   <scene>
     <object type="disk" name="c1" material="mtl1">
-      <scale value="0.5"/>
-      <!-- <rotate angle="60" y="1"/> -->
-      <translate y="5"/> 
+      <scale value="2"/>
+      <rotate angle="-90" y="1"/>
+      <!-- <translate y="2"/>  -->
     </object>
-    <object type="sphere" name="sphere1" material="mtl2">
-      <translate y="1" x="-2" z="2"/>
+    <object type="sphere" name="sphere3" material="mtl2">
+      <translate x="-4"/>
     </object>
-    <object type="sphere" name="sphere4" material="white">
-      <scale value="1000"/>
-      <translate y="-1000"/>
+    <object type="sphere" name="sphere4" material="mtl2">
+      <scale value="0.25"/>
+      <translate x="-2.5"/>
     </object>
   </scene>
   <light type="ambient" name="ambientLight">
+    <intensity value="0.3"/>
+  </light>
+  <light type="area" name="areaLight" object="c1">
     <intensity value="0.3"/>
   </light>
   <light type="direct" name="directionalLight">
@@ -23,6 +26,8 @@
   <material type="blinn" name="white">
     <diffuse r="1" g="1" b="1"/>
     <specular r="1.0" g="1.0" b="1.0" value="0.7"/>
+  </material>
+  <material type="emissive" name="mtl1">
   </material>
   <material type="blinn" name="mtl2">
     <diffuse r="0" g="0.5" b="0.41"/>
@@ -34,8 +39,8 @@
     <!-- <specular r="1.0" g="1.0" b="1.0" value="0.7"/> -->
   </material>
   <camera>
-    <position x="10" y="10" z="10"/>
-    <target x="0" y="0" z="0"/>
+    <position x="7" y="7" z="7"/>
+    <target x="-4" y="0" z="0"/>
     <up x="0" y="1" z="0"/>
     <fov value="90"/>
     <width value="400"/>

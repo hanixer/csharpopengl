@@ -1,6 +1,6 @@
 <xml>
   <scene>
-    <object type="sphere" name="c1" material="mtl1">
+    <object type="disk" name="c1" material="mtl1">
       <!-- <scale value="0.2"/> -->
       <!-- <rotate angle="60" y="1"/> -->
       <!-- <translate y="2"/>  -->
