@@ -11,6 +11,7 @@ type Object =
     | Triangle of Vector3d * Vector3d * Vector3d
     | Disk
     | Rectangle of Vector3d * Vector3d * Vector3d
+    | ObjectList of Object list
 
 let quadratic a b c =
     let discrim = b * b - 4.0 * a * c
@@ -81,7 +82,7 @@ let intersectTriangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
 let intersectRectangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
     let v1 = p1 - p0
     let v2 = p2 - p0
-    let normal = Vector3d.Cross(v2, v1)
+    let normal = Vector3d.Cross(v1, v2)
     normal.Normalize()
     let t = Vector3d.Dot(p0 - ray.Origin, normal) / Vector3d.Dot(ray.Direction, normal)
     if t > epsilon then
@@ -140,7 +141,7 @@ let intersectRectWithHoles ray width radius tMin =
         else
             None
 
-let intersect ray object tMin material =
+let rec intersect ray object tMin material =
     let computeHit (t : float) =
         let point = pointOnRay ray t
         let normal = point.Normalized()
@@ -189,6 +190,12 @@ let intersect ray object tMin material =
         intersectDisk ray
     | Rectangle(p0, p1, p2) ->
         intersectRectangle ray p0 p1 p2
+    | ObjectList objs ->
+        Seq.map (fun object -> intersect ray object tMin material) objs
+        |> Seq.minBy (fun h ->
+            if h.IsSome then h.Value.T
+            else Double.MaxValue)
+
 let samplePointOnObject object =
     match object with
     | Disk ->
@@ -203,3 +210,20 @@ let getAreaOfObject object =
     | Disk -> 2.0 * Math.PI
     | Sphere -> 4.0 * Math.PI
     | _ -> 0.0
+
+let makeBox (p0 : Vector3d) (p1 : Vector3d) =
+    let v0 = p0
+    let v1 = Vector3d(p1.X, p0.Y, p0.Z)
+    let v2 = Vector3d(p1.X, p0.Y, p1.Z)
+    let v3 = Vector3d(p0.X, p0.Y, p1.Z)
+    let v4 = Vector3d(p0.X, p1.Y, p0.Z)
+    let v5 = Vector3d(p1.X, p1.Y, p0.Z)
+    let v6 = p1
+    let v7 = Vector3d(p0.X, p1.Y, p1.Z)
+    let f0 = Rectangle(v0, v1, v4)
+    let f1 = Rectangle(v1, v2, v5)
+    let f2 = Rectangle(v2, v3, v6)
+    let f3 = Rectangle(v3, v0, v7)
+    let f4 = Rectangle(v4, v5, v7)
+    let f5 = Rectangle(v0, v1, v3)
+    ObjectList [f0; f1; f2; f3; f4; f5]

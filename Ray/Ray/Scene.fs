@@ -206,6 +206,19 @@ let getObjectFromType (xml : XmlElement) =
             let p1 = select xml "./p1" (fun elem -> readVector elem vz) vz
             let p2 = select xml "./p2" (fun elem -> readVector elem vz) vz
             Some(Object.Triangle(p0, p1, p2))
+        | "rectangle" ->
+            printf " - Rectangle"
+            let vz = Vector3d.Zero
+            let p0 = select xml "./p0" (fun elem -> readVector elem vz) vz
+            let p1 = select xml "./p1" (fun elem -> readVector elem vz) vz
+            let p2 = select xml "./p2" (fun elem -> readVector elem vz) vz
+            Some(Object.Rectangle(p0, p1, p2))
+        | "box" ->
+            printf " - Box"
+            let vz = Vector3d.Zero
+            let p0 = select xml "./p0" (fun elem -> readVector elem vz) vz
+            let p1 = select xml "./p1" (fun elem -> readVector elem vz) vz
+            Some(Object.makeBox p0 p1)
         | "cylinder" -> 
             printf " - Cylinder"
             Some Object.Cylinder

@@ -43,7 +43,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "areaLightTest3.xml"
+let file = "boxTest.xml"
 
 type Window1(width, height) =
     inherit Window(width, height)
@@ -54,7 +54,7 @@ type Window1(width, height) =
 
     member this.Update() = 
         let scene = loadSceneFromFile file    
-        let rect = Object.Rectangle(Vector3d(-1.0, 0.0, -4.0), Vector3d(-1.0, 1.0, -4.0), Vector3d(1.0, 0.0, -4.0))
+        let rect = makeBox (Vector3d.Zero) (Vector3d(1.0, 1.0, -1.0))
         let no = {Node.Object = Some rect; Node.Children = []; Node.Material = "mtl2"; Node.Name = "thin"; Node.Transform = identityTransform}
         let scene = {scene with Nodes = Map.add "thin" no scene.Nodes; NodesList = no :: scene.NodesList}
         let zbuffer =  Array2D.create scene.Camera.Height scene.Camera.Width 0.0

@@ -43,7 +43,7 @@ let isReachable source target t direction nodes =
     | None -> true
 
 let getReflectedForLightSource ray light hitInfo nodes nodesList material =
-    let samples = 10
+    let samples = 1
     let sum = 
         Seq.init samples (fun _ ->
         match samplePointOnLight light nodes with
@@ -58,9 +58,11 @@ let getReflectedForLightSource ray light hitInfo nodes nodesList material =
                 let area = getAreaOfLight light nodes
                 // let area = 1.0
                 let c = illuminate light samplePoint direction nodesList
+                Debug.Assert(c.X >= 0.0 && c.Y >= 0.0 && c.Z >= 0.0 && not(Double.IsNaN(c.X)))
                 let dot = Math.Max(Vector3d.Dot(hitInfo.Normal.Normalized(), direction), 0.0)
                 let attenuation = getAttenuation material
-                c * area * dot * attenuation / directionNonNorm.LengthSquared
+                // c * area * dot * attenuation / directionNonNorm.LengthSquared
+                c * attenuation
                 // Vector3d.One
                 // Vector3d(0.0, 0.0, 1.0)
             else
@@ -81,7 +83,8 @@ let areaLightTrace ray scene =
     | Some hitInfo ->
         let material = scene.Materials.[hitInfo.Material]
         let emitted = getEmitted material
-        let reflected = getReflectedTotal ray scene hitInfo material    
+        let reflected = getReflectedTotal ray scene hitInfo material 
+        Debug.Assert(reflected.X >= 0.0 && reflected.Y >= 0.0 && reflected.Z >= 0.0 && not(Double.IsNaN(reflected.X)))  
         // printfn "%A; %A\n" emitted reflected
         emitted + reflected
     | _ -> Vector3d(0.1, 0.0, 0.2)
