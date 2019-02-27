@@ -10,6 +10,7 @@ type Object =
     | RectXYWithHoles of float * float // width, radius
     | Triangle of Vector3d * Vector3d * Vector3d
     | Disk
+    | Rectangle of Vector3d * Vector3d * Vector3d
 
 let quadratic a b c =
     let discrim = b * b - 4.0 * a * c
@@ -76,6 +77,26 @@ let intersectTriangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
             Some {defaultHitInfo with T = t; Point = point; Normal = normal}
         else
             None
+
+let intersectRectangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
+    let v1 = p1 - p0
+    let v2 = p2 - p0
+    let normal = Vector3d.Cross(v2, v1)
+    normal.Normalize()
+    let t = Vector3d.Dot(p0 - ray.Origin, normal) / Vector3d.Dot(ray.Direction, normal)
+    if t > epsilon then
+        let point = pointOnRay ray t
+        let d = point - p0
+        let dDotV2 = Vector3d.Dot(d, v2)
+        let dDotV1 = Vector3d.Dot(d, v1)
+        if dDotV2 < 0.0 || dDotV2 > v2.LengthSquared then
+            None
+        else if dDotV1 < 0.0 || dDotV1 > v1.LengthSquared then
+            None
+        else
+            Some {defaultHitInfo with T = t; Point = pointOnRay ray t; Normal = normal}
+    else
+        None
 
 let intersectDisk ray =
     let t = (- ray.Origin.Z) / ray.Direction.Z
@@ -166,7 +187,8 @@ let intersect ray object tMin material =
         intersectRectWithHoles ray width radius tMin
     | Disk ->
         intersectDisk ray
-
+    | Rectangle(p0, p1, p2) ->
+        intersectRectangle ray p0 p1 p2
 let samplePointOnObject object =
     match object with
     | Disk ->

@@ -37,28 +37,30 @@ let isReachable source target t direction nodes =
     let shadowRay = {Origin = source ; Direction = direction}
     match intersectNodes shadowRay nodes epsilon with
     | Some(hitInfo) -> 
-        hitInfo.T >= t
+        hitInfo.T > (t - 0.001)
+        // hitInfo.T >= t && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
     // | Some(hitInfo) -> false
     | None -> true
 
 let getReflectedForLightSource ray light hitInfo nodes nodesList material =
-    let samples = 100
+    let samples = 10
     let sum = 
         Seq.init samples (fun _ ->
         match samplePointOnLight light nodes with
-        | Some(point) ->
-            let directionNonNorm = point - hitInfo.Point
+        | Some(samplePoint) ->
+            let pointOnSurf = hitInfo.Point + (hitInfo.Normal * epsilon)
+            let directionNonNorm = samplePoint - pointOnSurf
             let direction = directionNonNorm.Normalized()
-            let t = (point - hitInfo.Point).Length / direction.Length
-            let isReachable = isReachable hitInfo.Point point t direction nodesList
+            let t = (samplePoint - pointOnSurf).Length / direction.Length
+            let isReachable = isReachable pointOnSurf (samplePoint + -direction * epsilon) t direction nodesList
             if isReachable then
                 // printfn "yes, reachable"
                 let area = getAreaOfLight light nodes
                 // let area = 1.0
-                let c = illuminate light point direction nodesList
+                let c = illuminate light samplePoint direction nodesList
                 let dot = Math.Max(Vector3d.Dot(hitInfo.Normal.Normalized(), direction), 0.0)
                 let attenuation = getAttenuation material
-                c// * area * dot * attenuation / directionNonNorm.LengthSquared
+                c * area * dot * attenuation / directionNonNorm.LengthSquared
                 // Vector3d.One
                 // Vector3d(0.0, 0.0, 1.0)
             else

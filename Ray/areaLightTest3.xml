@@ -3,15 +3,24 @@
     <object type="disk" name="c1" material="mtl1">
       <!-- <scale value="0.2"/> -->
       <!-- <rotate angle="60" y="1"/> -->
-      <!-- <translate y="2"/>  -->
+      <translate z="-2"/> 
     </object>
-    <object type="sphere" name="sphere1" material="mtl2">
+    <!-- <object type="sphere" name="sphere1" material="mtl2">
       <translate x="-4"/>
-    </object>
+    </object> -->
     <object type="sphere" name="sphere3" material="mtl2">
+      <scale value="0.25"/>
       <translate z="-4"/>
     </object>
     <object type="sphere" name="sphere3" material="mtl2">
+      <scale value="0.25"/>
+      <translate x="-1" z="-4"/>
+    </object>
+    <object type="sphere" name="sphere3" material="mtl2">
+      <scale value="0.25"/>
+      <translate x="1" z="-4"/>
+    </object>
+    <!-- <object type="sphere" name="sphere3" material="mtl2">
       <translate y="-4"/>
     </object>
     <object type="sphere" name="sphere3" material="mtl2">
@@ -22,7 +31,7 @@
     </object>
     <object type="sphere" name="sphere3" material="mtl2">
       <translate z="4"/>
-    </object>
+    </object> -->
   </scene>
   <light type="ambient" name="ambientLight">
     <intensity value="0.3"/>
@@ -51,9 +60,9 @@
   </material>
   <camera>
     <position x="7" y="7" z="7"/>
-    <target x="0" y="0" z="0"/>
+    <target x="0" y="0" z="-4"/>
     <up x="0" y="1" z="0"/>
-    <fov value="90"/>
+    <fov value="20"/>
     <width value="400"/>
     <height value="400"/>
   </camera>
