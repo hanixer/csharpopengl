@@ -40,7 +40,8 @@ let isReachable source target t direction nodes =
         hitInfo.T > (t - 0.001)
         // hitInfo.T >= t && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
     // | Some(hitInfo) -> false
-    | None -> true
+    | None -> 
+        true
 
 let getReflectedForLightSource ray light hitInfo nodes nodesList material =
     let samples = 1

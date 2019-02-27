@@ -203,6 +203,15 @@ let samplePointOnObject object =
         // Some(randomInHemisphere())
     | Sphere ->
         Some(randomInHemisphere2())
+    | Rectangle(p0, p1, p2) ->
+        let r0, r1 = randomTwo()
+        let d1 = p1 - p0
+        let d2 = p2 - p0
+        let width = d1.Length
+        let height = d2.Length
+        let v1 = r0 * width * d1
+        let v2 = r1 * height * d2
+        Some(v1 + v2)
     | _ -> None
 
 let getAreaOfObject object =

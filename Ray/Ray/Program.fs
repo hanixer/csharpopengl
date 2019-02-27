@@ -43,7 +43,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "areaLightTest4.xml"
+let file = "areaLightTest6.xml"
 
 type Window1(width, height) =
     inherit Window(width, height)

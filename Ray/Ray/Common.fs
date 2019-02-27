@@ -104,6 +104,9 @@ let randomInHemisphere2 () =
     let z = Math.Cos theta
     Vector3d(x, z, y)
 
+let randomTwo() =
+    (random.NextDouble(), random.NextDouble())
+
 let colorToVector (color : Drawing.Color) =
   Vector3d(float color.R / 255.0, float color.G / 255.0, float color.B / 255.0)
 
