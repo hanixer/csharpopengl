@@ -61,8 +61,9 @@ let getReflectedForLightSource ray light hitInfo nodes nodesList material =
                 Debug.Assert(c.X >= 0.0 && c.Y >= 0.0 && c.Z >= 0.0 && not(Double.IsNaN(c.X)))
                 let dot = Math.Max(Vector3d.Dot(hitInfo.Normal.Normalized(), direction), 0.0)
                 let attenuation = getAttenuation material
-                // c * area * dot * attenuation / directionNonNorm.LengthSquared
-                c * attenuation
+                c * area * dot * attenuation / directionNonNorm.LengthSquared
+                // Debug.Assert(directionNonNorm.LengthSquared > 0.0)
+                // c * attenuation
                 // Vector3d.One
                 // Vector3d(0.0, 0.0, 1.0)
             else

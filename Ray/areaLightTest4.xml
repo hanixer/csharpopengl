@@ -2,7 +2,7 @@
   <scene>
     <object type="disk" name="c1" material="mtl1">
       <scale value="2"/>
-      <rotate angle="-90" y="1"/>
+      <!-- <rotate angle="-90" y="1"/> -->
       <!-- <translate y="2"/>  -->
     </object>
     <object type="sphere" name="sphere3" material="mtl2">
