@@ -1,33 +1,33 @@
 <xml>
   <scene>
     <!-- Objects -->
-    <!-- <object name="box">
+    <object name="box">
       <translate x="0" y="0" z="12"/>
       <object type="plane" name="WallBottom" material="wall">
         <scale value="32"/>
+        <rotate angle="90" x="1"/>
         <translate z="-12"/>
       </object>
       <object type="plane" name="WallTop" material="wall">
         <scale value="32"/>
-        <rotate angle="180" x="1"/>
+        <rotate angle="90" x="1"/>
         <translate z="12"/>
       </object>
       <object type="plane" name="WallBack" material="wall">
         <scale value="32"/>
-        <rotate angle="90" x="1"/>
         <translate y="20"/>
       </object>
       <object type="plane" name="WallLeft" material="wallRed">
         <scale value="32"/>
-        <rotate angle="90" y="1"/>
+        <rotate angle="-90" z="1"/>
         <translate x="-15"/>
       </object>
       <object type="plane" name="WallRight" material="wallBlue">
         <scale value="32"/>
-        <rotate angle="-90" y="1"/>
+        <rotate angle="90" z="1"/>
         <translate x="15"/>
       </object>
-    </object> -->
+    </object>
     <!-- <object type="obj" name="teapot.obj" material="mtl1">
       <scale value="0.75"/>
       <rotate angle="30" z="1"/>
@@ -37,6 +37,13 @@
       <scale value="4.5"/>
       <rotate angle="30" y="1"/>
       <translate x="8" y="-6" z="4.5"/>
+    </object>
+    <object type="disk" name="lightDisk" material="lightMat">
+      <scale value="50.5"/>
+      <rotate angle="90" y="1"/>
+      <!-- <rotate angle="50" z="1"/> -->
+
+      <translate x="-4" y="5" z="4.5"/>
     </object>
 
     <!-- Materials -->
@@ -65,6 +72,9 @@
       <diffuse  r="0.2" g="0.8" b="0.2"/>
       <specular r="0.9" g="0.9" b="1.0" value="0.8"/>
       <glossiness value="10"/>
+    </material>
+    <material type="emissive" name="lightMat">
+      <color value="1"/>
     </material>
 
     <!-- Lights -->

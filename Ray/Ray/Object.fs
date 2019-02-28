@@ -101,13 +101,7 @@ let intersectRectangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
         None
 
 let intersectPlane ray =
-    let normal = Vector3d(0.0, 1.0, 0.0)
-    let t = Vector3d.Dot(-ray.Origin, normal) / Vector3d.Dot(ray.Direction, normal)
-    if t > epsilon then
-        let point = pointOnRay ray t
-        Some {defaultHitInfo with T = t; Point = point; Normal = normal}
-    else
-        None
+    intersectRectangle ray (Vector3d(-1.0, 0.0, 1.0)) (Vector3d(1.0, 0.0, 1.0)) (Vector3d(-1.0, 0.0, -1.0))
 
 let intersectDisk ray =
     let t = (- ray.Origin.Z) / ray.Direction.Z
