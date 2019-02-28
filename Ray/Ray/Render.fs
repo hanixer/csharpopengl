@@ -62,7 +62,7 @@ let getReflectedForLightSource ray light hitInfo nodes nodesList material =
                 Debug.Assert(c.X >= 0.0 && c.Y >= 0.0 && c.Z >= 0.0 && not(Double.IsNaN(c.X)))
                 let dot = Math.Max(Vector3d.Dot(hitInfo.Normal.Normalized(), direction), 0.0)
                 let attenuation = getAttenuation material
-                c * area * dot * attenuation / directionNonNorm.LengthSquared
+                c * area * dot * attenuation / directionNonNorm.LengthSquared                
                 // Debug.Assert(directionNonNorm.LengthSquared > 0.0)
                 // c * attenuation
                 // Vector3d.One
@@ -89,6 +89,7 @@ let areaLightTrace ray scene =
         Debug.Assert(reflected.X >= 0.0 && reflected.Y >= 0.0 && reflected.Z >= 0.0 && not(Double.IsNaN(reflected.X)))  
         // printfn "%A; %A\n" emitted reflected
         emitted + reflected
+        // Vector3d(hitInfo.T / 120.0)
     | _ -> Vector3d(0.1, 0.0, 0.2)
 
 let rec traceRay ray scene depth = 

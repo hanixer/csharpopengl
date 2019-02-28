@@ -199,6 +199,9 @@ let getObjectFromType (xml : XmlElement) =
         | "sphere" -> 
             printf " - Sphere"
             Some Object.Sphere
+        | "plane" ->
+            printf " - Plane"
+            Some(Object.Plane)
         | "triangle" ->
             printf " - Triangle"
             let vz = Vector3d.Zero

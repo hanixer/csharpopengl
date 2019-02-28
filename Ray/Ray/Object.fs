@@ -12,6 +12,7 @@ type Object =
     | Disk
     | Rectangle of Vector3d * Vector3d * Vector3d
     | ObjectList of Object list
+    | Plane
 
 let quadratic a b c =
     let discrim = b * b - 4.0 * a * c
@@ -95,7 +96,16 @@ let intersectRectangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
         else if dDotV1 < 0.0 || dDotV1 > v1.LengthSquared then
             None
         else
-            Some {defaultHitInfo with T = t; Point = pointOnRay ray t; Normal = normal}
+            Some {defaultHitInfo with T = t; Point = point; Normal = normal}
+    else
+        None
+
+let intersectPlane ray =
+    let normal = Vector3d(0.0, 1.0, 0.0)
+    let t = Vector3d.Dot(-ray.Origin, normal) / Vector3d.Dot(ray.Direction, normal)
+    if t > epsilon then
+        let point = pointOnRay ray t
+        Some {defaultHitInfo with T = t; Point = point; Normal = normal}
     else
         None
 
@@ -190,6 +200,8 @@ let rec intersect ray object tMin material =
         intersectDisk ray
     | Rectangle(p0, p1, p2) ->
         intersectRectangle ray p0 p1 p2
+    | Plane -> 
+        intersectPlane ray
     | ObjectList objs ->
         Seq.map (fun object -> intersect ray object tMin material) objs
         |> Seq.minBy (fun h ->

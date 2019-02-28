@@ -62,8 +62,7 @@ let transformArea tm area =
 let getAreaOfNode node =
     match node.Object with
     | Some(object) ->
-        let area = getAreaOfObject object
-        transformArea node.Transform area
+        getAreaOfObject object
     | _ ->
         0.0
 
