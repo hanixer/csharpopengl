@@ -104,6 +104,32 @@ let randomInHemisphere2 () =
     let z = Math.Cos theta
     Vector3d(x, z, y)
 
+let randomCosineDirection () =
+    let r1 = random.NextDouble()
+    let r2 = random.NextDouble()
+    let z = Math.Sqrt(1.0 - r2)
+    let phi = 2.0 * Math.PI * r1
+    let x = Math.Cos phi * 2.0 * Math.Sqrt r2
+    let y = Math.Sin phi * 2.0 * Math.Sqrt r2
+    Vector3d(x, y, z)
+
+let buildOrthoNormalBasis (normal : Vector3d) =
+    let w = normal.Normalized()
+    let help =
+        if Math.Abs(w.X) > 0.9 then
+            Vector3d(0.0, 1.0, 0.0)
+        else
+            Vector3d(1.0, 0.0, 0.0)
+    let v = Vector3d.Cross(w, help)
+    v.Normalize()
+    let u = Vector3d.Cross(w, v)
+    (u, v, w)
+
+type V3 = Vector3d
+
+let localOrthoNormalBasis (a : V3) (u : V3, v : V3, w : V3) =
+    a.X * u + a.Y * v + a.Z * w
+
 let randomTwo() =
     (random.NextDouble(), random.NextDouble())
 

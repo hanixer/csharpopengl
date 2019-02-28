@@ -86,8 +86,15 @@ let rec pathTrace ray scene depth =
         let material = scene.Materials.[hitInfo.Material]
         let emitted = getEmitted material
         match scatter ray material hitInfo with
-        | Some(attenuation, scattered) when depth < 50 ->
-            emitted + attenuation * pathTrace scattered scene (depth + 1)
+        | Some(attenuation, scattered, pdf) when depth < 50 ->
+            // let pdf = 1.0
+            emitted + attenuation * pathTrace scattered scene (depth + 1) / pdf
+            // let scattered = 
+            //     let p = randomInUnitSphere()
+            //     let target = hitInfo.Point + hitInfo.Normal + p
+            //     let dir = (p - target).Normalized()
+            //     {scattered with Direction = dir}
+            // 0.5 * (scattered.Direction.Normalized()) + Vector3d(0.5)
         | _ ->
             emitted        
     | _ -> 
@@ -121,12 +128,13 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     // Parallel.For(0, bitmap.Height, fun r ->
     for r = 0 to bitmap.Height - 1 do
         for c = 0 to w - 1 do
+            let mutable acc = Vector3d.Zero
             for s = 0 to samples - 1 do
                 let ray = scene.Camera.Ray c r
                 let t, color = (0.0, pathTrace ray scene 0)
                 zbuffer.[r, c] <- t
-                buf.[r, c] <- buf.[r,c] + color
-            buf.[r, c] <- buf.[r, c] / float samples
+                acc <- acc + color
+            buf.[r, c] <- acc / float samples
     // ) |> ignore
     Array2D.iteri (fun r c x -> setPixel bitmap c r (clamp x)) buf
 

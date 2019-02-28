@@ -35,13 +35,15 @@ let getEmitted material =
 let scatter ray material hitInfo =
     match material with
     | Blinn(blinn) ->
-        let samplePoint = randomInUnitSphere()
-        let target = hitInfo.Point + hitInfo.Normal + samplePoint
-        let dir = target - hitInfo.Point
+        let samplePoint = randomCosineDirection()
+        let onb = buildOrthoNormalBasis hitInfo.Normal
+        let dir = localOrthoNormalBasis samplePoint onb
         dir.Normalize()
         let scattered = {Origin = hitInfo.Point; Direction = dir}
         let attenuation = blinn.DiffuseColor
-        Some (attenuation, scattered)
+        let _, _, w = onb
+        let pdf = Vector3d.Dot(hitInfo.Normal, dir) / Math.PI
+        Some (attenuation, scattered, pdf)
     | _ -> None
 
 let reflect (rayDir : Vector3d) (normal : Vector3d) =
