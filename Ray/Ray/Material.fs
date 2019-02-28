@@ -31,6 +31,19 @@ let getEmitted material =
     | Emissive(color) -> color
     | _ -> Vector3d.Zero
 
+// Return attenuation and scattered ray
+let scatter ray material hitInfo =
+    match material with
+    | Blinn(blinn) ->
+        let samplePoint = randomInUnitSphere()
+        let target = hitInfo.Point + hitInfo.Normal + samplePoint
+        let dir = target - hitInfo.Point
+        dir.Normalize()
+        let scattered = {Origin = hitInfo.Point; Direction = dir}
+        let attenuation = blinn.DiffuseColor
+        Some (attenuation, scattered)
+    | _ -> None
+
 let reflect (rayDir : Vector3d) (normal : Vector3d) =
     let proj = normal * Vector3d.Dot(-rayDir, normal)
     (rayDir + 2.0 * proj).Normalized()

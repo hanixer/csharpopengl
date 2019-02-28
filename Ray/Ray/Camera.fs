@@ -14,6 +14,7 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, upInput : Vector3d, fov : fl
     let aspect = heightf / widthf
     let scale = Math.Tan fov
     let mat3 = Matrix3d(right, up, towardViwer)
+    let random = Random()
 
     let transformToWorld vec3 =
         let x = Vector3d.Dot(vec3, mat3.Column0)
@@ -25,8 +26,8 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, upInput : Vector3d, fov : fl
     member this.Height = height
 
     member this.Ray column row =
-        let x = (float column / widthf - 0.5) * scale
-        let y = (float row / heightf - 0.5) * scale * aspect
+        let x = ((float column + random.NextDouble()) / widthf - 0.5) * scale
+        let y = ((float row + random.NextDouble()) / heightf - 0.5) * scale * aspect
         let dir = Vector3d(x, y, -1.0).Normalized()
         let dirT = transformToWorld dir
         {Origin = lookFrom; Direction = dirT.Normalized()}

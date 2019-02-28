@@ -80,17 +80,19 @@ let getReflectedTotal ray scene hitInfo material =
     |> Seq.map (fun light -> getReflectedForLightSource ray light hitInfo scene.Nodes scene.NodesList material) 
     |> Seq.fold (+) Vector3d.Zero
 
-let areaLightTrace ray scene =
+let rec pathTrace ray scene depth =
     match intersectNodes ray scene.NodesList epsilon with
     | Some hitInfo ->
         let material = scene.Materials.[hitInfo.Material]
         let emitted = getEmitted material
-        let reflected = getReflectedTotal ray scene hitInfo material 
-        Debug.Assert(reflected.X >= 0.0 && reflected.Y >= 0.0 && reflected.Z >= 0.0 && not(Double.IsNaN(reflected.X)))  
-        // printfn "%A; %A\n" emitted reflected
-        emitted + reflected
-        // Vector3d(hitInfo.T / 120.0)
-    | _ -> Vector3d(0.1, 0.0, 0.2)
+        match scatter ray material hitInfo with
+        | Some(attenuation, scattered) when depth < 50 ->
+            emitted + attenuation * pathTrace scattered scene (depth + 1)
+        | _ ->
+            emitted        
+    | _ -> 
+        Vector3d(0.1, 0.0, 0.2)
+        Vector3d.One * 0.2
 
 let rec traceRay ray scene depth = 
     let defaultRes = (Double.PositiveInfinity, Vector3d.Zero)
@@ -115,13 +117,16 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     let buf = Array2D.create bitmap.Height bitmap.Width Vector3d.Zero
     let w = bitmap.Width
     let h = bitmap.Height
+    let samples = 1
     // Parallel.For(0, bitmap.Height, fun r ->
     for r = 0 to bitmap.Height - 1 do
         for c = 0 to w - 1 do
-            let ray = scene.Camera.Ray c r
-            let t, color = (0.0, areaLightTrace ray scene)
-            zbuffer.[r, c] <- t
-            buf.[r, c] <- color
+            for s = 0 to samples - 1 do
+                let ray = scene.Camera.Ray c r
+                let t, color = (0.0, pathTrace ray scene 0)
+                zbuffer.[r, c] <- t
+                buf.[r, c] <- buf.[r,c] + color
+            buf.[r, c] <- buf.[r, c] / float samples
     // ) |> ignore
     Array2D.iteri (fun r c x -> setPixel bitmap c r (clamp x)) buf
 
