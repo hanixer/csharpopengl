@@ -5,6 +5,7 @@ open Common
 open System
 open Node
 open System.Diagnostics
+open Sampling
 
 type BlinnData = {
     DiffuseColor : Vector3d

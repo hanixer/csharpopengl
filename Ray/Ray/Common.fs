@@ -40,7 +40,6 @@ let mutable debugFlag = false
 
 let epsilon = 0.00001
 
-let private random = Random()
 
 let pointOnRay ray (t : float) =
     ray.Origin + ray.Direction * t
@@ -63,56 +62,6 @@ let getSphericalTexCoord (p : Vector3d) =
    let u = (phi + Math.PI) / (2.0 * Math.PI)
    Vector2d(u, v)
 
-let randomInUnitSphere () =
-    let points = Seq.initInfinite (fun _ -> 
-        let x = random.NextDouble()
-        let y = random.NextDouble()
-        let z = random.NextDouble()
-        2.0 * Vector3d(x, y, z) - Vector3d(1.0, 1.0, 1.0))
-    Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
-
-let randomInDisk () =
-    let points = Seq.initInfinite (fun _ -> 
-        let x = random.NextDouble()
-        let y = random.NextDouble()
-        2.0 * Vector3d(x, y, 0.0) - Vector3d(1.0, 1.0, 0.0))
-    Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
-
-let randomInHemisphere () =
-    let r1 = random.NextDouble()
-    let r2 = random.NextDouble()
-    let phi = 2.0 * Math.PI * r1
-    let theta = Math.Acos(1.0 - r2)
-    let x  = Math.Sin theta * Math.Cos phi
-    let y = Math.Sin theta * Math.Sin phi
-    let z = Math.Cos theta
-    let points = Seq.initInfinite (fun _ -> 
-        let x = random.NextDouble()
-        let y = random.NextDouble()
-        let z = random.NextDouble() * 0.5
-        2.0 * Vector3d(x, y, z) - Vector3d.One)
-    // Seq.find (fun (v : Vector3d) -> v.Length < 1.0) points
-    Vector3d(x, z, y)
-
-let randomInHemisphere2 () =
-    let r1 = random.NextDouble()
-    let r2 = random.NextDouble()
-    let phi = 2.0 * Math.PI * r1
-    let theta = Math.Acos(2.0 * r2 - 1.0)
-    let x  = Math.Sin theta * Math.Cos phi
-    let y = Math.Sin theta * Math.Sin phi
-    let z = Math.Cos theta
-    Vector3d(x, z, y)
-
-let randomCosineDirection () =
-    let r1 = random.NextDouble()
-    let r2 = random.NextDouble()
-    let z = Math.Sqrt(1.0 - r2)
-    let phi = 2.0 * Math.PI * r1
-    let x = Math.Cos phi * 2.0 * Math.Sqrt r2
-    let y = Math.Sin phi * 2.0 * Math.Sqrt r2
-    Vector3d(x, y, z)
-
 let buildOrthoNormalBasis (normal : Vector3d) =
     let w = normal.Normalized()
     let help =
@@ -129,9 +78,6 @@ type V3 = Vector3d
 
 let localOrthoNormalBasis (a : V3) (u : V3, v : V3, w : V3) =
     a.X * u + a.Y * v + a.Z * w
-
-let randomTwo() =
-    (random.NextDouble(), random.NextDouble())
 
 let colorToVector (color : Drawing.Color) =
   Vector3d(float color.R / 255.0, float color.G / 255.0, float color.B / 255.0)

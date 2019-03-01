@@ -3,6 +3,7 @@ module Object
 open System
 open OpenTK
 open Common
+open Sampling
 
 type Object = 
     | Sphere

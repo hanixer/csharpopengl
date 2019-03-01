@@ -3,6 +3,7 @@ open OpenTK
 open Common
 open Node
 open System
+open Sampling
 
 type Light =
     | AmbientLight of Vector3d
