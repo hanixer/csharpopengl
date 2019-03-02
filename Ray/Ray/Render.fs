@@ -18,9 +18,9 @@ let setPixel (bitmap : Bitmap) x y (color : Vector3d) =
     let r = int(Math.Sqrt(color.X) * 255.0)
     let g = int(Math.Sqrt(color.Y) * 255.0)
     let b = int(Math.Sqrt(color.Z) * 255.0)
-    let r = int((color.X) * 255.0)
-    let g = int((color.Y) * 255.0)
-    let b = int((color.Z) * 255.0)
+    // let r = int((color.X) * 255.0)
+    // let g = int((color.Y) * 255.0)
+    // let b = int((color.Z) * 255.0)
     let color = Drawing.Color.FromArgb(r, g, b)
     bitmap.SetPixel(x, y, color)
 
@@ -44,9 +44,9 @@ let isReachable source target t direction nodes =
         true
 
 let getReflectedForLightSource ray light hitInfo nodes nodesList material =
-    let samples = 1
+    let ALSsamples = 1
     let sum = 
-        Seq.init samples (fun _ ->
+        Seq.init ALSsamples (fun _ ->
         match samplePointOnLight light nodes with
         | Some(samplePoint) ->
             let pointOnSurf = hitInfo.Point + (hitInfo.Normal * epsilon)
@@ -73,7 +73,7 @@ let getReflectedForLightSource ray light hitInfo nodes nodesList material =
         | _ -> 
             Vector3d.Zero)
         |> Seq.fold (+) Vector3d.Zero
-    sum / float samples
+    sum / float ALSsamples
 
 let getReflectedTotal ray scene hitInfo material =
     scene.LightsList
@@ -87,7 +87,9 @@ let rec pathTrace ray scene depth =
         let emitted = getEmitted material
         match scatter ray material hitInfo with
         | Some(attenuation, scattered) when depth < 50 ->
-            emitted + attenuation * pathTrace scattered scene (depth + 1)
+            let dot = Math.Abs(Vector3d.Dot(hitInfo.Normal, scattered.Direction))
+            let dot = 1.0
+            emitted + attenuation * dot * pathTrace scattered scene (depth + 1)
         | _ ->
             emitted        
     | _ -> 
@@ -117,7 +119,7 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     let buf = Array2D.create bitmap.Height bitmap.Width Vector3d.Zero
     let w = bitmap.Width
     let h = bitmap.Height
-    let samples = 1
+    let samples = 50
     // Parallel.For(0, bitmap.Height, fun r ->
     for r = 0 to bitmap.Height - 1 do
         for c = 0 to w - 1 do
@@ -148,15 +150,3 @@ let drawZBuffer zbuffer =
             zbuffer
     bitmap
     
-
-
-
-
-
-
-
-
-
-
-
-

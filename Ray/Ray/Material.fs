@@ -40,7 +40,7 @@ let scatter ray material hitInfo =
         let target = hitInfo.Point + hitInfo.Normal + samplePoint
         let dir = target - hitInfo.Point
         dir.Normalize()
-        let scattered = {Origin = hitInfo.Point; Direction = dir}
+        let scattered = {Origin = hitInfo.Point; Direction = dir}        
         let attenuation = blinn.DiffuseColor
         Some (attenuation, scattered)
     | _ -> None

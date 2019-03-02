@@ -30,6 +30,24 @@ let cornellBox =
         // Translate(box1, Vector3d(350.0, 0.0, -260.0))
         // Translate(box2, Vector3d(130.0, 0.0, -260.0))        
     ]
+let cornellBoxWithSphere =
+    let red = Lambertian(ConstantTexture(Vector3d(1.0, 0.2, 0.2)))
+    let white = Lambertian(ConstantTexture(Vector3d(0.73)))
+    let green = Lambertian(ConstantTexture(Vector3d(0.2, 0.85, 0.25)))
+    let light = DiffuseLight(ConstantTexture(Vector3d(15.0)))
+    let blue = Lambertian(ConstantTexture(Vector3d(0.2, 0.2, 1.0)))
+    let box1 = makeBox Vector3d.Zero (Vector3d(165.0)) white
+    let box2 = makeBox Vector3d.Zero (Vector3d(165.0, 330.0, -165.0)) white
+    let earth = textureFromBitmap 
+    [
+        YzRect(0.0, 555.0, -555.0, 0.0, 0.0, red)
+        FlipNormals(YzRect(0.0, 555.0, -555.0, 0.0, 555.0, blue))
+        XzRect(213.0, 343.0, -332.0, -227.0, 554.0, light)
+        FlipNormals(XzRect(0.0, 555.0, -555.0, 0.0, 555.0, white))
+        XzRect(0.0, 555.0, -555.0, 0.0, 0.0, white)
+        XyRect(0.0, 555.0, 0.0, 555.0, -555.0, white)
+        Sphere(Vector3d(400.0, 100.0, -200.0), 100.0, green)
+    ]
 
 let withLight =
     let light = DiffuseLight(ConstantTexture(Vector3d(15.0)))
@@ -150,16 +168,16 @@ type Game() =
     let width = 500
     let height = 500
     let settings = { 
-        Samples = 10
+        Samples = 50
         // LookFrom = Vector3d(5.0, 2.0, 8.0)
         // LookAt = Vector3d(5.0, 0.0, 0.0)
         // Fov = 90.0
-        // LookFrom = Vector3d(278.0, 278.0, 800.0)
-        // LookAt = Vector3d(278.0, 278.0, 0.0)
-        // Fov = 40.0
-        LookFrom = Vector3d(-15.0, 5.0, 10.0)
-        LookAt = Vector3d(0.0)
-        Fov = 90.0
+        LookFrom = Vector3d(278.0, 278.0, 800.0)
+        LookAt = Vector3d(278.0, 278.0, 0.0)
+        Fov = 40.0
+        // LookFrom = Vector3d(-15.0, 5.0, 10.0)
+        // LookAt = Vector3d(0.0)
+        // Fov = 90.0
     }
     let zoom = 1.0
     let mutable lacunarity = 1.4
@@ -167,12 +185,12 @@ type Game() =
     
     // let hitable : Hitable = Bvh.makeBvh hitableSeq
     // let hitable = HitableList hitableSeq
-    // let hitable = HitableList cornellBox
+    let hitable = HitableList cornellBoxWithSphere
     // let hitable = Bvh.makeBvh cornellBox
     // let hitable = HitableList standardScene
     // let hitable = HitableList oneBox
     // let hitable = HitableList otherScene
-    let hitable = HitableList withLight
+    // let hitable = HitableList withLight
 
 
     let update() =
