@@ -62,7 +62,7 @@ let getReflectedForLightSource ray light hitInfo nodes nodesList material =
                 Debug.Assert(c.X >= 0.0 && c.Y >= 0.0 && c.Z >= 0.0 && not(Double.IsNaN(c.X)))
                 let dot = Math.Max(Vector3d.Dot(hitInfo.Normal.Normalized(), direction), 0.0)
                 let attenuation = getAttenuation material
-                c * area * dot * attenuation / directionNonNorm.LengthSquared                
+                c * area * dot * attenuation / directionNonNorm.LengthSquared               
                 // Debug.Assert(directionNonNorm.LengthSquared > 0.0)
                 // c * attenuation
                 // Vector3d.One
@@ -88,7 +88,8 @@ let rec pathTrace ray scene depth =
         match scatter ray material hitInfo with
         | Some(attenuation, scattered, pdf) when depth < 50 ->
             // let pdf = 1.0
-            emitted + attenuation * pathTrace scattered scene (depth + 1) / pdf
+            // Debug.Assert (pdf < 5.0)
+            emitted + attenuation * pathTrace scattered scene (depth + 1)
             // let scattered = 
             //     let p = randomInUnitSphere()
             //     let target = hitInfo.Point + hitInfo.Normal + p

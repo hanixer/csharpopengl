@@ -77,7 +77,7 @@
       <glossiness value="10"/>
     </material>
     <material type="emissive" name="lightMat">
-      <color value="15"/>
+      <color value="1"/>
     </material>
 
     <!-- Lights -->
