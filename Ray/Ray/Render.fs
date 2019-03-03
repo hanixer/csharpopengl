@@ -63,6 +63,7 @@ let getDirectLighting scene hitInfo lightNode =
     | _ ->
         Vector3d.Zero
 
+
 let rec pathTrace ray scene depth isEyeRay : Vector3d =    
     match intersectNodes ray scene.NodesList epsilon with
     | Some hitInfo ->
@@ -73,6 +74,7 @@ let rec pathTrace ray scene depth isEyeRay : Vector3d =
             let direct = 
                 Seq.map (getDirectLighting scene hitInfo) scene.AreaLights
                 |> Seq.fold (+) Vector3d.Zero
+                // Vector3d.Zero
             let indirect =
                 let dot = Math.Abs(Vector3d.Dot(hitInfo.Normal, -ray.Direction))
                 dot * pathTrace scattered scene (depth + 1) false
