@@ -1,5 +1,7 @@
 <xml>
   <scene>
+    <samples value="1"/>
+    <environment r="1" g="1" b="1" value="0.0"/>
     <!-- Objects -->
     <object name="box">
       <translate x="0" y="0" z="12"/>
@@ -43,9 +45,14 @@
       <rotate angle="90" y="1"/>
       <translate x="-4" y="5" z="4.5"/>
     </object> -->
-    <object type="plane" name="lightDisk" material="lightMat">
+    <!-- <object type="plane" name="lightRect" material="lightMat">
       <scale value="4"/>
       <rotate angle="90" x="1"/>
+      <translate x="0" y="0" z="20"/>
+    </object> -->
+    <object type="disk" name="lightRect" material="lightMat">
+      <scale value="4"/>
+      <!-- <rotate angle="90" x="1"/> -->
       <translate x="0" y="0" z="20"/>
     </object>
 
@@ -60,10 +67,6 @@
     </material>
     <material type="blinn" name="wallBlue">
       <diffuse  r="0.2" g="0.2" b="1.0"/>
-      <specular value="0"/>
-    </material>
-    <material type="blinn" name="light">
-      <emission  value="1"/>
       <specular value="0"/>
     </material>
     <material type="blinn" name="mtl1">
@@ -87,6 +90,14 @@
     </light>
   </scene>
 
+  <!-- <camera>
+    <position x="0" y="-60" z="16"/>
+    <target x="8" y="-6" z="4.5"/>
+    <up x="0" y="0" z="1"/>
+    <fov value="25"/>
+    <width value="800"/>
+    <height value="600"/>
+  </camera> -->
   <camera>
     <position x="0" y="-60" z="16"/>
     <target x="0" y="0" z="11"/>

@@ -17,6 +17,9 @@ type Scene = {
     Materials : Map<string, Material>
     Lights : Map<string, Light>
     LightsList : Light list
+    Environment : Vector3d
+    Samples : int    
+    AreaLights : Node list
 }
 
 let getMaterial scene name = Map.find name scene.Materials
@@ -25,14 +28,18 @@ let printIdent level =
     for i = 1 to level do 
         printf " "
 
-let readFloating (xml : XmlElement) (name : string) defaultVal =
-    xml.Attributes
-    |> Seq.cast<XmlAttribute>
-    |> Seq.tryFind (fun attr -> attr.Name = name)
-    |> Option.map (fun attr ->
-        Double.Parse(attr.Value, CultureInfo.InvariantCulture)
-        )
-    |> Option.defaultValue defaultVal
+let readFloating (xml : XmlNode) (name : string) defaultVal =
+    let xml = xml :?> XmlElement
+    if not (isNull xml) then
+        xml.Attributes
+        |> Seq.cast<XmlAttribute>
+        |> Seq.tryFind (fun attr -> attr.Name = name)
+        |> Option.map (fun attr ->
+            Double.Parse(attr.Value, CultureInfo.InvariantCulture)
+            )
+        |> Option.defaultValue defaultVal
+    else
+        defaultVal
 
 let readVector (xml : XmlNode) (defaultVec : Vector3d) =
     if not (isNull xml) then
@@ -307,7 +314,33 @@ let loadScene (xml : XmlDocument) =
             |> Map.ofSeq
         let lightsList = lights |> Map.toList |> List.map snd
         let nodesMap = List.collect getNodePairs nodes |> Map.ofList
-        {Nodes = nodesMap; NodesList = nodes; Camera = camera; Materials = materials; Lights = lights; LightsList = lightsList}
+        let environment =
+            readColor (xml.SelectSingleNode "scene/environment") Vector3d.Zero
+        let samples =   
+            readFloating (xml.SelectSingleNode "scene/samples") "value" 1.0 |> int
+        let areaLights =
+            let ms =
+                materials
+                |> Map.toSeq
+                |> Seq.choose (fun (n, m) ->
+                    match m with
+                    | Emissive _ -> Some n
+                    | _ -> None)
+            nodes
+            |> Seq.filter (fun n -> Seq.contains n.Material ms)
+        printfn "samples %A" samples
+        printfn "area lights count %A" (Seq.length areaLights)
+        { 
+          Nodes = nodesMap
+          NodesList = nodes
+          Camera = camera
+          Materials = materials
+          Lights = lights
+          LightsList = lightsList
+          Environment = environment
+          Samples = samples 
+          AreaLights = Seq.toList areaLights
+         }
     else
         failwith "xml tag not found"
 

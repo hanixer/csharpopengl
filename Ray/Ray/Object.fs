@@ -203,28 +203,41 @@ let rec intersect ray object tMin material =
             if h.IsSome then h.Value.T
             else Double.MaxValue)
 
-let samplePointOnObject object =
+let samplePointRectangle (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d)=
+    let r0, r1 = randomTwo()
+    let d1 = p1 - p0
+    let d2 = p2 - p0
+    let width = d1.Length
+    let height = d2.Length
+    let v1 = r0 * width * d1
+    let v2 = r1 * height * d2
+    let norm = Vector3d.Cross(d1, d2)        
+    Some(p0 + v1 + v2, norm.Normalized())
+
+let samplePointAndNormOnObject object =
     match object with
     | Disk ->
-        Some(randomInDisk())
-        // Some(randomInHemisphere())
+        let norm = Vector3d(0.0, 0.0, 1.0)
+        Some(randomInDisk(), norm)
     | Sphere ->
-        Some(randomInHemisphere2())
+        let point = randomInHemisphere2()
+        let norm = point.Normalized()
+        Some(randomInHemisphere2(), norm)
     | Rectangle(p0, p1, p2) ->
-        let r0, r1 = randomTwo()
-        let d1 = p1 - p0
-        let d2 = p2 - p0
-        let width = d1.Length
-        let height = d2.Length
-        let v1 = r0 * width * d1
-        let v2 = r1 * height * d2
-        Some(v1 + v2)
+        samplePointRectangle p0 p1 p2
+    | Plane ->
+        samplePointRectangle (Vector3d(-1.0, 0.0, 1.0)) (Vector3d(1.0, 0.0, 1.0)) (Vector3d(-1.0, 0.0, -1.0))
     | _ -> None
 
 let getAreaOfObject object =
     match object with
     | Disk -> 2.0 * Math.PI
     | Sphere -> 4.0 * Math.PI
+    | Rectangle(p0, p1, p2) ->
+        let d1 = p1 - p0
+        let d2 = p2 - p0
+        d1.Length * d2.Length
+    | Plane -> 4.0
     | _ -> 0.0
 
 let makeBox (p0 : Vector3d) (p1 : Vector3d) =

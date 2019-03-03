@@ -47,11 +47,12 @@ and intersectNode ray node tMin =
             hitInfoChilds
     Option.map (hitInfoToWorld ray node) hitInfo
 
-let samplePointOnNode node =
+let samplePointAndNormOnNode node =
     match node.Object with
     | Some(object) ->
-        samplePointOnObject object
-        |> Option.map (transformPoint node.Transform)
+        samplePointAndNormOnObject object
+        |> Option.map (fun (point, norm) ->
+            (transformPoint node.Transform point, transformNormal node.Transform norm))
     | _ ->
         None
 

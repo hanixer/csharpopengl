@@ -33,68 +33,56 @@ let clamp (color : Vector3d) =
 
 let maxDepth = 5
 
-let isReachable source target t direction nodes =
+let isReachable source t direction nodes =
     let shadowRay = {Origin = source ; Direction = direction}
     match intersectNodes shadowRay nodes epsilon with
     | Some(hitInfo) -> 
-        hitInfo.T > (t - 0.001)
+        hitInfo.T > (t - 0.001) 
+            && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
         // hitInfo.T >= t && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
     // | Some(hitInfo) -> false
     | None -> 
         true
 
-let getReflectedForLightSource ray light hitInfo nodes nodesList material =
-    let ALSsamples = 1
-    let sum = 
-        Seq.init ALSsamples (fun _ ->
-        match samplePointOnLight light nodes with
-        | Some(samplePoint) ->
-            let pointOnSurf = hitInfo.Point + (hitInfo.Normal * epsilon)
-            let directionNonNorm = samplePoint - pointOnSurf
-            let direction = directionNonNorm.Normalized()
-            let t = (samplePoint - pointOnSurf).Length / direction.Length
-            let isReachable = isReachable pointOnSurf (samplePoint + -direction * epsilon) t direction nodesList
-            if isReachable then
-                // printfn "yes, reachable"
-                let area = getAreaOfLight light nodes
-                // let area = 1.0
-                let c = illuminate light samplePoint direction nodesList
-                Debug.Assert(c.X >= 0.0 && c.Y >= 0.0 && c.Z >= 0.0 && not(Double.IsNaN(c.X)))
-                let dot = Math.Max(Vector3d.Dot(hitInfo.Normal.Normalized(), direction), 0.0)
-                let attenuation = getAttenuation material
-                c * area * dot * attenuation / directionNonNorm.LengthSquared                
-                // Debug.Assert(directionNonNorm.LengthSquared > 0.0)
-                // c * attenuation
-                // Vector3d.One
-                // Vector3d(0.0, 0.0, 1.0)
-            else
-                Vector3d(0.0, 1.0, 0.0)
-                Vector3d.Zero
-        | _ -> 
-            Vector3d.Zero)
-        |> Seq.fold (+) Vector3d.Zero
-    sum / float ALSsamples
+let getDirectLighting scene hitInfo lightNode =
+    // rho * Le * v * A * cosThetaI * cosThetaL / distance^2
+    match samplePointAndNormOnNode lightNode with
+    | Some (samplePoint, normalLight) ->
+        let direction = hitInfo.Point - samplePoint
+        let directionNorm = direction.Normalized()
+        let isReachable = isReachable hitInfo.Point direction.Length -directionNorm scene.NodesList
+        if isReachable then
+            let material = scene.Materials.[lightNode.Material]
+            let emitted = getEmitted material
+            let cosThetaI = Math.Abs(Vector3d.Dot(hitInfo.Normal, -directionNorm))
+            let cosThetaL = Math.Abs(Vector3d.Dot(normalLight, directionNorm))
+            let area = getAreaOfNode lightNode
+            emitted * cosThetaI * cosThetaL * area / direction.LengthSquared
+        else
+            Vector3d.Zero
+    | _ ->
+        Vector3d.Zero
 
-let getReflectedTotal ray scene hitInfo material =
-    scene.LightsList
-    |> Seq.map (fun light -> getReflectedForLightSource ray light hitInfo scene.Nodes scene.NodesList material) 
-    |> Seq.fold (+) Vector3d.Zero
-
-let rec pathTrace ray scene depth =
+let rec pathTrace ray scene depth isEyeRay : Vector3d =    
     match intersectNodes ray scene.NodesList epsilon with
     | Some hitInfo ->
         let material = scene.Materials.[hitInfo.Material]
-        let emitted = getEmitted material
+        let emitted = if isEyeRay  then getEmitted material else Vector3d.Zero
         match scatter ray material hitInfo with
-        | Some(attenuation, scattered) when depth < 50 ->
-            let dot = Math.Abs(Vector3d.Dot(hitInfo.Normal, scattered.Direction))
-            let dot = 1.0
-            emitted + attenuation * dot * pathTrace scattered scene (depth + 1)
+        | Some(attenuation, scattered) when depth < 50 && emitted = Vector3d.Zero ->
+            let direct = 
+                Seq.map (getDirectLighting scene hitInfo) scene.AreaLights
+                |> Seq.fold (+) Vector3d.Zero
+            let indirect =
+                let dot = Math.Abs(Vector3d.Dot(hitInfo.Normal, -ray.Direction))
+                dot * pathTrace scattered scene (depth + 1) false
+            emitted 
+                + attenuation * direct 
+                + attenuation * indirect
         | _ ->
             emitted        
     | _ -> 
-        Vector3d(0.1, 0.0, 0.2)
-        Vector3d.One * 0.2
+        scene.Environment
 
 let rec traceRay ray scene depth = 
     let defaultRes = (Double.PositiveInfinity, Vector3d.Zero)
@@ -119,16 +107,20 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     let buf = Array2D.create bitmap.Height bitmap.Width Vector3d.Zero
     let w = bitmap.Width
     let h = bitmap.Height
-    let samples = 50
+    let samples = scene.Samples
     // Parallel.For(0, bitmap.Height, fun r ->
     for r = 0 to bitmap.Height - 1 do
         for c = 0 to w - 1 do
             for s = 0 to samples - 1 do
                 let ray = scene.Camera.Ray c r
-                let t, color = (0.0, pathTrace ray scene 0)
+                let t, color = (0.0, pathTrace ray scene 0 true)
                 zbuffer.[r, c] <- t
                 buf.[r, c] <- buf.[r,c] + color
             buf.[r, c] <- buf.[r, c] / float samples
+        let percent = int(float r / float bitmap.Height * 1000.0)
+        if percent % 50 = 0 then
+            printfn "%A%%" (percent / 10)
+        ()
     // ) |> ignore
     Array2D.iteri (fun r c x -> setPixel bitmap c r (clamp x)) buf
 

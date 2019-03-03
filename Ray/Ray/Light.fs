@@ -48,7 +48,7 @@ let samplePointOnLight light nodes =
     match light with
     | AreaLight(nodeName) ->
         let node = Map.find nodeName nodes
-        samplePointOnNode node
+        samplePointAndNormOnNode node
     | _ -> None    
 
 let getAreaOfLight light nodes =
