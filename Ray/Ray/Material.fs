@@ -19,8 +19,6 @@ type BlinnData = {
 type Material =
     | Blinn of BlinnData
     | ReflectMaterial of Vector3d
-    
-    member this.Number = 23
 
 let reflect (rayDir : Vector3d) (normal : Vector3d) =
     let proj = normal * Vector3d.Dot(-rayDir, normal)
