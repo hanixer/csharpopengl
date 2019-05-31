@@ -3,8 +3,6 @@ open OpenTK
 open Light
 open Common
 open System
-open Node
-open System.Diagnostics
 open Sampling
 
 type BlinnData = {

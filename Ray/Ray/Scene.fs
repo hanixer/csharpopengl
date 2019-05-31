@@ -205,40 +205,40 @@ let getObjectFromType (xml : XmlElement) =
         match typeAttr.InnerText with
         | "sphere" -> 
             printf " - Sphere"
-            Some Object.Sphere
+            Some Shape.Sphere
         | "plane" ->
             printf " - Plane"
-            Some(Object.Plane)
+            Some(Shape.Plane)
         | "triangle" ->
             printf " - Triangle"
             let vz = Vector3d.Zero
             let p0 = select xml "./p0" (fun elem -> readVector elem vz) vz
             let p1 = select xml "./p1" (fun elem -> readVector elem vz) vz
             let p2 = select xml "./p2" (fun elem -> readVector elem vz) vz
-            Some(Object.Triangle(p0, p1, p2))
+            Some(Shape.Triangle(p0, p1, p2))
         | "rectangle" ->
             printf " - Rectangle"
             let vz = Vector3d.Zero
             let p0 = select xml "./p0" (fun elem -> readVector elem vz) vz
             let p1 = select xml "./p1" (fun elem -> readVector elem vz) vz
             let p2 = select xml "./p2" (fun elem -> readVector elem vz) vz
-            Some(Object.Rectangle(p0, p1, p2))
+            Some(Shape.Rectangle(p0, p1, p2))
         | "box" ->
             printf " - Box"
             let vz = Vector3d.Zero
             let p0 = select xml "./p0" (fun elem -> readVector elem vz) vz
             let p1 = select xml "./p1" (fun elem -> readVector elem vz) vz
-            Some(Object.makeBox p0 p1)
+            Some(Shape.makeBox p0 p1)
         | "cylinder" ->
             printf " - Cylinder"
-            Some Object.Cylinder
+            Some Shape.Cylinder
         | "disk" -> 
             printf " - Disk"
-            Some Object.Disk
+            Some Shape.Disk
         | "rectWithHoles" ->
             printf " - rect with holes"
             let radius = readFloating xml "radius" 0.1
-            Some(Object.RectXYWithHoles(1.0, radius))
+            Some(Shape.RectXYWithHoles(1.0, radius))
         | _ -> 
             printf " - UNKNOWN TYPE"
             None

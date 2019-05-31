@@ -4,7 +4,7 @@ open System
 open OpenTK
 open Scene
 open Common
-open Object
+open Shape
 open Node
 open Transform
 open System.Diagnostics

@@ -9,7 +9,7 @@ open Render
 open System
 open OpenTK
 open OpenTK.Input
-open Object
+open Shape
 open Transform
 open Light
 open Common

@@ -2,13 +2,13 @@ module Node
 
 open System
 open OpenTK
-open Object
+open Shape
 open Transform
 open Common
 
 type Node = {
     Name : string
-    Object : Object option
+    Object : Shape option
     Children : Node list
     Transform : Transform
     Material : string
@@ -21,7 +21,7 @@ let tryFindBestHitInfo hitInfos =
         | _, Some _ -> hitInfo       
         | _ -> best
     let result = Seq.fold fold None hitInfos
-    result    
+    result
 
 let hitInfoToWorld ray node hitInfo =
     let point = transformPoint node.Transform hitInfo.Point
