@@ -11,7 +11,7 @@ open Material
 open Light
 
 type Scene = {
-    Camera : Camera 
+    Camera : Camera
     Nodes : Map<string, Node>
     NodesList : Node list
     Materials : Map<string, Material>
@@ -151,7 +151,7 @@ let loadMaterial (xml : XmlNode) =
             let color = readColor (xml.SelectSingleNode "./color") Vector3d.One
             Some(Emissive(color))
         | _ -> None
-            
+
     printfn ""
     material
     |> Option.map (fun material ->
@@ -229,7 +229,7 @@ let getObjectFromType (xml : XmlElement) =
             let p0 = select xml "./p0" (fun elem -> readVector elem vz) vz
             let p1 = select xml "./p1" (fun elem -> readVector elem vz) vz
             Some(Object.makeBox p0 p1)
-        | "cylinder" -> 
+        | "cylinder" ->
             printf " - Cylinder"
             Some Object.Cylinder
         | "disk" -> 
@@ -295,7 +295,7 @@ let loadScene (xml : XmlDocument) =
             else        
                 failwith "scene tag not found"
         let camera = 
-            let cameraXml = xml.Item "camera" 
+            let cameraXml = xml.Item "camera"
             if not (isNull cameraXml) then
                 loadCamera cameraXml
             else        

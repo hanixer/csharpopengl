@@ -13,6 +13,7 @@
     <Compile Include="Light.fs" />
     <Compile Include="Material.fs" />
     <Compile Include="Window.fs" />
+    <Compile Include="Shape.fs" />
     <Compile Include="Scene.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="Program.fs" />

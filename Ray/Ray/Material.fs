@@ -19,8 +19,9 @@ type BlinnData = {
 
 type Material =
     | Blinn of BlinnData
-    | ReflectMaterial of Vector3d
-    | Emissive of Vector3d
+    | Reflection of color : Vector3d
+    | Refraction of color : Vector3d * refrIndex : float
+    | Emissive of lightColor : Vector3d
 
 let getAttenuation material =
     match material with
@@ -36,11 +37,11 @@ let getEmitted material =
 let scatter ray material hitInfo =
     match material with
     | Blinn(blinn) ->
-        let samplePoint = randomInUnitSphere()
-        let target = hitInfo.Point + hitInfo.Normal + samplePoint
-        let dir = target - hitInfo.Point
+        let samplePoint = randomCosineDirection()
+        let onb = buildOrthoNormalBasis hitInfo.Normal
+        let dir = localOrthoNormalBasis samplePoint onb
         dir.Normalize()
-        let scattered = {Origin = hitInfo.Point; Direction = dir}        
+        let scattered = {Origin = hitInfo.Point; Direction = dir}
         let attenuation = blinn.DiffuseColor
         Some (attenuation, scattered)
     | _ -> None
@@ -121,11 +122,11 @@ let rec shade ray material hitInfo lights nodes =
                 Some {Origin = hitInfo.Point; Direction = refractedDir}
             else None
         (directColor, scattered)
-    | ReflectMaterial(reflectColor) ->
-        let scattered = 
-            let reflectedDir = reflect ray.Direction hitInfo.Normal
-            Some {Origin = hitInfo.Point; Direction = reflectedDir}
-        (reflectColor, scattered)
+    // | ReflectMaterial(reflectColor) ->
+    //     let scattered =
+    //         let reflectedDir = reflect ray.Direction hitInfo.Normal
+    //         Some {Origin = hitInfo.Point; Direction = reflectedDir}
+    //     (reflectColor, scattered)
 
 let defaultBlinn = {
     DiffuseColor = Vector3d(0.5)
