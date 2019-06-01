@@ -15,9 +15,10 @@ open Light
 open Common
 open Material
 open Node
+open ObjLoader.Loader.Loaders
 
 let drawLine (g : Drawing.Graphics) (p1 : Vector2) (p2 : Vector2) =
-    g.DrawLine(Drawing.Pens.White, Drawing.PointF(p1.X, p1.Y), Drawing.PointF(p2.X, p2.Y))    
+    g.DrawLine(Drawing.Pens.White, Drawing.PointF(p1.X, p1.Y), Drawing.PointF(p2.X, p2.Y))
 
 let drawnBitmap =
     let bmp = new Drawing.Bitmap(500, 500)
@@ -52,8 +53,8 @@ type Window1(width, height) =
     let mutable zbitmap : Drawing.Bitmap = null
     let mutable isZ = false
 
-    member this.Update() = 
-        let scene = loadSceneFromFile file    
+    member this.Update() =
+        let scene = loadSceneFromFile file
         // let rect = makeBox (Vector3d.Zero) (Vector3d(1.0, 1.0, -1.0))
         // let no = {Node.Object = Some rect; Node.Children = []; Node.Material = "mtl2"; Node.Name = "thin"; Node.Transform = identityTransform}
         // let scene = {scene with Nodes = Map.add "thin" no scene.Nodes; NodesList = no :: scene.NodesList}
@@ -67,15 +68,19 @@ type Window1(width, height) =
 
     override this.OnUpdateFrame e =
         base.OnUpdateFrame e
-        if base.Keyboard.[Key.Z] then 
+        if base.Keyboard.[Key.Z] then
             this.DrawBitmapAndSave (if isZ then bitmap else zbitmap)
             isZ <- not isZ
-        if base.Keyboard.[Key.F5] then 
+        if base.Keyboard.[Key.F5] then
             this.Update()
 
 [<EntryPoint>]
 let main argv =
-    let win = new Window1(800, 600)
-    win.Update()
-    win.Run()
+    let m = TriangleMesh.loadFromFile "scenes/sphere.obj"
+    printfn "%A" m
+
+    // let win = new Window1(800, 600)
+    // win.Update()
+    // win.Run()
+
     0 // return an integer exit code

@@ -14,7 +14,7 @@ open Light
 
 type Bitmap = System.Drawing.Bitmap
 
-let setPixel (bitmap : Bitmap) x y (color : Vector3d) =    
+let setPixel (bitmap : Bitmap) x y (color : Vector3d) =
     let r = int(Math.Sqrt(color.X) * 255.0)
     let g = int(Math.Sqrt(color.Y) * 255.0)
     let b = int(Math.Sqrt(color.Z) * 255.0)
@@ -143,4 +143,3 @@ let drawZBuffer zbuffer =
             setPixel bitmap column row <| Vector3d(f)) 
             zbuffer
     bitmap
-    
