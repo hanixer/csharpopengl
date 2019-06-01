@@ -14,6 +14,7 @@ type Object =
     | Rectangle of Vector3d * Vector3d * Vector3d
     | ObjectList of Object list
     | Plane
+    | TriangleObj of TriangleMesh.Data
 
 let quadratic a b c =
     let discrim = b * b - 4.0 * a * c
@@ -80,6 +81,14 @@ let intersectTriangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
             Some {defaultHitInfo with T = t; Point = point; Normal = normal}
         else
             None
+
+let intersectTriangleObj ray (data : TriangleMesh.Data) =
+    Seq.map (fun (face : TriangleMesh.Face) ->
+        let p0 = data.Vertex(face.[0])
+        let p1 = data.Vertex(face.[1])
+        let p2 = data.Vertex(face.[2])
+        intersectTriangle ray p0 p1 p2 ) data.Faces
+    |> tryFindBestHitInfo
 
 let intersectRectangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
     let v1 = p1 - p0
@@ -179,7 +188,7 @@ let rec intersect ray object tMin material =
         let a = ray.Direction.X * ray.Direction.X + ray.Direction.Z * ray.Direction.Z
         let b = 2.0 * (ray.Origin.X * ray.Direction.X + ray.Origin.Z * ray.Direction.Z)
         let c = ray.Origin.X * ray.Origin.X + ray.Origin.Z * ray.Origin.Z - 1.0
-        if debugFlag then 
+        if debugFlag then
             printfn "a = %A; b = %A; c = %A" a b c
             printfn "%A " <| quadratic a b c
         match quadratic a b c with
@@ -187,21 +196,23 @@ let rec intersect ray object tMin material =
             computeHit t0
         | Some(_, t1) when t1 > tMin ->
             computeHit t1
-        | _ -> 
+        | _ ->
             None
-    | RectXYWithHoles(width, radius) ->    
+    | RectXYWithHoles(width, radius) ->
         intersectRectWithHoles ray width radius tMin
     | Disk ->
         intersectDisk ray
     | Rectangle(p0, p1, p2) ->
         intersectRectangle ray p0 p1 p2
-    | Plane -> 
+    | Plane ->
         intersectPlane ray
     | ObjectList objs ->
         Seq.map (fun object -> intersect ray object tMin material) objs
         |> Seq.minBy (fun h ->
             if h.IsSome then h.Value.T
             else Double.MaxValue)
+    | TriangleObj data ->
+        intersectTriangleObj ray data
 
 let samplePointRectangle (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d)=
     let r0, r1 = randomTwo()
@@ -211,7 +222,7 @@ let samplePointRectangle (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d)=
     let height = d2.Length
     let v1 = r0 * width * d1
     let v2 = r1 * height * d2
-    let norm = Vector3d.Cross(d1, d2)        
+    let norm = Vector3d.Cross(d1, d2)
     Some(p0 + v1 + v2, norm.Normalized())
 
 let samplePointAndNormOnObject object =

@@ -14,14 +14,6 @@ type Node = {
     Material : string
 }
 
-let tryFindBestHitInfo hitInfos =
-    let fold best hitInfo =
-        match (best, hitInfo) with
-        | Some b, Some h ->  if h.T < b.T then hitInfo else best
-        | _, Some _ -> hitInfo       
-        | _ -> best
-    let result = Seq.fold fold None hitInfos
-    result    
 
 let hitInfoToWorld ray node hitInfo =
     let point = transformPoint node.Transform hitInfo.Point

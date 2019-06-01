@@ -5,14 +5,11 @@ open ObjLoader.Loader.Loaders
 
 type Face = int[]
 
-type Mesh = {
-    V : Vector3d[] // vertex list
-    F : Face[] // faces
-    VN : Vector3d[] // vertex normal
-    FN : Face[] // normal faces
-    VT : Vector3d[] // texture vertices
-    FT : Face[] // texture faces
-}
+type Data(v : Vector3d[], f : Face[], VN : Vector3d[],FN : Face[],VT : Vector3d[],FT : Face[]) =
+    member __.FacesCount = f.Length
+    member __.Vertex(i : int) = v.[i]
+    member __.Faces = f
+    override __.ToString() = "nothing"
 
 let private toVector3d (v : ObjLoader.Loader.Data.VertexData.Vertex) =
     Vector3d(float v.X, float v.Y, float v.Z)
@@ -44,7 +41,7 @@ let private loadResultToMesh (lr : LoadResult) =
             f.Add(vertexFace)
             fn.Add(normalFace)
             ft.Add(texFace)
-    { V = v; F = f.ToArray(); VN = vn; FN = fn.ToArray(); VT = vt; FT = ft.ToArray()}
+    Data(v, f.ToArray(), vn, fn.ToArray(), vt, ft.ToArray())
 
 let loadFromFile filename =
     let fs = new FileStream(filename, FileMode.Open)

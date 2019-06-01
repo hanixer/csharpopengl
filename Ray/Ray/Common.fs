@@ -19,6 +19,15 @@ type BoundingBox = {
     PMax : Vector3d
 }
 
+let tryFindBestHitInfo hitInfos =
+    let fold best hitInfo =
+        match (best, hitInfo) with
+        | Some b, Some h ->  if h.T < b.T then hitInfo else best
+        | _, Some _ -> hitInfo
+        | _ -> best
+    let result = Seq.fold fold None hitInfos
+    result
+
 let hitBoundingBox (box : BoundingBox) ray tmin tmax = 
    let handle (tmin, tmax) (box1, box2, rayOrig, rayDir) =
       let inv = 1.0 / rayDir
