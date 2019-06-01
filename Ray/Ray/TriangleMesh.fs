@@ -34,7 +34,6 @@ let private loadResultToMesh (lr : LoadResult) =
         if face.Count < 3 then
             failwith "expected 3 and more face points"
         for i = 1 to face.Count - 2 do
-            printfn "%A" i
             let vertexFace = [| face.[0].VertexIndex; face.[i].VertexIndex; face.[i+1].VertexIndex |]
             let normalFace = [| face.[0].NormalIndex; face.[i].NormalIndex; face.[i+1].NormalIndex |]
             let texFace = [| face.[0].TextureIndex; face.[i].TextureIndex; face.[i+1].TextureIndex |]
@@ -44,7 +43,7 @@ let private loadResultToMesh (lr : LoadResult) =
     Data(v, f.ToArray(), vn, fn.ToArray(), vt, ft.ToArray())
 
 let loadFromFile filename =
-    let fs = new FileStream(filename, FileMode.Open)
+    use fs = new FileStream(filename, FileMode.Open)
     let loader = ObjLoaderFactory().Create()
     let loadResult = loader.Load(fs)
     loadResultToMesh loadResult

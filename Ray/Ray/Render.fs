@@ -86,7 +86,7 @@ let rec pathTrace ray scene depth isEyeRay : Vector3d =
     | _ -> 
         scene.Environment
 
-let rec traceRay ray scene depth = 
+let rec traceRay ray scene depth =
     let defaultRes = (Double.PositiveInfinity, Vector3d.Zero)
     if depth > maxDepth then
         defaultRes
@@ -115,7 +115,8 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
         for c = 0 to w - 1 do
             for s = 0 to samples - 1 do
                 let ray = scene.Camera.Ray c r
-                let t, color = (0.0, pathTrace ray scene 0 true)
+                // let t, color = (0.0, pathTrace ray scene 0 true)
+                let t, color = traceRay ray scene 0
                 zbuffer.[r, c] <- t
                 buf.[r, c] <- buf.[r,c] + color
             buf.[r, c] <- buf.[r, c] / float samples

@@ -1,0 +1,30 @@
+<xml>
+  <scene>
+    <object type="sphere" name="lom" material="notwhite">
+    </object>
+  </scene>
+  <light type="ambient" name="ambientLight">
+    <intensity value="0.7"/>
+  </light>
+  <light type="direct" name="directionalLight">
+    <intensity value="0.1"/>
+    <direction x="0" y="-1" z="-1"/>
+  </light>
+  <material type="blinn" name="notwhite">
+    <diffuse r="1" g="0.5" b="0.5"/>
+  </material>
+  <material type="blinn" name="white">
+    <diffuse value="1"/>
+  </material>
+  <material type="emissive" name="lightMat">
+    <color value="1"/>
+  </material>
+  <camera>
+    <position x="5" y="5" z="5"/>
+    <target x="0" y="0" z="0"/>
+    <up x="0" y="1" z="0"/>
+    <fov value="45"/>
+    <width value="400"/>
+    <height value="400"/>
+  </camera>
+</xml>

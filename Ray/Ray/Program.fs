@@ -16,6 +16,7 @@ open Common
 open Material
 open Node
 open ObjLoader.Loader.Loaders
+open System.IO
 
 let drawLine (g : Drawing.Graphics) (p1 : Vector2) (p2 : Vector2) =
     g.DrawLine(Drawing.Pens.White, Drawing.PointF(p1.X, p1.Y), Drawing.PointF(p2.X, p2.Y))
@@ -44,7 +45,7 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = "scenes/planeTest.xml"
+let file = @"scenes\old\test3.xml"
 
 type Window1(width, height) =
     inherit Window(width, height)
