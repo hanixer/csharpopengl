@@ -16,6 +16,7 @@
     <Compile Include="Window.fs" />
     <Compile Include="Scene.fs" />
     <Compile Include="Render.fs" />
+    <Compile Include="Render2.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>

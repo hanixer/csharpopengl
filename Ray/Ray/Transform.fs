@@ -80,4 +80,12 @@ let transformNormal (transform : Transform) (n : Vector3d) =
     let x = Vector4d.Dot(point4, m.Column0)
     let y = Vector4d.Dot(point4, m.Column1)
     let z = Vector4d.Dot(point4, m.Column2)
-    Vector3d(x, y, z)    
+    Vector3d(x, y, z)
+
+let perspective fov near far =
+    let r1 = Vector4d(1.0, 0.0, 0.0, 0.0)
+    let r2 = Vector4d(0.0, 1.0, 0.0, 0.0)
+    let r3 = Vector4d(0.0, 0.0, far / (near - far), far*near / (near - far))
+    let r4 = Vector4d(0.0, 0.0, -1.0, 0.0)
+    let m = Matrix4d(r1, r2, r3, r4)
+    {M = m; Inv = m.Inverted()}
