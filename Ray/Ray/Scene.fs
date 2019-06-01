@@ -9,6 +9,7 @@ open Transform
 open OpenTK
 open Material
 open Light
+open System.IO
 
 type Scene = {
     Camera : Camera 
@@ -199,11 +200,18 @@ let loadLight (xml : XmlNode) =
     | _ -> None
     |> Option.map (fun light -> (name, light))
 
-let getObjectFromType (xml : XmlElement) = 
+let readStrAttribute (xml : XmlElement) (name : string) =
+    let nameAttr = xml.Attributes.[name]
+    if not (isNull nameAttr) then
+        nameAttr.InnerText
+    else
+        ""
+
+let getObjectFromType (xml : XmlElement) =
     let typeAttr = xml.Attributes.["type"]
     if not (isNull typeAttr) then
         match typeAttr.InnerText with
-        | "sphere" -> 
+        | "sphere" ->
             printf " - Sphere"
             Some Object.Sphere
         | "plane" ->
@@ -229,27 +237,25 @@ let getObjectFromType (xml : XmlElement) =
             let p0 = select xml "./p0" (fun elem -> readVector elem vz) vz
             let p1 = select xml "./p1" (fun elem -> readVector elem vz) vz
             Some(Object.makeBox p0 p1)
-        | "cylinder" -> 
+        | "cylinder" ->
             printf " - Cylinder"
             Some Object.Cylinder
-        | "disk" -> 
+        | "disk" ->
             printf " - Disk"
             Some Object.Disk
         | "rectWithHoles" ->
             printf " - rect with holes"
             let radius = readFloating xml "radius" 0.1
             Some(Object.RectXYWithHoles(1.0, radius))
-        | _ -> 
+        | "obj" ->
+            printf " - triangle obj model"
+            let filename = readStrAttribute xml "name"
+            let data = TriangleMesh.loadFromFile filename
+            Some(Object.TriangleObj(data))
+        | _ ->
             printf " - UNKNOWN TYPE"
             None
     else None
-
-let readStrAttribute (xml : XmlElement) (name : string) =
-    let nameAttr = xml.Attributes.[name]
-    if not (isNull nameAttr) then
-        nameAttr.InnerText
-    else
-        ""
 
 let rec loadObject (xml : XmlNode) level =
     let xml = xml :?> XmlElement
@@ -264,14 +270,14 @@ let rec loadObject (xml : XmlNode) level =
     {Name = name; Object = object; Children = children; Transform = tm; Material = material}
 
 and loadChildren (xml : XmlElement) level =
-    xml.ChildNodes    
+    xml.ChildNodes
     |> Seq.cast<XmlNode>
     |> Seq.filter (fun child -> child.Name = "object" && child.NodeType = XmlNodeType.Element)
     |> Seq.map (fun child -> loadObject child (level + 1))
     |> Seq.toList
 
-let loadSceneObjects (xml : XmlElement) =   
-    loadChildren xml 0     
+let loadSceneObjects (xml : XmlElement) =
+    loadChildren xml 0
 
 let loadCamera (xml : XmlElement) =
     let pos = select xml "./position" (fun elem -> readVector elem defCameraPos) defCameraPos
@@ -286,19 +292,19 @@ let rec getNodePairs node =
     (node.Name, node) :: (List.collect getNodePairs node.Children)
 
 let loadScene (xml : XmlDocument) =
-    let xml = xml.Item "xml"    
+    let xml = xml.Item "xml"
     if not (isNull xml) then
-        let nodes = 
-            let sceneXml = xml.Item "scene"    
+        let nodes =
+            let sceneXml = xml.Item "scene"
             if not (isNull sceneXml) then
                 loadSceneObjects sceneXml
-            else        
+            else
                 failwith "scene tag not found"
-        let camera = 
-            let cameraXml = xml.Item "camera" 
+        let camera =
+            let cameraXml = xml.Item "camera"
             if not (isNull cameraXml) then
                 loadCamera cameraXml
-            else        
+            else
                 failwith "camera tag not found"
         let materials =
             xml.GetElementsByTagName "material"
@@ -316,7 +322,7 @@ let loadScene (xml : XmlDocument) =
         let nodesMap = List.collect getNodePairs nodes |> Map.ofList
         let environment =
             readColor (xml.SelectSingleNode "scene/environment") Vector3d.Zero
-        let samples =   
+        let samples =
             readFloating (xml.SelectSingleNode "scene/samples") "value" 1.0 |> int
         let areaLights =
             let ms =
@@ -345,6 +351,11 @@ let loadScene (xml : XmlDocument) =
         failwith "xml tag not found"
 
 let loadSceneFromFile (filename : string) =
+    let remember = Environment.CurrentDirectory
+    let dir = Path.GetDirectoryName(filename)
+    Environment.CurrentDirectory <- dir
     let xml = XmlDocument()
-    xml.Load(filename)    
-    loadScene xml
+    xml.Load(Path.GetFileName(filename))
+    let sc = loadScene xml
+    Environment.CurrentDirectory <- remember
+    sc

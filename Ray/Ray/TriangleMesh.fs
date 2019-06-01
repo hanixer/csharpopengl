@@ -7,7 +7,7 @@ type Face = int[]
 
 type Data(v : Vector3d[], f : Face[], VN : Vector3d[],FN : Face[],VT : Vector3d[],FT : Face[]) =
     member __.FacesCount = f.Length
-    member __.Vertex(i : int) = v.[i]
+    member __.Vertex(i : int) = v.[i-1]
     member __.Faces = f
     override __.ToString() = "nothing"
 
