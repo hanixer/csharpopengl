@@ -115,3 +115,13 @@ let screenToRaster width height =
     let sc1 = scale (Vector3d(0.5, -0.5 * aspect, 1.))
     let sc2 = scale (Vector3d(float width, float height, 1.))
     compose sc2 (compose sc1 transl)
+
+let lookAt (position : Vector3d) (target : Vector3d) (up : Vector3d) =
+    let towardViwer = (position - target).Normalized()
+    let right = Vector3d.Cross(up.Normalized(), towardViwer)
+    let up = Vector3d.Cross(towardViwer, right)
+    let r0 = Vector4d(right.X, up.X, towardViwer.X, position.X)
+    let r1 = Vector4d(right.Y, up.Y, towardViwer.Y, position.Y)
+    let r2 = Vector4d(right.Z, up.Z, towardViwer.Z, position.Z)
+    let r3 = Vector4d(0., 0., 0., 1.)
+    fromMatrix (Matrix4d(r0, r1, r2, r3))

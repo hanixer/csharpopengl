@@ -43,7 +43,7 @@ let measure task =
     stopwatch.Stop()
     Console.WriteLine(stopwatch.ElapsedMilliseconds)
 
-let file = @"scenes\old\oneSphere.xml"
+let file = @"scenes\old\test3.xml"
 
 let node =
     let transform = Vector3d(0.07, 3.0, 0.07) |> scale

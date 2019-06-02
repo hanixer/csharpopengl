@@ -26,8 +26,10 @@
     <color value="1"/>
   </material>
   <camera>
-    <position x="5" y="5" z="5"/>
-    <target x="0" y="0" z="0"/>
+    <!-- <position x="5" y="5" z="5"/> -->
+    <!-- <target x="0" y="0" z="0"/> -->
+    <position x="-1" y="0" z="0"/>
+    <target x="-1" y="0" z="-1"/>
     <up x="0" y="1" z="0"/>
     <fov value="90"/>
     <width value="400"/>

@@ -120,6 +120,8 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
                 // let ray = scene.Camera.Ray c r
                 // let t, color = (0.0, pathTrace ray scene 0 true)
                 let t, color = traceRay ray scene 0
+                // let color = (ray.Direction + Vector3d.One) * 0.5
+                // printfn "%A" color
                 zbuffer.[r, c] <- t
                 buf.[r, c] <- buf.[r,c] + color
             buf.[r, c] <- buf.[r, c] / float samples

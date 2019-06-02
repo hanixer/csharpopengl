@@ -28,7 +28,8 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, upInput : Vector3d, fov : fl
     let screenToRaster = Transform.screenToRaster width height
     let rasterToScreen = Transform.inverted screenToRaster
     let rasterToCamera = Transform.compose screenToCamera rasterToScreen
-    let cameraToWorld = Matrix4d.LookAt(lookFrom, lookAt, upInput)
+    let toWorldMatrix = Transform.transpose (Matrix4d.LookAt(lookFrom, lookAt, upInput))
+    let cameraToWorld = Transform.lookAt lookFrom lookAt upInput
     let transformToWorld vec3 =
         let x = Vector3d.Dot(vec3, mat3.Column0)
         let y = Vector3d.Dot(vec3, mat3.Column1)
@@ -42,10 +43,12 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, upInput : Vector3d, fov : fl
         let rasterP = Vector3d(rasterSample)
         let p1 = Transform.transformPoint rasterToScreen rasterP
         let p2 = Transform.transformPoint screenToCamera p1
-        let direction = Transform.transformPoint rasterToCamera rasterP
+        let cameraP = Transform.transformPoint rasterToCamera rasterP
+        let worldP = Transform.transformPoint cameraToWorld cameraP
+        let direction = worldP - lookFrom
         direction.Normalize()
         // printfn "rs = %A p1 = %A p2 = %A d = %A" rasterSample p1 p2 direction
-        { Origin = Vector3d.Zero
+        { Origin = lookFrom
           Direction = direction }
 
     member this.Ray column row =
