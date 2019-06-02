@@ -23,7 +23,8 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, upInput : Vector3d, fov : fl
     let scale = Math.Tan fov2
     let mat3 = Matrix3d(right, up, towardViwer)
     let random = Random()
-    let cameraToScreen = Transform.perspective fov 1e-4 1e4
+    let fovHorizontal = fov * aspect
+    let cameraToScreen = Transform.perspective fovHorizontal 1e-4 1e4
     let screenToCamera = Transform.inverted cameraToScreen
     let screenToRaster = Transform.screenToRaster width height
     let rasterToScreen = Transform.inverted screenToRaster

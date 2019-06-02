@@ -16,27 +16,6 @@ open Node
 open ObjLoader.Loader.Loaders
 open System.IO
 
-let drawLine (g : Drawing.Graphics) (p1 : Vector2) (p2 : Vector2) =
-    g.DrawLine
-        (Drawing.Pens.White, Drawing.PointF(p1.X, p1.Y),
-         Drawing.PointF(p2.X, p2.Y))
-
-let drawnBitmap =
-    let bmp = new Drawing.Bitmap(500, 500)
-    let g = Drawing.Graphics.FromImage bmp
-    let a = Vector2.Zero
-    let b = Vector2(50.0f, 50.0f)
-    let c = Vector2(100.0f, 0.0f)
-    let n = Vector2(-50.0f, 50.0f)
-    let ofs = Vector2(50.0f, 0.0f)
-    let scale = 0.5f
-    drawLine g a b
-    drawLine g b c
-    drawLine g a c
-    drawLine g ofs (n + ofs)
-    g.Flush()
-    bmp
-
 let measure task =
     let stopwatch = Diagnostics.Stopwatch.StartNew() //creates and start the instance of Stopwatch
     Async.RunSynchronously task
