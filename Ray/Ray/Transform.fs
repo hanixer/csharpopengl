@@ -2,6 +2,7 @@ module Transform
 
 open OpenTK
 open System
+open Bounds
 
 type Transform =
     { M : Matrix4d
@@ -125,3 +126,15 @@ let lookAt (position : Vector3d) (target : Vector3d) (up : Vector3d) =
     let r2 = Vector4d(right.Z, up.Z, towardViwer.Z, position.Z)
     let r3 = Vector4d(0., 0., 0., 1.)
     fromMatrix (Matrix4d(r0, r1, r2, r3))
+
+let bounds tm (box : Bounds) =
+      let p0 = transformPoint tm box.PMin
+      let b1 = {PMin=p0; PMax = p0}
+      let b2 = addPoint b1 (transformPoint tm (Vector3d(box.PMin.X, box.PMin.Y, box.PMax.Z)))
+      let b3 = addPoint b2 (transformPoint tm (Vector3d(box.PMin.X, box.PMax.Y, box.PMin.Z)))
+      let b4 = addPoint b3 (transformPoint tm (Vector3d(box.PMin.X, box.PMax.Y, box.PMax.Z)))
+      let b5 = addPoint b4 (transformPoint tm (Vector3d(box.PMax.X, box.PMin.Y, box.PMin.Z)))
+      let b6 = addPoint b5 (transformPoint tm (Vector3d(box.PMax.X, box.PMin.Y, box.PMax.Z)))
+      let b7 = addPoint b6 (transformPoint tm (Vector3d(box.PMax.X, box.PMax.Y, box.PMin.Z)))
+      let b8 = addPoint b7 (transformPoint tm (Vector3d(box.PMax.X, box.PMax.Y, box.PMax.Z)))
+      b8

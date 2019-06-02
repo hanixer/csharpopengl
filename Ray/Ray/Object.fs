@@ -174,7 +174,7 @@ let rec intersect ray object tMin material =
             computeHit t0
         | Some(_, t1) when t1 > tMin ->
             computeHit t1
-        | _ -> 
+        | _ ->
             None
     | Cylinder ->
         let computeHit (t : float) =
@@ -183,7 +183,7 @@ let rec intersect ray object tMin material =
             if point.Y <= 1.0 && point.Y >= -1.0 then
                 Some {defaultHitInfo with T = t; Point = point; Normal = normal}
             else
-                None            
+                None
 
         let a = ray.Direction.X * ray.Direction.X + ray.Direction.Z * ray.Direction.Z
         let b = 2.0 * (ray.Origin.X * ray.Direction.X + ray.Origin.Z * ray.Direction.Z)
@@ -250,6 +250,15 @@ let getAreaOfObject object =
         d1.Length * d2.Length
     | Plane -> 4.0
     | _ -> 0.0
+
+let worldBounds object =
+    match object with
+    | Sphere ->
+        { Bounds.Bounds.PMin = Vector3d.One * -1.
+          Bounds.Bounds.PMax = Vector3d.One}
+    | _ ->
+        { Bounds.Bounds.PMin = Vector3d.One * -1.
+          Bounds.Bounds.PMax = Vector3d.One}
 
 let makeBox (p0 : Vector3d) (p1 : Vector3d) =
     let v0 = p0

@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="Sampling.fs" />
+    <Compile Include="Bounds.fs" />
     <Compile Include="Transform.fs" />
     <Compile Include="TriangleMesh.fs" />
     <Compile Include="Object.fs" />
