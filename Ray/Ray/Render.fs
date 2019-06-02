@@ -36,12 +36,12 @@ let maxDepth = 5
 let isReachable source t direction nodes =
     let shadowRay = {Origin = source ; Direction = direction}
     match intersectNodes shadowRay nodes epsilon with
-    | Some(hitInfo) -> 
-        hitInfo.T > (t - 0.001) 
+    | Some(hitInfo) ->
+        hitInfo.T > (t - 0.001)
             && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
         // hitInfo.T >= t && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
     // | Some(hitInfo) -> false
-    | None -> 
+    | None ->
         true
 
 let getDirectLighting scene hitInfo lightNode =
@@ -71,7 +71,7 @@ let rec pathTrace ray scene depth isEyeRay : Vector3d =
         let emitted = if isEyeRay  then getEmitted material else Vector3d.Zero
         match scatter ray material hitInfo with
         | Some(attenuation, scattered) when depth < 50 && emitted = Vector3d.Zero ->
-            let direct = 
+            let direct =
                 Seq.map (getDirectLighting scene hitInfo) scene.AreaLights
                 |> Seq.fold (+) Vector3d.Zero
                 // Vector3d.Zero
@@ -117,11 +117,7 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
             for s = 0 to samples - 1 do
                 let sample = Vector2d(float c, float r) + (next2D sampler)
                 let ray = scene.Camera.Ray2 sample
-                // let ray = scene.Camera.Ray c r
-                // let t, color = (0.0, pathTrace ray scene 0 true)
                 let t, color = traceRay ray scene 0
-                // let color = (ray.Direction + Vector3d.One) * 0.5
-                // printfn "%A" color
                 zbuffer.[r, c] <- t
                 buf.[r, c] <- buf.[r,c] + color
             buf.[r, c] <- buf.[r, c] / float samples
@@ -145,7 +141,6 @@ let drawZBuffer zbuffer =
                 if Double.IsInfinity z
                 then 0.0
                 else (max - z) / (max - min)
-                // else 1.0 - (z - min) / (max - min)
             setPixel bitmap column row <| Vector3d(f))
             zbuffer
     bitmap
