@@ -28,7 +28,7 @@ let tryFindBestHitInfo hitInfos =
     let result = Seq.fold fold None hitInfos
     result
 
-let hitBoundingBox (box : BoundingBox) ray tmin tmax = 
+let hitBoundingBox (box : BoundingBox) ray tmin tmax =
    let handle (tmin, tmax) (box1, box2, rayOrig, rayDir) =
       let inv = 1.0 / rayDir
       let t1 = (box1 - rayOrig) * inv

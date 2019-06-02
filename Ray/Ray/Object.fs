@@ -29,7 +29,7 @@ let quadratic a b c =
         else
             Some(t0, t1)
 
-let isInsideDisk (point : Vector3d) (center : Vector3d) radius = 
+let isInsideDisk (point : Vector3d) (center : Vector3d) radius =
     (point - center).Length * (point - center).Length < radius * radius
 
 let defaultHitInfo = {

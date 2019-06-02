@@ -10,6 +10,10 @@ type Transform = {
 
 let identityTransform = {M = Matrix4d.Identity; Inv = Matrix4d.Identity}
 
+let fromMatrix m =
+    { M = m
+      Inv = m.Inverted() }
+
 let transpose (m : Matrix4d) =
     Matrix4d (
         m.Column0, m.Column1, m.Column2, m.Column3
@@ -88,4 +92,12 @@ let perspective fov near far =
     let r3 = Vector4d(0.0, 0.0, far / (near - far), far*near / (near - far))
     let r4 = Vector4d(0.0, 0.0, -1.0, 0.0)
     let m = Matrix4d(r1, r2, r3, r4)
-    {M = m; Inv = m.Inverted()}
+    let proj = {M = m; Inv = m.Inverted()}
+    let invTang = 1. / Math.Tan(MathHelper.DegreesToRadians(fov / 2.))
+    let sc = scale (Vector3d(invTang, invTang, 1.))
+    compose proj sc
+
+let screenToRaster aspect =
+    let transl = translate (Vector3d(1., 1. / aspect, 0.))
+    let sc = scale (Vector3d(0.5, 0.5 * aspect, 1.))
+    compose sc transl

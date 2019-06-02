@@ -45,7 +45,11 @@ let measure task =
     stopwatch.Stop();
     Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-let file = @"scenes\old\test3.xml"
+let file = @"scenes\old\oneSphere.xml"
+
+let node =
+    let transform = Vector3d(0.07, 3.0, 0.07) |> scale
+    {Node.Name=""; Node.Children=[]; Node.Object = Some Object.Cylinder; Node.Transform = transform; Material = "white"}
 
 type Window1(width, height) =
     inherit Window(width, height)
@@ -56,6 +60,7 @@ type Window1(width, height) =
 
     member this.Update() =
         let scene = loadSceneFromFile file
+        addNode scene node
         let zbuffer =  Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap zbuffer scene } |> measure
@@ -70,10 +75,27 @@ type Window1(width, height) =
         if base.Keyboard.[Key.F5] then
             this.Update()
 
+
+
 [<EntryPoint>]
 let main argv =
-    let win = new Window1(800, 600)
-    win.Update()
-    win.Run()
+    // let win = new Window1(800, 600)
+    // win.Update()
+    // win.Run()
+
+    let p0 = Vector3d(3., 0., -2.)
+    let p1 = Vector3d(3., 5., -2.)
+    let p2 = Vector3d(-1., 3., -3.)
+    let pers = perspective 90. 1e-4 1e4
+
+    let p0 = transformPoint pers p0
+    let p1 = transformPoint pers p1
+    let p2 = transformPoint pers p2
+
+    printfn "%A %A %A" p0 p1 p2
+
+    use img = new System.Drawing.Bitmap(800, 600)
+    use g = System.Drawing.Graphics.FromImage(img)
+
 
     0 // return an integer exit code

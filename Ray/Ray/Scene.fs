@@ -12,9 +12,9 @@ open Light
 open System.IO
 
 type Scene = {
-    Camera : Camera 
-    Nodes : Map<string, Node>
-    NodesList : Node list
+    Camera : Camera
+    mutable Nodes : Map<string, Node>
+    mutable NodesList : Node list
     Materials : Map<string, Material>
     Lights : Map<string, Light>
     LightsList : Light list
@@ -23,10 +23,14 @@ type Scene = {
     AreaLights : Node list
 }
 
+let addNode scene node =
+    scene.Nodes <- scene.Nodes.Add(node.Name, node)
+    scene.NodesList <- node :: scene.NodesList
+
 let getMaterial scene name = Map.find name scene.Materials
 
 let printIdent level =
-    for i = 1 to level do 
+    for i = 1 to level do
         printf " "
 
 let readFloating (xml : XmlNode) (name : string) defaultVal =

@@ -10,6 +10,7 @@ type Window(width, height) =
 
     let canvas = new Drawing.Bitmap(width, height, Drawing.Imaging.PixelFormat.Format32bppArgb)
     let mutable bytes = Array.create (width * height * 4) (byte 0)
+    let mutable shouldRedraw = true
 
     let update() =
         let stopwatch = Diagnostics.Stopwatch.StartNew(); //creates and start the instance of Stopwatch
@@ -19,18 +20,18 @@ type Window(width, height) =
         stopwatch.Stop();
         Console.WriteLine(stopwatch.ElapsedMilliseconds);
 
-    do 
+    do
         base.VSync <- VSyncMode.On
 
     member this.DrawBitmapAndSave bitmap =
         let zoom = 1.0
         Common.drawBitmapOnBitmap bitmap canvas zoom
         bytes <- Common.getBytesFromBitmap canvas
-        bitmap.RotateFlip(Drawing.RotateFlipType.RotateNoneFlipY)        
+        bitmap.RotateFlip(Drawing.RotateFlipType.RotateNoneFlipY)
         if System.IO.Directory.Exists "test-images" |> not then
             System.IO.Directory.CreateDirectory "test-images" |> ignore
         bitmap.Save("test-images/output.png")
-
+        shouldRedraw <- true
 
      /// <summary>Load resources here.</summary>
      /// <param name="e">Not used.</param>
@@ -59,8 +60,8 @@ type Window(width, height) =
     /// </summary>
     /// <param name="e">Contains timing information for framerate independent logic.</param>
     override o.OnUpdateFrame e =
-        base.OnUpdateFrame e   
-        if base.Keyboard.[Key.Escape] then base.Close()    
+        base.OnUpdateFrame e
+        if base.Keyboard.[Key.Escape] then base.Close()
 
     /// <summary>
     /// Called when it is time to render the next frame. Add your rendering code here.
@@ -68,11 +69,11 @@ type Window(width, height) =
     /// <param name="e">Contains timing information.</param>
     override o.OnRenderFrame(e) =
         base.OnRenderFrame e
-        GL.Clear(ClearBufferMask.ColorBufferBit ||| ClearBufferMask.DepthBufferBit)
-        let mutable modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY)
-        GL.MatrixMode(MatrixMode.Modelview)
-        GL.LoadMatrix(&modelview)
-
-        GL.DrawPixels(canvas.Width, canvas.Height, PixelFormat.Bgra, PixelType.UnsignedByte, bytes)
-
-        base.SwapBuffers()  
+        if shouldRedraw then
+            shouldRedraw <- false
+            GL.Clear(ClearBufferMask.ColorBufferBit ||| ClearBufferMask.DepthBufferBit)
+            let mutable modelview = Matrix4.LookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY)
+            GL.MatrixMode(MatrixMode.Modelview)
+            GL.LoadMatrix(&modelview)
+            GL.DrawPixels(canvas.Width, canvas.Height, PixelFormat.Bgra, PixelType.UnsignedByte, bytes)
+            base.SwapBuffers()
