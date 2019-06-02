@@ -19,8 +19,9 @@ type Scene = {
     Lights : Map<string, Light>
     LightsList : Light list
     Environment : Vector3d
-    Samples : int    
+    Samples : int
     AreaLights : Node list
+    Primitive : Primitive
 }
 
 let addNode scene node =
@@ -261,6 +262,25 @@ let getObjectFromType (xml : XmlElement) =
             None
     else None
 
+let constructPrimitive objectOpt transform children =
+    let withChildren prim =
+        if List.isEmpty children then
+            prim
+        else
+            PrimitiveList(prim::children)
+
+    let withTransform prim =
+        if transform = Transform.identityTransform then
+            withChildren prim
+        else
+            withChildren (TransformedPrimitive(prim, transform))
+
+    match objectOpt with
+    | Some(object) ->
+        withTransform (GeometricPrimitive(object))
+    | _ ->
+        withChildren (PrimitiveList[])
+
 let rec loadObject (xml : XmlNode) level =
     let xml = xml :?> XmlElement
     let name = readStrAttribute xml "name"
@@ -271,7 +291,7 @@ let rec loadObject (xml : XmlNode) level =
     printfn ""
     let tm = loadTransform xml level
     let children = loadChildren xml level
-    {Name = name; Object = object; Children = children; Transform = tm; Material = material}
+    constructPrimitive object tm children
 
 and loadChildren (xml : XmlElement) level =
     xml.ChildNodes
@@ -298,7 +318,7 @@ let rec getNodePairs node =
 let loadScene (xml : XmlDocument) =
     let xml = xml.Item "xml"
     if not (isNull xml) then
-        let nodes =
+        let primitives =
             let sceneXml = xml.Item "scene"
             if not (isNull sceneXml) then
                 loadSceneObjects sceneXml
@@ -323,33 +343,23 @@ let loadScene (xml : XmlDocument) =
             |> Seq.choose id
             |> Map.ofSeq
         let lightsList = lights |> Map.toList |> List.map snd
-        let nodesMap = List.collect getNodePairs nodes |> Map.ofList
+        let nodesMap = Map.empty //List.collect getNodePairs nodes |> Map.ofList
         let environment =
             readColor (xml.SelectSingleNode "scene/environment") Vector3d.Zero
         let samples =
             readFloating (xml.SelectSingleNode "scene/samples") "value" 1.0 |> int
-        let areaLights =
-            let ms =
-                materials
-                |> Map.toSeq
-                |> Seq.choose (fun (n, m) ->
-                    match m with
-                    | Emissive _ -> Some n
-                    | _ -> None)
-            nodes
-            |> Seq.filter (fun n -> Seq.contains n.Material ms)
         printfn "samples %A" samples
-        printfn "area lights count %A" (Seq.length areaLights)
-        { 
+        {
           Nodes = nodesMap
-          NodesList = nodes
+          NodesList = []
           Camera = camera
           Materials = materials
           Lights = lights
           LightsList = lightsList
           Environment = environment
-          Samples = samples 
-          AreaLights = Seq.toList areaLights
+          Samples = samples
+          AreaLights = []
+          Primitive = PrimitiveList primitives
          }
     else
         failwith "xml tag not found"

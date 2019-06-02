@@ -6,6 +6,11 @@ open Object
 open Transform
 open Common
 
+type Primitive =
+    | GeometricPrimitive of Object // * Material * AreaLight
+    | TransformedPrimitive of Primitive * Transform
+    | PrimitiveList of Primitive list
+
 type Node = {
     Name : string
     Object : Object option
@@ -13,7 +18,6 @@ type Node = {
     Transform : Transform
     Material : string
 }
-
 
 let hitInfoToWorld ray node hitInfo =
     let point = transformPoint node.Transform hitInfo.Point
@@ -58,7 +62,6 @@ let getAreaOfNode node =
         getAreaOfObject object
     | _ ->
         0.0
-
 
 let getBoundingBox node =
     1
