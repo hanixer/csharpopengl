@@ -3,11 +3,17 @@
 open Transform
 open OpenTK
 
-let t1 = translate (Vector3d(-1.))
-let t2 = scale (Vector3d(3.))
-let t3 = compose t1 t2
-let t4 = compose t2 t1
-let p = Vector3d(1.,2.,3.)
-let p1 = (transformPoint t3 p) = (transformPoint t1 (transformPoint t2 p))
-let p2 = (transformPoint t4 p) = (transformPoint t2 (transformPoint t1 p))
-let p3 = (transformPoint t4 p) <> (transformPoint t3 p)
+let width = 8
+let height = 6
+let aspect = 8./6.
+let t1 = screenToRaster width height
+let p1 = Vector3d(-1., 3./4., 0.)
+let p2 = transformPoint t1 p1
+let p3 = Vector3d.Zero
+let p5 = Vector3d(1., -3./4., 0.)
+let t3 = inverted t1 // rasterToScreen
+let p10 = Vector3d(0.5,0.5,0.)
+let p11 = transformPoint t3 p10
+let p12 = transformPoint t3 Vector3d.Zero
+let p13 = Vector3d(8.,6.,0.)
+let p14 = transformPoint t3 p13

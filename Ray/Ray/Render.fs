@@ -110,11 +110,14 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
     let w = bitmap.Width
     let h = bitmap.Height
     let samples = scene.Samples
+    let sampler = makeSampler()
     // Parallel.For(0, bitmap.Height, fun r ->
     for r = 0 to bitmap.Height - 1 do
         for c = 0 to w - 1 do
             for s = 0 to samples - 1 do
-                let ray = scene.Camera.Ray c r
+                let sample = Vector2d(float c, float r) + (next2D sampler)
+                let ray = scene.Camera.Ray2 sample
+                // let ray = scene.Camera.Ray c r
                 // let t, color = (0.0, pathTrace ray scene 0 true)
                 let t, color = traceRay ray scene 0
                 zbuffer.[r, c] <- t
@@ -136,11 +139,11 @@ let drawZBuffer zbuffer =
         let min = Seq.min seq
         let max = Seq.max seq
         Array2D.iteri (fun row column z ->
-            let f = 
+            let f =
                 if Double.IsInfinity z
                 then 0.0
                 else (max - z) / (max - min)
                 // else 1.0 - (z - min) / (max - min)
-            setPixel bitmap column row <| Vector3d(f)) 
+            setPixel bitmap column row <| Vector3d(f))
             zbuffer
     bitmap

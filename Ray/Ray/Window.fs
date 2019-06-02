@@ -23,8 +23,9 @@ type Window(width, height) =
     do
         base.VSync <- VSyncMode.On
 
-    member this.DrawBitmapAndSave bitmap =
+    member this.DrawBitmapAndSave (bitmap : System.Drawing.Bitmap) =
         let zoom = 1.0
+        bitmap.RotateFlip(Drawing.RotateFlipType.RotateNoneFlipY)
         Common.drawBitmapOnBitmap bitmap canvas zoom
         bytes <- Common.getBytesFromBitmap canvas
         bitmap.RotateFlip(Drawing.RotateFlipType.RotateNoneFlipY)

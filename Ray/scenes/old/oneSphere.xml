@@ -1,7 +1,13 @@
 <xml>
   <scene>
     <object type="sphere" name="lom" material="notwhite">
+      <scale value="1"/>
+      <translate x="0" y="2" z="-5"/>
     </object>
+    <!-- <object type="sphere" name="lom" material="notwhite"> -->
+    <!-- <scale value="4"/> -->
+    <!-- <translate z="-5" y="4" x="2" /> -->
+    <!-- </object> -->
   </scene>
   <light type="ambient" name="ambientLight">
     <intensity value="0.7"/>
@@ -23,8 +29,10 @@
     <position x="5" y="5" z="5"/>
     <target x="0" y="0" z="0"/>
     <up x="0" y="1" z="0"/>
-    <fov value="45"/>
+    <fov value="90"/>
     <width value="400"/>
-    <height value="400"/>
+    <height value="300"/>
+    <!-- <width value="8"/> -->
+    <!-- <height value="6"/> -->
   </camera>
 </xml>
