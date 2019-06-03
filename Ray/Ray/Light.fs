@@ -8,8 +8,8 @@ open Sampling
 type Light =
     | AmbientLight of Vector3d
     | DirectLight of intensity : Vector3d * direction : Vector3d
-    | PointLight of intensity : Vector3d * position : Vector3d // intensity, position
-    | AmbientOccluder of intensity : Vector3d * minAmount : float // intensity, min amount
+    | PointLight of intensity : Vector3d * position : Vector3d 
+    | AmbientOccluder of intensity : Vector3d * minAmount : float
     | AreaLight of object : string
 
 let private random = Random()

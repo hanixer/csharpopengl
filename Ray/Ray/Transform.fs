@@ -137,7 +137,7 @@ let ray transform (r : Common.Ray) =
 
 let hitInfo transform (info : Common.HitInfo) =
       { info with Point = transformPoint transform info.Point 
-                  Normal = transformNormal transform info.Normal }
+                  Normal = (transformNormal transform info.Normal).Normalized() }
 
 let bounds tm (box : Bounds) =
       let p0 = transformPoint tm box.PMin

@@ -47,3 +47,6 @@ let loadFromFile filename =
     let loader = ObjLoaderFactory().Create()
     let loadResult = loader.Load(fs)
     loadResultToMesh loadResult
+
+let meshToList (data : Data) =
+    Seq.map (fun (face : Face) -> data.Vertex(face.[0]), data.Vertex(face.[1]), data.Vertex(face.[2])) data.Faces

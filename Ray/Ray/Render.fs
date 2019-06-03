@@ -97,7 +97,7 @@ let rec traceRay ray scene depth =
     else
         match Node.intersect ray scene.Primitive with
         | Some hitInfo ->
-            let color = (hitInfo.Normal + Vector3d.One) * 0.5
+            let color = (hitInfo.Normal.Normalized() + Vector3d.One) * 0.5
             (hitInfo.T, color)
             // let material = scene.Materials.[hitInfo.Material]
             // let shadedColor, scattered = shade ray material hitInfo scene.LightsList scene.NodesList

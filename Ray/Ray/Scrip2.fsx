@@ -4,6 +4,7 @@ open Transform
 open OpenTK
 open Bounds
 
-let t1 = scale (Vector3d(-2.,-2.,1.))
-let r = Common.makeRay (Vector3d.Zero) (Vector3d(3.,3.,3.).Normalized())
-let r1 = Transform.ray t1 r
+let pw = scale (Vector3d(1.,-0.5,1.))
+let wp = inverted pw
+let n = Vector3d(0., -1.0, 0.)
+let n2 = transformNormal pw n

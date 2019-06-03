@@ -22,7 +22,39 @@ let measure task =
     stopwatch.Stop()
     Console.WriteLine(stopwatch.ElapsedMilliseconds)
 
-let file = @"scenes\old\test3.xml"
+let file = @"scenes\old\oneSphere.xml"
+
+type OctreeNode = {
+    Children : OctreeNode []
+    Primitives : Primitive list
+    Bounds : Bounds.Bounds
+}
+
+let splitBox (box : Bounds.Bounds) =
+    let mid = box.PMin + (box.PMax - box.PMin) / 2.
+    mid
+
+let rec constructTree box primitives =
+    if Seq.length primitives < 5 then
+        { Children = Array.Empty()
+          Primitives = primitives
+          Bounds = box }
+    else       
+        
+        failwith ""
+
+let makeScene (scene : Scene) =
+    let me = TriangleMesh.loadFromFile @"scenes\teapot-low.obj"
+    let m = Seq.head scene.Materials
+    let mname = m.Key
+    let listTriangles = (Seq.map (Object.Triangle >> (fun i -> GeometricPrimitive(i, mname))) (TriangleMesh.meshToList me)) |> Seq.toList
+    let p0 = GeometricPrimitive(Object.Sphere, mname)
+    let p1 = makeTransformedPrimitive p0 (scale (Vector3d(0.25)))
+    let p2 = makeTransformedPrimitive p0 (translate (Vector3d(2.,0.,0.)))
+    let p3 = makeTransformedPrimitive p1 (translate (Vector3d(2.,2.,0.)))
+    let p4 = makeTransformedPrimitive p1 (translate (Vector3d(0.,2.,0.)))
+    let prim = PrimitiveList listTriangles
+    { scene with Primitive = prim }
 
 type Window1(width, height) =
     inherit Window(width, height)
@@ -32,6 +64,7 @@ type Window1(width, height) =
 
     member this.Update() =
         let scene = loadSceneFromFile file
+        let scene = makeScene scene
         let zbuffer = Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap zbuffer scene } |> measure
