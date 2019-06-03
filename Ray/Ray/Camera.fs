@@ -35,8 +35,8 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, upInput : Vector3d, fov : fl
         let cameraP = Transform.transformPoint rasterToCamera rasterP
         let worldP = Transform.transformPoint cameraToWorld cameraP
         cameraP.Normalize()
-        let tMin = 1e-4 / cameraP.Z
-        let tMax = 1e4 / cameraP.Z
+        let tMin = 1e-4 / -cameraP.Z
+        let tMax = 1e4 / -cameraP.Z
         let direction = worldP - lookFrom
         direction.Normalize()
         { Origin = lookFrom

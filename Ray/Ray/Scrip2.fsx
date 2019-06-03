@@ -4,7 +4,8 @@ open Transform
 open OpenTK
 open Bounds
 
-let pw = scale (Vector3d(1.,-0.5,1.))
-let wp = inverted pw
-let n = Vector3d(0., -1.0, 0.)
-let n2 = transformNormal pw n
+// (0.00, 0.00, 2.00) (0.03, -0.20, -0.98) (-1.00, -1.00, -1.00) (1.00, 1.00, 1.00)
+
+let b1 = makeBounds (Vector3d(-1., -1., -1.)) (Vector3d(1., 1.,1.))
+let r = Common.makeRay (Vector3d(0.,0.,2.)) (Vector3d(0.03,-0.2,-0.98).Normalized())
+let res2 = hitBoundingBox r b1

@@ -24,6 +24,15 @@ let measure task =
 
 let file = @"scenes\old\oneSphere.xml"
 
+let makeSphere m x y z =
+    let off = Vector3d(float x,float y,float z)
+    makeTransformedPrimitive (GeometricPrimitive(Object.Sphere, m)) (Transform.translate off)
+
+let makeSpheres m =
+    [ for x = 0 to 1 do
+        for y = 0 to 1 do
+            for z = 0 to 1 do
+                yield makeSphere m (x * 3) (y * 3) (z * 3) ]
 
 let makeScene (scene : Scene) =
     let me = TriangleMesh.loadFromFile @"scenes\teapot-low.obj"
@@ -38,6 +47,11 @@ let makeScene (scene : Scene) =
     let p3 = makeTransformedPrimitive p1 (translate (Vector3d(2., 2., 0.)))
     let p4 = makeTransformedPrimitive p1 (translate (Vector3d(0., 2., 0.)))
     let prim = PrimitiveList listTriangles
+    // let prim = OctreeAgregate(Node.makeOctree listTriangles)
+    let sphs = makeSpheres mname
+    // let sphs = [makeSphere mname 0 0 0]
+    let prim = OctreeAgregate(Node.makeOctree sphs)
+    let prim = PrimitiveList sphs
     { scene with Primitive = prim }
 
 type Window1(width, height) =

@@ -33,7 +33,7 @@ let hitBoundingBox ray (box : Bounds) =
     let box2 = box.PMax
     let t1, t2 = handle (tmin, tmax) (box1.X, box2.X, ray.Origin.X, ray.Direction.X)
     let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y)
-    let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y)
+    let t1, t2 = handle (t1, t2) (box1.Z, box2.Z, ray.Origin.Z, ray.Direction.Z)
     t1 < t2 && t2 > 0.0
 
 let union box1 box2 =
@@ -50,17 +50,17 @@ let addPoint box point =
     union box { PMin = point
                 PMax = point }
 
-let isLessOrEq (v1 : Vector3d) (v2 : Vector3d) = v1.X <= v2.X && v1.Y <= v2.Y && v1.Z <= v2.Z
+let isLessOrEq (v1 : Vector3d) (v2 : Vector3d) = v1.X < v2.X && v1.Y < v2.Y && v1.Z < v2.Z
 
 let intersects box1 box2 =
-    if isLessOrEq box1.PMin box2.PMin then isLessOrEq box2.PMax box1.PMax || isLessOrEq box2.PMin box1.PMax
-    else isLessOrEq box1.PMax box2.PMax || isLessOrEq box2.PMax box1.PMax
+    isLessOrEq box1.PMin box2.PMax && isLessOrEq box2.PMin box1.PMax
 
 let splitBox (box : Bounds) =
     let mid = box.PMin + (box.PMax - box.PMin) / 2.
-    let xoff = Vector3d(mid.X, 0., 0.)
-    let yoff = Vector3d(0., mid.Y, 0.)
-    let zoff = Vector3d(0., 0., mid.Z)
+    let off = mid - box.PMin
+    let xoff = Vector3d(off.X, 0., 0.)
+    let yoff = Vector3d(0., off.Y, 0.)
+    let zoff = Vector3d(0., 0., off.Z)
     [| makeBounds box.PMin mid
        makeBounds (box.PMin + xoff) (mid + xoff)
        makeBounds (box.PMin + zoff) (mid + zoff)

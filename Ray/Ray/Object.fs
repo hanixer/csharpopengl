@@ -252,12 +252,11 @@ let getAreaOfObject object =
 
 let worldBounds object =
     match object with
-    | Sphere ->
-        { Bounds.Bounds.PMin = Vector3d.One * -1.
-          Bounds.Bounds.PMax = Vector3d.One}
+    | Triangle(p0, p1, p2) ->
+        let b1 = Bounds.makeBounds p0 p1
+        Bounds.addPoint b1 p2
     | _ ->
-        { Bounds.Bounds.PMin = Vector3d.One * -1.
-          Bounds.Bounds.PMax = Vector3d.One}
+        Bounds.makeBounds (Vector3d.One * -1.) Vector3d.One
 
 let makeBox (p0 : Vector3d) (p1 : Vector3d) =
     let v0 = p0

@@ -20,6 +20,9 @@ and Primitive =
 let makeTransformedPrimitive prim primToWorld =
     TransformedPrimitive(prim, primToWorld, inverted primToWorld)
 
+let printVec (v : Vector3d) =
+    printf "(%.2f, %.2f, %.2f) " v.X v.Y v.Z
+
 let rec intersect ray primitive =
     match primitive with
     | GeometricPrimitive(object, material) ->
@@ -36,7 +39,13 @@ let rec intersect ray primitive =
         intersectOctree ray octree
 
 and intersectOctree ray octree =
+    // printVec ray.Origin
+    // printVec ray.Direction
+    // printVec octree.Bounds.PMin
+    // printVec octree.Bounds.PMax
+    // printfn ""
     if Bounds.hitBoundingBox ray octree.Bounds then
+        // printfn "KEY SHOW!!!"
         if Seq.isEmpty octree.Children then
             let hits = List.map (intersect ray) octree.Primitives
             tryFindBestHitInfo hits
@@ -63,6 +72,8 @@ let getAreaOfNode node =
     // | Some(object) -> getAreaOfObject object
     // | _ -> 0.0
 
+
+
 let rec worldBounds primitive : Bounds.Bounds =
     match primitive with
     | GeometricPrimitive(object, _) ->
@@ -71,16 +82,28 @@ let rec worldBounds primitive : Bounds.Bounds =
         let box = worldBounds prim
         Transform.bounds primToWorld box
     | PrimitiveList(prims) ->
-        List.fold (fun box prim ->
-            Bounds.union box (worldBounds prim))
-            (Bounds.makeBounds Vector3d.Zero Vector3d.Zero)
-            prims
+        primitivesToBoxes prims
     | OctreeAgregate(octree) -> octree.Bounds
 
-let putPrimitivesInBox primitives box =
-    List.filter (fun primitive -> Bounds.intersects box (worldBounds primitive)) primitives
+and primitivesToBoxes primitives =
+    match primitives with
+    | p :: ps ->
+        let box = worldBounds p
+        let boxes = Seq.map worldBounds ps
+        Seq.fold Bounds.union box boxes
+    | _ ->
+        Bounds.makeBounds Vector3d.Zero Vector3d.Zero
 
-let rec constructOctree box primitives =
+let putPrimitivesInBox primitives box =
+    printfn "==================="
+    List.filter (fun primitive ->
+        let b2 = worldBounds primitive
+        let result = Bounds.intersects box b2
+        printfn "%A %A %A" box b2 result
+        result)
+        primitives
+
+let rec makeOctreeHelper box primitives =
     if Seq.length primitives < 5 then
         { Children = Array.Empty()
           Primitives = primitives
@@ -88,7 +111,13 @@ let rec constructOctree box primitives =
     else
         let boxes = Bounds.splitBox box
         let groupedPrims = Array.map (putPrimitivesInBox primitives) boxes
-        let children = Array.mapi (fun i primitives -> constructOctree boxes.[i] primitives) groupedPrims
+        let makeChild i primitives =
+            makeOctreeHelper boxes.[i] primitives
+        let children = Array.mapi makeChild groupedPrims
         { Children = children
           Primitives = primitives
           Bounds = box }
+
+let makeOctree primitives =
+    let box = primitivesToBoxes primitives
+    makeOctreeHelper box primitives
