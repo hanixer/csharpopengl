@@ -95,16 +95,14 @@ and primitivesToBoxes primitives =
         Bounds.makeBounds Vector3d.Zero Vector3d.Zero
 
 let putPrimitivesInBox primitives box =
-    printfn "==================="
     List.filter (fun primitive ->
         let b2 = worldBounds primitive
         let result = Bounds.intersects box b2
-        printfn "%A %A %A" box b2 result
         result)
         primitives
 
 let rec makeOctreeHelper box primitives =
-    if Seq.length primitives < 5 then
+    if Seq.length primitives < 10 then
         { Children = Array.Empty()
           Primitives = primitives
           Bounds = box }

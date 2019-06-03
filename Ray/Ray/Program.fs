@@ -29,13 +29,14 @@ let makeSphere m x y z =
     makeTransformedPrimitive (GeometricPrimitive(Object.Sphere, m)) (Transform.translate off)
 
 let makeSpheres m =
+    makeSphere m 1 1 1 ::
     [ for x = 0 to 1 do
         for y = 0 to 1 do
             for z = 0 to 1 do
                 yield makeSphere m (x * 3) (y * 3) (z * 3) ]
 
 let makeScene (scene : Scene) =
-    let me = TriangleMesh.loadFromFile @"scenes\teapot-low.obj"
+    let me = TriangleMesh.loadFromFile @"scenes\teapot.obj"
     let m = Seq.head scene.Materials
     let mname = m.Key
     let listTriangles =
@@ -47,11 +48,11 @@ let makeScene (scene : Scene) =
     let p3 = makeTransformedPrimitive p1 (translate (Vector3d(2., 2., 0.)))
     let p4 = makeTransformedPrimitive p1 (translate (Vector3d(0., 2., 0.)))
     let prim = PrimitiveList listTriangles
-    // let prim = OctreeAgregate(Node.makeOctree listTriangles)
-    let sphs = makeSpheres mname
+    let prim = OctreeAgregate(Node.makeOctree listTriangles)
+    // let sphs = makeSpheres mname
     // let sphs = [makeSphere mname 0 0 0]
-    let prim = OctreeAgregate(Node.makeOctree sphs)
-    let prim = PrimitiveList sphs
+    // let prim = OctreeAgregate(Node.makeOctree sphs)
+    // let prim = PrimitiveList sphs
     { scene with Primitive = prim }
 
 type Window1(width, height) =
@@ -68,6 +69,7 @@ type Window1(width, height) =
         async { render bitmap zbuffer scene } |> measure
         isZ <- false
         this.DrawBitmapAndSave bitmap
+        this.Close()
 
     override this.OnUpdateFrame e =
         base.OnUpdateFrame e
