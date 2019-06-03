@@ -8,22 +8,30 @@ type Bounds =
     { PMin : Vector3d
       PMax : Vector3d }
 
-let hitBoundingBox (box : Bounds) ray tmin tmax =
+let makeBounds a b =
+    { PMin = a
+      PMax = b }
+
+let hitBoundingBox ray (box : Bounds) =
+    let tmin = ray.TMin
+    let tmax = ray.TMax
+
     let handle (tmin, tmax) (box1, box2, rayOrig, rayDir) =
         let inv = 1.0 / rayDir
         let t1 = (box1 - rayOrig) * inv
         let t2 = (box2 - rayOrig) * inv
+
         let t3, t4 =
             if rayDir < 0.0 then (t2, t1)
             else (t1, t2)
+
         let t5 = Math.Max(tmin, t3)
         let t6 = Math.Min(tmax, t4)
         (t5, t6)
 
     let box1 = box.PMin
     let box2 = box.PMax
-    let t1, t2 =
-        handle (tmin, tmax) (box1.X, box2.X, ray.Origin.X, ray.Direction.X)
+    let t1, t2 = handle (tmin, tmax) (box1.X, box2.X, ray.Origin.X, ray.Direction.X)
     let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y)
     let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y)
     t1 < t2 && t2 > 0.0
@@ -39,4 +47,25 @@ let union box1 box2 =
       PMax = Vector3d(xmax, ymax, zmax) }
 
 let addPoint box point =
-    union box {PMin = point; PMax = point}
+    union box { PMin = point
+                PMax = point }
+
+let isLessOrEq (v1 : Vector3d) (v2 : Vector3d) = v1.X <= v2.X && v1.Y <= v2.Y && v1.Z <= v2.Z
+
+let intersects box1 box2 =
+    if isLessOrEq box1.PMin box2.PMin then isLessOrEq box2.PMax box1.PMax || isLessOrEq box2.PMin box1.PMax
+    else isLessOrEq box1.PMax box2.PMax || isLessOrEq box2.PMax box1.PMax
+
+let splitBox (box : Bounds) =
+    let mid = box.PMin + (box.PMax - box.PMin) / 2.
+    let xoff = Vector3d(mid.X, 0., 0.)
+    let yoff = Vector3d(0., mid.Y, 0.)
+    let zoff = Vector3d(0., 0., mid.Z)
+    [| makeBounds box.PMin mid
+       makeBounds (box.PMin + xoff) (mid + xoff)
+       makeBounds (box.PMin + zoff) (mid + zoff)
+       makeBounds (box.PMin + zoff + xoff) (mid + zoff + xoff)
+       makeBounds (box.PMin + yoff) (mid + yoff)
+       makeBounds (box.PMin + yoff + xoff) (mid + yoff + xoff)
+       makeBounds (box.PMin + yoff + zoff) (mid + yoff + zoff)
+       makeBounds (box.PMin + yoff + zoff + xoff) (mid + yoff + zoff + xoff) |]

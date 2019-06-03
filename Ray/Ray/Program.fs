@@ -24,35 +24,19 @@ let measure task =
 
 let file = @"scenes\old\oneSphere.xml"
 
-type OctreeNode = {
-    Children : OctreeNode []
-    Primitives : Primitive list
-    Bounds : Bounds.Bounds
-}
-
-let splitBox (box : Bounds.Bounds) =
-    let mid = box.PMin + (box.PMax - box.PMin) / 2.
-    mid
-
-let rec constructTree box primitives =
-    if Seq.length primitives < 5 then
-        { Children = Array.Empty()
-          Primitives = primitives
-          Bounds = box }
-    else       
-        
-        failwith ""
 
 let makeScene (scene : Scene) =
     let me = TriangleMesh.loadFromFile @"scenes\teapot-low.obj"
     let m = Seq.head scene.Materials
     let mname = m.Key
-    let listTriangles = (Seq.map (Object.Triangle >> (fun i -> GeometricPrimitive(i, mname))) (TriangleMesh.meshToList me)) |> Seq.toList
+    let listTriangles =
+        (Seq.map (Object.Triangle >> (fun i -> GeometricPrimitive(i, mname))) (TriangleMesh.meshToList me))
+        |> Seq.toList
     let p0 = GeometricPrimitive(Object.Sphere, mname)
     let p1 = makeTransformedPrimitive p0 (scale (Vector3d(0.25)))
-    let p2 = makeTransformedPrimitive p0 (translate (Vector3d(2.,0.,0.)))
-    let p3 = makeTransformedPrimitive p1 (translate (Vector3d(2.,2.,0.)))
-    let p4 = makeTransformedPrimitive p1 (translate (Vector3d(0.,2.,0.)))
+    let p2 = makeTransformedPrimitive p0 (translate (Vector3d(2., 0., 0.)))
+    let p3 = makeTransformedPrimitive p1 (translate (Vector3d(2., 2., 0.)))
+    let p4 = makeTransformedPrimitive p1 (translate (Vector3d(0., 2., 0.)))
     let prim = PrimitiveList listTriangles
     { scene with Primitive = prim }
 
