@@ -11,46 +11,54 @@ type Primitive =
     | TransformedPrimitive of Primitive * Transform
     | PrimitiveList of Primitive list
 
-type Node = {
-    Name : string
-    Object : Object option
-    Children : Node list
-    Transform : Transform
-    Material : string
-}
+type Node =
+    { Name : string
+      Object : Object option
+      Children : Node list
+      Transform : Transform
+      Material : string }
 
 let hitInfoToWorld ray node hitInfo =
     let point = transformPoint node.Transform hitInfo.Point
     let normal = transformNormal node.Transform hitInfo.Normal
     let t = (point - ray.Origin).Length
-    let mat = if hitInfo.Material.Length > 0 then hitInfo.Material else node.Material
-    {hitInfo with Point = point; Normal = normal.Normalized(); T = t; Material = mat;}
 
-let rec intersectNodes ray nodes tMin =
-        Seq.map (fun node -> intersectNode ray node tMin) nodes
-        |> tryFindBestHitInfo
-    
-and intersectNode ray node tMin =
-    let rayLocal = {Origin = transformPointInv node.Transform ray.Origin; Direction = (transformVector node.Transform.Inv ray.Direction).Normalized()}
-    let hitInfoChilds = intersectNodes rayLocal node.Children tMin
+    let mat =
+        if hitInfo.Material.Length > 0 then hitInfo.Material
+        else node.Material
+    { hitInfo with Point = point
+                   Normal = normal.Normalized()
+                   T = t
+                   Material = mat }
+
+let rec intersectNodes ray nodes =
+    Seq.map (fun node -> intersectNode ray node) nodes |> tryFindBestHitInfo
+
+and intersectNode ray node =
+    let rayLocal =
+        { ray with Origin = transformPointInv node.Transform ray.Origin
+                   Direction =
+                       (transformVector node.Transform.Inv ray.Direction)
+                           .Normalized() }
+
+    let hitInfoChilds = intersectNodes rayLocal node.Children
+
     let hitInfo =
         if Option.isSome node.Object then
-            tryFindBestHitInfo [
-                hitInfoChilds
-                intersect rayLocal node.Object.Value tMin node.Material
-            ]
-        else
-            hitInfoChilds
+            tryFindBestHitInfo [ hitInfoChilds
+                                 intersect rayLocal node.Object.Value ]
+        else hitInfoChilds
     Option.map (hitInfoToWorld ray node) hitInfo
 
 let samplePointAndNormOnNode node =
     match node.Object with
     | Some(object) ->
         samplePointAndNormOnObject object
-        |> Option.map (fun (point, norm) ->
-            (transformPoint node.Transform point, transformNormal node.Transform norm))
-    | _ ->
-        None
+        |> Option.map
+               (fun (point, norm) ->
+               (transformPoint node.Transform point,
+                transformNormal node.Transform norm))
+    | _ -> None
 
 let transformArea tm area =
     let diag = tm.M.Diagonal
@@ -58,10 +66,7 @@ let transformArea tm area =
 
 let getAreaOfNode node =
     match node.Object with
-    | Some(object) ->
-        getAreaOfObject object
-    | _ ->
-        0.0
+    | Some(object) -> getAreaOfObject object
+    | _ -> 0.0
 
-let getBoundingBox node =
-    1
+let getBoundingBox node = 1

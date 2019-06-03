@@ -40,7 +40,7 @@ let scatter ray material hitInfo =
         let target = hitInfo.Point + hitInfo.Normal + samplePoint
         let dir = target - hitInfo.Point
         dir.Normalize()
-        let scattered = {Origin = hitInfo.Point; Direction = dir}        
+        let scattered = {ray with Origin = hitInfo.Point; Direction = dir}        
         let attenuation = blinn.DiffuseColor
         Some (attenuation, scattered)
     | _ -> None
@@ -115,17 +115,18 @@ let rec shade ray material hitInfo lights nodes =
         let scattered = 
             if isReflectionPresent then
                 let reflectedDir = reflect ray.Direction hitInfo.Normal
-                Some {Origin = hitInfo.Point; Direction = reflectedDir}
+                Some {ray with Origin = hitInfo.Point; Direction = reflectedDir}
             else if isRefractionPresent then
                 let refractedDir = refract ray.Direction hitInfo.Normal b.Ior
-                Some {Origin = hitInfo.Point; Direction = refractedDir}
+                Some {ray with Origin = hitInfo.Point; Direction = refractedDir}
             else None
         (directColor, scattered)
     | ReflectMaterial(reflectColor) ->
         let scattered = 
             let reflectedDir = reflect ray.Direction hitInfo.Normal
-            Some {Origin = hitInfo.Point; Direction = reflectedDir}
+            Some {ray with Origin = hitInfo.Point; Direction = reflectedDir}
         (reflectColor, scattered)
+    | e -> failwithf "shade: not implemented material %A" e
 
 let defaultBlinn = {
     DiffuseColor = Vector3d(0.5)

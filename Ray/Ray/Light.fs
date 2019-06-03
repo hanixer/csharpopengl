@@ -29,6 +29,7 @@ let lightDir light point =
     | DirectLight(_, direction) -> direction
     | PointLight(_, position) -> (point - position).Normalized()
     | AmbientOccluder(_) -> randomInHemisphere()
+    | _ -> failwith "lightDir: not implemented"
 
 let isAmbient l = 
     match l with
@@ -37,8 +38,8 @@ let isAmbient l =
 
 let isInShadow light point nodes =     
     let direction = -(lightDir light point)
-    let shadowRay = {Origin = point ; Direction = direction}    
-    let shadowHit = intersectNodes shadowRay nodes epsilon
+    let shadowRay = makeRay point direction
+    let shadowHit = intersectNodes shadowRay nodes
     match (shadowHit, light) with
     | Some shadowHitInfo, PointLight(_, lightPos) ->
         (shadowHitInfo.Point - point).Length < (lightPos - point).Length

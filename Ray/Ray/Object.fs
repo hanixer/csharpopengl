@@ -37,7 +37,6 @@ let defaultHitInfo = {
     Point = Vector3d.Zero
     Normal = Vector3d.Zero
     Material = ""
-    Depth = 0
 }
 
 // (1 - beta - gamma) * a + beta * b + gamma * c = o + t * d
@@ -126,9 +125,9 @@ let intersectDisk ray =
     else
         None
 
-let intersectRectWithHoles ray width radius tMin =
+let intersectRectWithHoles ray width radius =
     let t = (- ray.Origin.Z) / ray.Direction.Z
-    if t < tMin then
+    if t < ray.TMin then
         None
     else
         let point = pointOnRay ray t
@@ -155,7 +154,7 @@ let intersectRectWithHoles ray width radius tMin =
         else
             None
 
-let rec intersect ray object tMin material =
+let rec intersect ray object =
     let computeHit (t : float) =
         let point = pointOnRay ray t
         let normal = point.Normalized()
@@ -170,9 +169,9 @@ let rec intersect ray object tMin material =
         let b = 2.0 * Vector3d.Dot(ray.Direction, offset)
         let c = Vector3d.Dot(offset, offset) - 1.0
         match quadratic a b c with
-        | Some(t0, _) when t0 > tMin ->
+        | Some(t0, _) when t0 > ray.TMin ->
             computeHit t0
-        | Some(_, t1) when t1 > tMin ->
+        | Some(_, t1) when t1 > ray.TMin ->
             computeHit t1
         | _ ->
             None
@@ -192,14 +191,14 @@ let rec intersect ray object tMin material =
             printfn "a = %A; b = %A; c = %A" a b c
             printfn "%A " <| quadratic a b c
         match quadratic a b c with
-        | Some(t0, _) when t0 > tMin ->
+        | Some(t0, _) when t0 > ray.TMin ->
             computeHit t0
-        | Some(_, t1) when t1 > tMin ->
+        | Some(_, t1) when t1 > ray.TMin ->
             computeHit t1
         | _ ->
             None
     | RectXYWithHoles(width, radius) ->
-        intersectRectWithHoles ray width radius tMin
+        intersectRectWithHoles ray width radius
     | Disk ->
         intersectDisk ray
     | Rectangle(p0, p1, p2) ->
@@ -207,7 +206,7 @@ let rec intersect ray object tMin material =
     | Plane ->
         intersectPlane ray
     | ObjectList objs ->
-        Seq.map (fun object -> intersect ray object tMin material) objs
+        Seq.map (fun object -> intersect ray object) objs
         |> Seq.minBy (fun h ->
             if h.IsSome then h.Value.T
             else Double.MaxValue)

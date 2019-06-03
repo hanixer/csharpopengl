@@ -34,8 +34,8 @@ let clamp (color : Vector3d) =
 let maxDepth = 5
 
 let isReachable source t direction nodes =
-    let shadowRay = {Origin = source ; Direction = direction}
-    match intersectNodes shadowRay nodes epsilon with
+    let shadowRay = makeRay source  direction
+    match intersectNodes shadowRay nodes with
     | Some(hitInfo) ->
         hitInfo.T > (t - 0.001)
             && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
@@ -65,7 +65,7 @@ let getDirectLighting scene hitInfo lightNode =
 
 
 let rec pathTrace ray scene depth isEyeRay : Vector3d =    
-    match intersectNodes ray scene.NodesList epsilon with
+    match intersectNodes ray scene.NodesList with
     | Some hitInfo ->
         let material = scene.Materials.[hitInfo.Material]
         let emitted = if isEyeRay  then getEmitted material else Vector3d.Zero
@@ -91,7 +91,7 @@ let rec traceRay ray scene depth =
     if depth > maxDepth then
         defaultRes
     else
-        match intersectNodes ray scene.NodesList epsilon with
+        match intersectNodes ray scene.NodesList with
         | Some hitInfo ->
             let material = scene.Materials.[hitInfo.Material]
             let shadedColor, scattered = shade ray material hitInfo scene.LightsList scene.NodesList
