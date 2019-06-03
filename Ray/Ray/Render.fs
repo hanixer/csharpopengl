@@ -91,7 +91,7 @@ let rec traceRay ray scene depth =
     if depth > maxDepth then
         defaultRes
     else
-        match intersectNodes ray scene.NodesList with
+        match Node.intersect ray scene.Primitive with
         | Some hitInfo ->
             let material = scene.Materials.[hitInfo.Material]
             let shadedColor, scattered = shade ray material hitInfo scene.LightsList scene.NodesList

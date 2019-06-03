@@ -8,6 +8,8 @@ type Transform =
     { M : Matrix4d
       Inv : Matrix4d }
 
+// Transforms construction
+
 let inverted tm =
     { M = tm.Inv
       Inv = tm.M }
@@ -66,35 +68,6 @@ let scale (v : Vector3d) =
     { M = m
       Inv = inv }
 
-let private transformPointHelper (m : Matrix4d) (point : Vector3d) =
-    let point4 = Vector4d(point, 1.0)
-    let x = Vector4d.Dot(point4, m.Row0)
-    let y = Vector4d.Dot(point4, m.Row1)
-    let z = Vector4d.Dot(point4, m.Row2)
-    let w = Vector4d.Dot(point4, m.Row3)
-    Vector3d(x / w, y / w, z / w)
-
-let transformPoint (transform : Transform) (point : Vector3d) =
-    transformPointHelper transform.M point
-
-let transformPointInv (transform : Transform) (point : Vector3d) =
-    transformPointHelper transform.Inv point
-
-let transformVector (m : Matrix4d) (vector : Vector3d) =
-    let point4 = Vector4d(vector, 0.0)
-    let x = Vector4d.Dot(point4, m.Row0)
-    let y = Vector4d.Dot(point4, m.Row1)
-    let z = Vector4d.Dot(point4, m.Row2)
-    Vector3d(x, y, z)
-
-let transformNormal (transform : Transform) (n : Vector3d) =
-    let m = transform.Inv
-    let point4 = Vector4d(n, 0.0)
-    let x = Vector4d.Dot(point4, m.Column0)
-    let y = Vector4d.Dot(point4, m.Column1)
-    let z = Vector4d.Dot(point4, m.Column2)
-    Vector3d(x, y, z)
-
 let perspective fov near far =
     let r1 = Vector4d(1.0, 0.0, 0.0, 0.0)
     let r2 = Vector4d(0.0, 1.0, 0.0, 0.0)
@@ -126,6 +99,45 @@ let lookAt (position : Vector3d) (target : Vector3d) (up : Vector3d) =
     let r2 = Vector4d(right.Z, up.Z, towardViwer.Z, position.Z)
     let r3 = Vector4d(0., 0., 0., 1.)
     fromMatrix (Matrix4d(r0, r1, r2, r3))
+
+// Applying transforms
+
+let private transformPointHelper (m : Matrix4d) (point : Vector3d) =
+    let point4 = Vector4d(point, 1.0)
+    let x = Vector4d.Dot(point4, m.Row0)
+    let y = Vector4d.Dot(point4, m.Row1)
+    let z = Vector4d.Dot(point4, m.Row2)
+    let w = Vector4d.Dot(point4, m.Row3)
+    Vector3d(x / w, y / w, z / w)
+
+let transformPoint (transform : Transform) (point : Vector3d) =
+    transformPointHelper transform.M point
+
+let transformPointInv (transform : Transform) (point : Vector3d) =
+    transformPointHelper transform.Inv point
+
+let transformVector (m : Matrix4d) (vector : Vector3d) =
+    let point4 = Vector4d(vector, 0.0)
+    let x = Vector4d.Dot(point4, m.Row0)
+    let y = Vector4d.Dot(point4, m.Row1)
+    let z = Vector4d.Dot(point4, m.Row2)
+    Vector3d(x, y, z)
+
+let transformNormal (transform : Transform) (n : Vector3d) =
+    let m = transform.Inv
+    let point4 = Vector4d(n, 0.0)
+    let x = Vector4d.Dot(point4, m.Column0)
+    let y = Vector4d.Dot(point4, m.Column1)
+    let z = Vector4d.Dot(point4, m.Column2)
+    Vector3d(x, y, z)
+
+let ray transform (r : Common.Ray) =
+    { r with Origin = transformPoint transform r.Origin
+             Direction = transformVector transform.M r.Direction }
+
+let hitInfo transform (info : Common.HitInfo) =
+      { info with Point = transformPoint transform info.Point 
+                  Normal = transformNormal transform info.Normal }
 
 let bounds tm (box : Bounds) =
       let p0 = transformPoint tm box.PMin

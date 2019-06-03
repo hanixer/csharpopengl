@@ -262,7 +262,7 @@ let getObjectFromType (xml : XmlElement) =
             None
     else None
 
-let constructPrimitive objectOpt transform children =
+let constructPrimitive objectOpt material transform children =
     let withChildren prim =
         if List.isEmpty children then
             prim
@@ -273,11 +273,11 @@ let constructPrimitive objectOpt transform children =
         if transform = Transform.identityTransform then
             withChildren prim
         else
-            withChildren (TransformedPrimitive(prim, transform))
+            withChildren (makeTransformedPrimitive prim transform)
 
     match objectOpt with
     | Some(object) ->
-        withTransform (GeometricPrimitive(object))
+        withTransform (GeometricPrimitive(object, material))
     | _ ->
         withChildren (PrimitiveList[])
 
@@ -291,7 +291,7 @@ let rec loadObject (xml : XmlNode) level =
     printfn ""
     let tm = loadTransform xml level
     let children = loadChildren xml level
-    constructPrimitive object tm children
+    constructPrimitive object material tm children
 
 and loadChildren (xml : XmlElement) level =
     xml.ChildNodes

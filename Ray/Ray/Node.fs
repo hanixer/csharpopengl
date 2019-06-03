@@ -7,9 +7,12 @@ open Transform
 open Common
 
 type Primitive =
-    | GeometricPrimitive of Object // * Material * AreaLight
-    | TransformedPrimitive of Primitive * Transform
+    | GeometricPrimitive of Object * material : string // * AreaLight
+    | TransformedPrimitive of prim : Primitive * primToWorld : Transform * worldToPrim : Transform
     | PrimitiveList of Primitive list
+
+let makeTransformedPrimitive prim primToWorld =
+    TransformedPrimitive(prim, primToWorld, inverted primToWorld)
 
 type Node =
     { Name : string
@@ -17,6 +20,19 @@ type Node =
       Children : Node list
       Transform : Transform
       Material : string }
+
+let rec intersect ray primitive =
+    match primitive with
+    | GeometricPrimitive(object, material) -> 
+        let hit = Object.intersect ray object
+        Option.map (fun (hit : HitInfo) -> { hit with Material = material }) hit
+    | TransformedPrimitive(child, primToWorld, worldToPrim) ->
+        let rayPrim = Transform.ray worldToPrim ray 
+        let hit = intersect rayPrim child
+        Option.map (Transform.hitInfo primToWorld) hit
+    | PrimitiveList prims ->
+        let hitInfos = List.map (intersect ray) prims
+        tryFindBestHitInfo hitInfos
 
 let hitInfoToWorld ray node hitInfo =
     let point = transformPoint node.Transform hitInfo.Point
@@ -46,7 +62,7 @@ and intersectNode ray node =
     let hitInfo =
         if Option.isSome node.Object then
             tryFindBestHitInfo [ hitInfoChilds
-                                 intersect rayLocal node.Object.Value ]
+                                 Object.intersect rayLocal node.Object.Value ]
         else hitInfoChilds
     Option.map (hitInfoToWorld ray node) hitInfo
 
