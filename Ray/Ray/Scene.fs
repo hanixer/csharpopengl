@@ -13,20 +13,14 @@ open System.IO
 
 type Scene = {
     Camera : Camera
-    mutable Nodes : Map<string, Node>
-    mutable NodesList : Node list
     Materials : Map<string, Material>
     Lights : Map<string, Light>
     LightsList : Light list
     Environment : Vector3d
     Samples : int
-    AreaLights : Node list
+    // AreaLights : Node list
     Primitive : Primitive
 }
-
-let addNode scene node =
-    scene.Nodes <- scene.Nodes.Add(node.Name, node)
-    scene.NodesList <- node :: scene.NodesList
 
 let getMaterial scene name = Map.find name scene.Materials
 
@@ -312,9 +306,6 @@ let loadCamera (xml : XmlElement) =
     let height =  select xml "./height" (fun elem -> readFloating elem "value" defCameraHeight) defCameraHeight
     Camera(pos, target, up, fov, int width, int height)
 
-let rec getNodePairs node =
-    (node.Name, node) :: (List.collect getNodePairs node.Children)
-
 let loadScene (xml : XmlDocument) =
     let xml = xml.Item "xml"
     if not (isNull xml) then
@@ -350,15 +341,12 @@ let loadScene (xml : XmlDocument) =
             readFloating (xml.SelectSingleNode "scene/samples") "value" 1.0 |> int
         printfn "samples %A" samples
         {
-          Nodes = nodesMap
-          NodesList = []
           Camera = camera
           Materials = materials
           Lights = lights
           LightsList = lightsList
           Environment = environment
           Samples = samples
-          AreaLights = []
           Primitive = PrimitiveList primitives
          }
     else

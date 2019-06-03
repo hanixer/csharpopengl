@@ -11,6 +11,7 @@ open System.Diagnostics
 open Material
 open System.Threading.Tasks
 open Light
+open Transform
 
 type Bitmap = System.Drawing.Bitmap
 
@@ -34,57 +35,60 @@ let clamp (color : Vector3d) =
 let maxDepth = 5
 
 let isReachable source t direction nodes =
-    let shadowRay = makeRay source  direction
-    match intersectNodes shadowRay nodes with
-    | Some(hitInfo) ->
-        hitInfo.T > (t - 0.001)
-            && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
-        // hitInfo.T >= t && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
-    // | Some(hitInfo) -> false
-    | None ->
-        true
+    failwith "should be reimplemented with new primitives"
+    // let shadowRay = makeRay source  direction
+    // match intersectNodes shadowRay nodes with
+    // | Some(hitInfo) ->
+    //     hitInfo.T > (t - 0.001)
+    //         && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
+    //     // hitInfo.T >= t && Vector3d.Dot(hitInfo.Normal, direction) > 0.0
+    // // | Some(hitInfo) -> false
+    // | None ->
+    //     true
 
 let getDirectLighting scene hitInfo lightNode =
     // rho * Le * v * A * cosThetaI * cosThetaL / distance^2
-    match samplePointAndNormOnNode lightNode with
-    | Some (samplePoint, normalLight) ->
-        let direction = hitInfo.Point - samplePoint
-        let directionNorm = direction.Normalized()
-        let isReachable = isReachable hitInfo.Point direction.Length -directionNorm scene.NodesList
-        if isReachable then
-            let material = scene.Materials.[lightNode.Material]
-            let emitted = getEmitted material
-            let cosThetaI = Math.Abs(Vector3d.Dot(hitInfo.Normal, -directionNorm))
-            let cosThetaL = Math.Abs(Vector3d.Dot(normalLight, directionNorm))
-            let area = getAreaOfNode lightNode
-            emitted * cosThetaI * cosThetaL * area / direction.LengthSquared
-        else
-            Vector3d.Zero
-    | _ ->
-        Vector3d.Zero
+    failwith "should be reimplemented with new primitives"
+    // match samplePointAndNormOnNode lightNode with
+    // | Some (samplePoint, normalLight) ->
+    //     let direction = hitInfo.Point - samplePoint
+    //     let directionNorm = direction.Normalized()
+    //     let isReachable = isReachable hitInfo.Point direction.Length -directionNorm scene.NodesList
+    //     if isReachable then
+    //         let material = scene.Materials.[lightNode.Material]
+    //         let emitted = getEmitted material
+    //         let cosThetaI = Math.Abs(Vector3d.Dot(hitInfo.Normal, -directionNorm))
+    //         let cosThetaL = Math.Abs(Vector3d.Dot(normalLight, directionNorm))
+    //         let area : float = getAreaOfNode lightNode
+    //         emitted * cosThetaI * cosThetaL * area / direction.LengthSquared
+    //     else
+    //         Vector3d.Zero
+    // | _ ->
+    //     Vector3d.Zero
 
 
-let rec pathTrace ray scene depth isEyeRay : Vector3d =    
-    match intersectNodes ray scene.NodesList with
-    | Some hitInfo ->
-        let material = scene.Materials.[hitInfo.Material]
-        let emitted = if isEyeRay  then getEmitted material else Vector3d.Zero
-        match scatter ray material hitInfo with
-        | Some(attenuation, scattered) when depth < 50 && emitted = Vector3d.Zero ->
-            let direct =
-                Seq.map (getDirectLighting scene hitInfo) scene.AreaLights
-                |> Seq.fold (+) Vector3d.Zero
-                // Vector3d.Zero
-            let indirect =
-                let dot = Math.Abs(Vector3d.Dot(hitInfo.Normal, -ray.Direction))
-                dot * pathTrace scattered scene (depth + 1) false
-            emitted 
-                + attenuation * direct 
-                + attenuation * indirect
-        | _ ->
-            emitted        
-    | _ -> 
-        scene.Environment
+let rec pathTrace ray scene depth isEyeRay : Vector3d =  
+    failwith "should be reimplemented with new primitives"  
+    // match intersectNodes ray scene.NodesList with
+    // | Some hitInfo ->
+    //     let material = scene.Materials.[hitInfo.Material]
+    //     let emitted = if isEyeRay  then getEmitted material else Vector3d.Zero
+    //     match scatter ray material hitInfo with
+    //     | Some(attenuation, scattered) when depth < 50 && emitted = Vector3d.Zero ->
+    //         let direct =
+    //             Seq.map (getDirectLighting scene hitInfo) scene.AreaLights
+    //             |> Seq.fold (+) Vector3d.Zero
+    //             // Vector3d.Zero
+    //         let indirect =
+    //             let dot = Math.Abs(Vector3d.Dot(hitInfo.Normal, -ray.Direction))
+    //             dot * pathTrace scattered scene (depth + 1) false
+    //         emitted 
+    //             + attenuation * direct 
+    //             + attenuation * indirect
+    //     | _ ->
+    //         emitted        
+    // | _ -> 
+    //     scene.Environment
 
 let rec traceRay ray scene depth =
     let defaultRes = (Double.PositiveInfinity, Vector3d.Zero)
@@ -93,16 +97,18 @@ let rec traceRay ray scene depth =
     else
         match Node.intersect ray scene.Primitive with
         | Some hitInfo ->
-            let material = scene.Materials.[hitInfo.Material]
-            let shadedColor, scattered = shade ray material hitInfo scene.LightsList scene.NodesList
-            match scattered with
-            | Some scatRay ->
-                let _, scatColor = traceRay scatRay scene (depth + 1)
-                let color = shadedColor + scatColor
-                Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
-                (hitInfo.T, color)
-            | _ ->
-                (hitInfo.T, shadedColor)
+            let color = (hitInfo.Normal + Vector3d.One) * 0.5
+            (hitInfo.T, color)
+            // let material = scene.Materials.[hitInfo.Material]
+            // let shadedColor, scattered = shade ray material hitInfo scene.LightsList scene.NodesList
+            // match scattered with
+            // | Some scatRay ->
+            //     let _, scatColor = traceRay scatRay scene (depth + 1)
+            //     let color = shadedColor + scatColor
+            //     Debug.Assert(not (color.X < 0.0 || color.Y < 0.0 || color.Z < 0.0))
+            //     (hitInfo.T, color)
+            // | _ ->
+            //     (hitInfo.T, shadedColor)
         | _ -> defaultRes
 
 let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =

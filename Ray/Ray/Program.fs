@@ -24,14 +24,6 @@ let measure task =
 
 let file = @"scenes\old\test3.xml"
 
-let node =
-    let transform = Vector3d(0.07, 3.0, 0.07) |> scale
-    { Node.Name = ""
-      Node.Children = []
-      Node.Object = Some Object.Cylinder
-      Node.Transform = transform
-      Material = "white" }
-
 type Window1(width, height) =
     inherit Window(width, height)
     let mutable bitmap : Drawing.Bitmap = null

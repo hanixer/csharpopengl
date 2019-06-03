@@ -37,13 +37,14 @@ let isAmbient l =
     | _ -> false
 
 let isInShadow light point nodes =     
-    let direction = -(lightDir light point)
-    let shadowRay = makeRay point direction
-    let shadowHit = intersectNodes shadowRay nodes
-    match (shadowHit, light) with
-    | Some shadowHitInfo, PointLight(_, lightPos) ->
-        (shadowHitInfo.Point - point).Length < (lightPos - point).Length
-    | _ -> Option.isSome shadowHit
+    failwith "should be reimplemented with new primitives"
+    // let direction = -(lightDir light point)
+    // let shadowRay = makeRay point direction
+    // let shadowHit = intersectNodes shadowRay nodes
+    // match (shadowHit, light) with
+    // | Some shadowHitInfo, PointLight(_, lightPos) ->
+        // (shadowHitInfo.Point - point).Length < (lightPos - point).Length
+    // | _ -> Option.isSome shadowHit
     
 let samplePointOnLight light nodes =
     match light with
