@@ -253,7 +253,8 @@ let getAreaOfObject object =
 let worldBounds object =
     match object with
     | Triangle(p0, p1, p2) ->
-        let b1 = Bounds.makeBounds p0 p1
+        let b0 = Bounds.makeBounds p0 p0
+        let b1 = Bounds.addPoint b0 p1
         Bounds.addPoint b1 p2
     | _ ->
         Bounds.makeBounds (Vector3d.One * -1.) Vector3d.One

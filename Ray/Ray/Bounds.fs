@@ -38,7 +38,8 @@ let hitBoundingBox ray (box : Bounds) =
     let t1, t2 = handle (tmin, tmax) (box1.X, box2.X, ray.Origin.X, ray.Direction.X)
     let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y)
     let t1, t2 = handle (t1, t2) (box1.Z, box2.Z, ray.Origin.Z, ray.Direction.Z)
-    t1 < t2 && t2 > 0.0
+    printfn "%A %A %A %A\n" ray box t1 t2
+    t1 <= t2
 
 let union box1 box2 =
     let xmin = Math.Min(box1.PMin.X, box2.PMin.X)
@@ -49,6 +50,12 @@ let union box1 box2 =
     let zmax = Math.Max(box1.PMax.Z, box2.PMax.Z)
     { PMin = Vector3d(xmin, ymin, zmin)
       PMax = Vector3d(xmax, ymax, zmax) }
+
+let unionMany boxes =
+    match Seq.tryHead boxes with
+    | Some(box) ->
+        Seq.fold union box (Seq.tail boxes)
+    | _ -> failwith "unionMany: non empty seq is expected"
 
 let centroid box =
     0.5 * box.PMin + 0.5 * box.PMax

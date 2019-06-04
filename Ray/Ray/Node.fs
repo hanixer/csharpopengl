@@ -42,12 +42,7 @@ let rec worldBounds primitive : Bounds.Bounds =
     | BVHAccelerator(bvh) -> worldBoundsBVH bvh
 
 and primitivesToBoxes (primitives : Primitive seq) =
-    match Seq.tryHead primitives with
-    | Some(p)->
-        let box = worldBounds p
-        let boxes = Seq.map worldBounds (Seq.tail primitives)
-        Seq.fold Bounds.union box boxes
-    | _ -> Bounds.makeBounds Vector3d.Zero Vector3d.Zero
+    Bounds.unionMany (Seq.map worldBounds primitives)
 
 let rec intersect ray primitive =
     match primitive with
@@ -186,7 +181,7 @@ let rec makeBHVHelper (primInfos : BVHPrimInfoMap) (prims : Primitive []) =
            fun (p : Primitive) -> (snd primInfos.[p]).Y
            fun (p : Primitive) -> (snd primInfos.[p]).Z |]
     let n = prims.Length
-    let bounds = primitivesToBoxes prims
+    let bounds = Bounds.unionMany (Seq.map (fun prim -> fst primInfos.[prim]) prims)
     if n = 1 then makeLeafBVH prims.[0] bounds
     else
         let centroidBounds = centroidBounds primInfos prims
@@ -195,10 +190,17 @@ let rec makeBHVHelper (primInfos : BVHPrimInfoMap) (prims : Primitive []) =
         let left, right = Array.splitAt (n / 2) prims
         makeInteriorBVH (makeBHVHelper primInfos left) (makeBHVHelper primInfos right) bounds
 
+let rec setOfPrims bvh =
+    match bvh with
+    | BVHLeaf(i, _) -> [i]
+    | BVHInterior(l, r, _) -> List.append (setOfPrims l) (setOfPrims r)
+
 let makeBVH primitives =
     let primInfos = BVHPrimInfoMap()
     for prim in primitives do
         let bounds = worldBounds prim
         let centroid = Bounds.centroid bounds
         primInfos.Add(prim, (bounds, centroid))
-    BVHAccelerator(makeBHVHelper primInfos (Array.ofSeq primitives))
+    let bvh = makeBHVHelper primInfos (Array.ofSeq primitives)
+    let result = BVHAccelerator(bvh)
+    result
