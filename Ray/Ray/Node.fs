@@ -12,8 +12,8 @@ type OctreeNode =
       Bounds : Bounds.Bounds }
 
 and BVHNode =
-    | BVHLeaf of Primitive
-    | BVHInterior of left : BVHNode * right : BVHNode
+    | BVHLeaf of prim : Primitive * bounds : Bounds.Bounds
+    | BVHInterior of left : BVHNode * right : BVHNode * bounds : Bounds.Bounds
 
 and Primitive =
     | GeometricPrimitive of Object * material : string // * AreaLight
@@ -24,6 +24,30 @@ and Primitive =
 
 let makeTransformedPrimitive prim primToWorld = TransformedPrimitive(prim, primToWorld, inverted primToWorld)
 let printVec (v : Vector3d) = printf "(%.2f, %.2f, %.2f) " v.X v.Y v.Z
+
+let worldBoundsBVH bvh =
+    match bvh with
+    | BVHLeaf(_, bounds) -> bounds
+    | BVHInterior(_, _, bounds) -> bounds
+
+// returns bounding box of the primitive in world space
+let rec worldBounds primitive : Bounds.Bounds =
+    match primitive with
+    | GeometricPrimitive(object, _) -> Object.worldBounds object
+    | TransformedPrimitive(prim, primToWorld, _) ->
+        let box = worldBounds prim
+        Transform.bounds primToWorld box
+    | PrimitiveList(prims) -> primitivesToBoxes prims
+    | OctreeAgregate(octree) -> octree.Bounds
+    | BVHAccelerator(bvh) -> worldBoundsBVH bvh
+
+and primitivesToBoxes (primitives : Primitive seq) =
+    match Seq.tryHead primitives with
+    | Some(p)->
+        let box = worldBounds p
+        let boxes = Seq.map worldBounds (Seq.tail primitives)
+        Seq.fold Bounds.union box boxes
+    | _ -> Bounds.makeBounds Vector3d.Zero Vector3d.Zero
 
 let rec intersect ray primitive =
     match primitive with
@@ -38,18 +62,23 @@ let rec intersect ray primitive =
         let hits = List.map (intersect ray) prims
         tryFindBestHitInfo hits
     | OctreeAgregate(octree) -> intersectOctree ray octree
+    | BVHAccelerator(bvh) -> intersectBVH ray bvh
 
 and intersectOctree ray octree =
-    // printVec ray.Origin
-    // printVec ray.Direction
-    // printVec octree.Bounds.PMin
-    // printVec octree.Bounds.PMax
-    // printfn ""
     if Bounds.hitBoundingBox ray octree.Bounds then
         let hits1 = Seq.map (intersectOctree ray) octree.Children
         let hits2 = List.map (intersect ray) octree.Primitives
         tryFindBestHitInfo [ tryFindBestHitInfo hits1
                              tryFindBestHitInfo hits2 ]
+    else None
+
+and intersectBVH ray bvh =
+    if Bounds.hitBoundingBox ray (worldBoundsBVH bvh) then
+        match bvh with
+        | BVHLeaf(prim, _) -> intersect ray prim
+        | BVHInterior(left, right, _) ->
+            tryFindBestHitInfo [ intersectBVH ray left
+                                 intersectBVH ray right ]
     else None
 
 let samplePointAndNormOnNode node = failwith "should be reimplemented with new primitives"
@@ -61,27 +90,8 @@ let samplePointAndNormOnNode node = failwith "should be reimplemented with new p
 //                (transformPoint node.Transform point,
 //                 transformNormal node.Transform norm))
 //     | _ -> None
+
 let getAreaOfNode node = failwith "should be reimplemented with new primitives"
-
-// match node.Object with
-// | Some(object) -> getAreaOfObject object
-// | _ -> 0.0
-let rec worldBounds primitive : Bounds.Bounds =
-    match primitive with
-    | GeometricPrimitive(object, _) -> Object.worldBounds object
-    | TransformedPrimitive(prim, primToWorld, _) ->
-        let box = worldBounds prim
-        Transform.bounds primToWorld box
-    | PrimitiveList(prims) -> primitivesToBoxes prims
-    | OctreeAgregate(octree) -> octree.Bounds
-
-and primitivesToBoxes primitives =
-    match primitives with
-    | p :: ps ->
-        let box = worldBounds p
-        let boxes = Seq.map worldBounds ps
-        Seq.fold Bounds.union box boxes
-    | _ -> Bounds.makeBounds Vector3d.Zero Vector3d.Zero
 
 type PrimToBox = Collections.Generic.Dictionary<Primitive, Bounds.Bounds>
 
@@ -152,7 +162,7 @@ let makeOctree primitives =
     for p in primitives do
         m.Add(p, worldBounds p)
     let box = primitivesToBoxes primitives
-    let maxDepth = 8 + (int (Math.Log(float primitives.Length)))
+    let maxDepth = 8 + (int (Math.Log(float (Seq.length primitives))))
     let result = makeOctreeHelper maxDepth 0 box primitives m
     let primset = primitivesSet result
     printfn "set %d origin %d" primset.Count primitives.Length
@@ -162,9 +172,9 @@ let makeOctree primitives =
 /// BVH
 type BVHPrimInfoMap = Collections.Generic.Dictionary<Primitive, Bounds.Bounds * Vector3d>
 
-let makeLeafBVH prim = BVHLeaf prim
+let makeLeafBVH prim bounds = BVHLeaf(prim, bounds)
 
-let makeInteriorBVH left right = BVHInterior(left, right)
+let makeInteriorBVH left right bounds = BVHInterior(left, right, bounds)
 
 let centroidBounds (primInfos : BVHPrimInfoMap) (prims : Primitive []) =
     let fold bounds prim = Bounds.union bounds (fst primInfos.[prim])
@@ -176,13 +186,14 @@ let rec makeBHVHelper (primInfos : BVHPrimInfoMap) (prims : Primitive []) =
            fun (p : Primitive) -> (snd primInfos.[p]).Y
            fun (p : Primitive) -> (snd primInfos.[p]).Z |]
     let n = prims.Length
-    if n = 1 then makeLeafBVH prims.[0]
+    let bounds = primitivesToBoxes prims
+    if n = 1 then makeLeafBVH prims.[0] bounds
     else
         let centroidBounds = centroidBounds primInfos prims
         let axis = Bounds.maximumExtent centroidBounds
         Array.sortInPlaceBy axisComparisons.[axis] prims
         let left, right = Array.splitAt (n / 2) prims
-        makeInteriorBVH (makeBHVHelper primInfos left) (makeBHVHelper primInfos right)
+        makeInteriorBVH (makeBHVHelper primInfos left) (makeBHVHelper primInfos right) bounds
 
 let makeBVH primitives =
     let primInfos = BVHPrimInfoMap()
@@ -190,4 +201,4 @@ let makeBVH primitives =
         let bounds = worldBounds prim
         let centroid = Bounds.centroid bounds
         primInfos.Add(prim, (bounds, centroid))
-    makeBHVHelper primInfos (Array.ofSeq primitives)
+    BVHAccelerator(makeBHVHelper primInfos (Array.ofSeq primitives))
