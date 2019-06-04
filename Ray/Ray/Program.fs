@@ -36,7 +36,7 @@ let makeSpheres m =
                 yield makeSphere m (x * 3) (y * 3) (z * 3) ]
 
 let makeScene (scene : Scene) =
-    let me = TriangleMesh.loadFromFile @"scenes\sphere.obj"
+    let me = TriangleMesh.loadFromFile @"test-images\ajax.obj"
     printfn "mesh faces = %d" me.FacesCount
     let m = Seq.head scene.Materials
     let mname = m.Key

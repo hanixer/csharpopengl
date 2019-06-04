@@ -196,6 +196,7 @@ let rec setOfPrims bvh =
     | BVHInterior(l, r, _) -> List.append (setOfPrims l) (setOfPrims r)
 
 let makeBVH primitives =
+    let stopwatch = Diagnostics.Stopwatch.StartNew() //creates and start the instance of Stopwatch
     let primInfos = BVHPrimInfoMap()
     for prim in primitives do
         let bounds = worldBounds prim
@@ -203,4 +204,6 @@ let makeBVH primitives =
         primInfos.Add(prim, (bounds, centroid))
     let bvh = makeBHVHelper primInfos (Array.ofSeq primitives)
     let result = BVHAccelerator(bvh)
+    stopwatch.Stop()
+    Console.WriteLine("BVH construction: {0}", stopwatch.ElapsedMilliseconds)
     result

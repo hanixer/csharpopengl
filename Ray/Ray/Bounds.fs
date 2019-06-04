@@ -38,7 +38,6 @@ let hitBoundingBox ray (box : Bounds) =
     let t1, t2 = handle (tmin, tmax) (box1.X, box2.X, ray.Origin.X, ray.Direction.X)
     let t1, t2 = handle (t1, t2) (box1.Y, box2.Y, ray.Origin.Y, ray.Direction.Y)
     let t1, t2 = handle (t1, t2) (box1.Z, box2.Z, ray.Origin.Z, ray.Direction.Z)
-    printfn "%A %A %A %A\n" ray box t1 t2
     t1 <= t2
 
 let union box1 box2 =
