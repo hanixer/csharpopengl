@@ -8,7 +8,11 @@ type Bounds =
     { PMin : Vector3d
       PMax : Vector3d }
 
+let mutable counter = 0
+
 let makeBounds a b =
+    counter <- counter + 1
+    // printfn "bounds counter %d" counter
     { PMin = a
       PMax = b }
 
@@ -60,7 +64,10 @@ let intersects box1 box2 =
 let contains box1 box2 =
     isLessOrEq box1.PMin box2.PMin && isLessOrEq box2.PMax box1.PMax
 
+let mutable counter2 = 0
 let splitBox (box : Bounds) =
+    counter2 <- counter2 + 1
+    // printfn "splitBox counter %d" counter2
     let mid = box.PMin + (box.PMax - box.PMin) / 2.
     let off = mid - box.PMin
     let xoff = Vector3d(off.X, 0., 0.)
@@ -74,3 +81,7 @@ let splitBox (box : Bounds) =
        makeBounds (box.PMin + yoff + xoff) (mid + yoff + xoff)
        makeBounds (box.PMin + yoff + zoff) (mid + yoff + zoff)
        makeBounds (box.PMin + yoff + zoff + xoff) (mid + yoff + zoff + xoff) |]
+
+let volume box =
+    let diff = box.PMax - box.PMin
+    diff.X * diff.Y * diff.Z

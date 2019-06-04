@@ -90,16 +90,18 @@ and primitivesToBoxes primitives =
     | _ ->
         Bounds.makeBounds Vector3d.Zero Vector3d.Zero
 
-let putPrimitivesInBox primitives box =
+type PrimToBox = Collections.Generic.Dictionary<Primitive, Bounds.Bounds>
+
+let putPrimitivesInBox primitives (primToBox : PrimToBox)  box =
     List.filter (fun primitive ->
-        let b2 = worldBounds primitive
+        let b2 = primToBox.[primitive]
         let result = Bounds.intersects box b2
         result)
         primitives
 
-let splitPrimsWithFullCover (box : Bounds.Bounds) prims =
+let splitPrimsWithFullCover (box : Bounds.Bounds) prims (primToBox : PrimToBox) =
     let fold (full, notFull) prim =
-        let boxPrim = worldBounds prim
+        let boxPrim = primToBox.[prim]
         // printf "boxPrim ="
         // printVec boxPrim.PMin
         // printVec boxPrim.PMax
@@ -113,22 +115,56 @@ let splitPrimsWithFullCover (box : Bounds.Bounds) prims =
             (full, prim :: notFull)
     List.fold fold ([], []) prims
 
-let rec makeOctreeHelper box primitives =
-    if Seq.length primitives < 10 then
+let rec printTriangle p =
+    match p with
+    | GeometricPrimitive(Object.Triangle(p0, p1, p2), _) ->
+        printf "Object.Triangle("
+        printf "Vector3d(%A, %A, %A)," p0.X p0.Y p0.Z
+        printf "Vector3d(%A, %A, %A)," p1.X p1.Y p1.Z
+        printf "Vector3d(%A, %A, %A)" p2.X p2.Y p2.Z
+        printfn ")"
+    | _ -> ()
+
+let rec primitivesSet node = 
+    let res = Collections.Generic.HashSet<Primitive>()
+    for c in node.Children do
+        res.UnionWith(primitivesSet c)
+    res.UnionWith(node.Primitives)
+    res
+
+let rec makeOctreeHelper maxDepth depth (box : Bounds.Bounds) primitives primToBox =
+    let vol = Bounds.volume box
+    // printf "makeOctreeHelper %d " (Seq.length primitives)
+    // printVec box.PMin
+    // printf " %A" vol
+    if Seq.length primitives < 10 || depth >= maxDepth then
+        // printfn " less!"
         { Children = Array.Empty()
           Primitives = primitives
           Bounds = box }
     else
-        let (fullCover, notFullCover) = splitPrimsWithFullCover box primitives
+        // let (fullCover, notFullCover) = splitPrimsWithFullCover box primitives primToBox
+        // printfn " full = %d; not = %d " fullCover.Length notFullCover.Length
         let boxes = Bounds.splitBox box
-        let groupedPrims = Array.map (putPrimitivesInBox notFullCover) boxes
+        let groupedPrims = Array.map (putPrimitivesInBox primitives primToBox) boxes
+        let hs = Collections.Generic.HashSet<Primitive>()
+        for gr in groupedPrims do            
+            hs.UnionWith(gr)
+        System.Diagnostics.Debug.Assert(hs.Count = primitives.Length)
         let makeChild i primitives =
-            makeOctreeHelper boxes.[i] primitives
+            makeOctreeHelper maxDepth (depth + 1) boxes.[i] primitives primToBox
         let children = Array.mapi makeChild groupedPrims
         { Children = children
-          Primitives = fullCover
+          Primitives = []
           Bounds = box }
 
 let makeOctree primitives =
+    let m = Collections.Generic.Dictionary<Primitive, Bounds.Bounds>()
+    for p in primitives do
+        m.Add(p, worldBounds p)
     let box = primitivesToBoxes primitives
-    makeOctreeHelper box primitives
+    let maxDepth = 8 + (int(Math.Log(float primitives.Length)))
+    let result = makeOctreeHelper maxDepth 0 box primitives m
+    let primset = primitivesSet result
+    printfn "set %d origin %d" primset.Count  primitives.Length
+    result

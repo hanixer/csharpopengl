@@ -36,7 +36,7 @@ let makeSpheres m =
                 yield makeSphere m (x * 3) (y * 3) (z * 3) ]
 
 let makeScene (scene : Scene) =
-    let me = TriangleMesh.loadFromFile @"scenes\teapot.obj"
+    let me = TriangleMesh.loadFromFile @"scenes\sphere.obj"
     printfn "mesh faces = %d" me.FacesCount
     let m = Seq.head scene.Materials
     let mname = m.Key
@@ -48,9 +48,29 @@ let makeScene (scene : Scene) =
     let p2 = makeTransformedPrimitive p0 (translate (Vector3d(2., 0., 0.)))
     let p3 = makeTransformedPrimitive p1 (translate (Vector3d(2., 2., 0.)))
     let p4 = makeTransformedPrimitive p1 (translate (Vector3d(0., 2., 0.)))
-    let prim = PrimitiveList listTriangles
+    let tri = Object.Triangle(Vector3d.Zero, Vector3d(1., 0., 0.), Vector3d(1., 1., 0.))
+    let p5 = GeometricPrimitive(tri, mname)
+    let p6 = makeTransformedPrimitive p5 (translate (Vector3d(0., 0., 1.)))
+    let p7 = makeTransformedPrimitive p5 (translate (Vector3d(0., 0., 0.5)))
+    let prim = OctreeAgregate(Node.makeOctree [p5; p6; p7])
+    // let prim = PrimitiveList listTriangles
     let prim = OctreeAgregate(Node.makeOctree listTriangles)
     let sphs = makeSpheres mname
+    let tris = [
+        Object.Triangle(Vector3d(1.378399968, -1.378399968, 0.01090000011),Vector3d(1.152999997, -1.571099997, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        Object.Triangle(Vector3d(1.152999997, -1.571099997, 0.01090000011),Vector3d(0.8988000154, -1.727499962, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        Object.Triangle(Vector3d(0.8988000154, -1.727499962, 0.01090000011),Vector3d(0.6194000244, -1.843799949, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        // Object.Triangle(Vector3d(0.6194000244, -1.843799949, 0.01090000011),Vector3d(0.3185000122, -1.916399956, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        // Object.Triangle(Vector3d(0.3185000122, -1.916399956, 0.01090000011),Vector3d(0.0, -1.941400051, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        // Object.Triangle(Vector3d(0.0, -1.941400051, 0.01090000011),Vector3d(-0.3185000122, -1.916399956, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        // Object.Triangle(Vector3d(-0.3185000122, -1.916399956, 0.01090000011),Vector3d(-0.6194000244, -1.843799949, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        // Object.Triangle(Vector3d(-0.6194000244, -1.843799949, 0.01090000011),Vector3d(-0.8988000154, -1.727499962, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        // Object.Triangle(Vector3d(-0.8988000154, -1.727499962, 0.01090000011),Vector3d(-1.152999997, -1.571099997, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        // Object.Triangle(Vector3d(-1.152999997, -1.571099997, 0.01090000011),Vector3d(-1.378399968, -1.378399968, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+        // Object.Triangle(Vector3d(-1.378399968, -1.378399968, 0.01090000011),Vector3d(-1.571099997, -1.152999997, 0.01090000011),Vector3d(0.0, 0.0, 0.0))
+    ]
+    // let prims = List.map (fun j -> GeometricPrimitive(j, mname)) tris
+    // let prim = OctreeAgregate(Node.makeOctree prims)
     // let sphs = [makeSphere mname 0 0 0]
     // let prim = OctreeAgregate(Node.makeOctree sphs)
     // let prim = PrimitiveList sphs
