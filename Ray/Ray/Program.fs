@@ -37,6 +37,7 @@ let makeSpheres m =
 
 let makeScene (scene : Scene) =
     let me = TriangleMesh.loadFromFile @"scenes\teapot.obj"
+    printfn "mesh faces = %d" me.FacesCount
     let m = Seq.head scene.Materials
     let mname = m.Key
     let listTriangles =
@@ -49,7 +50,7 @@ let makeScene (scene : Scene) =
     let p4 = makeTransformedPrimitive p1 (translate (Vector3d(0., 2., 0.)))
     let prim = PrimitiveList listTriangles
     let prim = OctreeAgregate(Node.makeOctree listTriangles)
-    // let sphs = makeSpheres mname
+    let sphs = makeSpheres mname
     // let sphs = [makeSphere mname 0 0 0]
     // let prim = OctreeAgregate(Node.makeOctree sphs)
     // let prim = PrimitiveList sphs

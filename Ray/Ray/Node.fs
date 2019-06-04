@@ -45,13 +45,9 @@ and intersectOctree ray octree =
     // printVec octree.Bounds.PMax
     // printfn ""
     if Bounds.hitBoundingBox ray octree.Bounds then
-        // printfn "KEY SHOW!!!"
-        if Seq.isEmpty octree.Children then
-            let hits = List.map (intersect ray) octree.Primitives
-            tryFindBestHitInfo hits
-        else
-            let hits = Seq.map (intersectOctree ray) octree.Children
-            tryFindBestHitInfo hits
+        let hits1 = Seq.map (intersectOctree ray) octree.Children
+        let hits2 = List.map (intersect ray) octree.Primitives
+        tryFindBestHitInfo [ tryFindBestHitInfo hits1; tryFindBestHitInfo hits2 ]
     else
         None
 
@@ -101,19 +97,36 @@ let putPrimitivesInBox primitives box =
         result)
         primitives
 
+let splitPrimsWithFullCover (box : Bounds.Bounds) prims =
+    let fold (full, notFull) prim =
+        let boxPrim = worldBounds prim
+        // printf "boxPrim ="
+        // printVec boxPrim.PMin
+        // printVec boxPrim.PMax
+        // printf "; box ="
+        // printVec box.PMin
+        // printVec box.PMax
+        // printfn ""
+        if Bounds.contains boxPrim box then
+            (prim :: full, notFull)
+        else
+            (full, prim :: notFull)
+    List.fold fold ([], []) prims
+
 let rec makeOctreeHelper box primitives =
     if Seq.length primitives < 10 then
         { Children = Array.Empty()
           Primitives = primitives
           Bounds = box }
     else
+        let (fullCover, notFullCover) = splitPrimsWithFullCover box primitives
         let boxes = Bounds.splitBox box
-        let groupedPrims = Array.map (putPrimitivesInBox primitives) boxes
+        let groupedPrims = Array.map (putPrimitivesInBox notFullCover) boxes
         let makeChild i primitives =
             makeOctreeHelper boxes.[i] primitives
         let children = Array.mapi makeChild groupedPrims
         { Children = children
-          Primitives = primitives
+          Primitives = fullCover
           Bounds = box }
 
 let makeOctree primitives =

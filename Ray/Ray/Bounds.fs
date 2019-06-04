@@ -50,10 +50,15 @@ let addPoint box point =
     union box { PMin = point
                 PMax = point }
 
-let isLessOrEq (v1 : Vector3d) (v2 : Vector3d) = v1.X < v2.X && v1.Y < v2.Y && v1.Z < v2.Z
+let isLess (v1 : Vector3d) (v2 : Vector3d) = v1.X < v2.X && v1.Y < v2.Y && v1.Z < v2.Z
+let isLessOrEq (v1 : Vector3d) (v2 : Vector3d) = v1.X <= v2.X && v1.Y <= v2.Y && v1.Z <= v2.Z
 
 let intersects box1 box2 =
     isLessOrEq box1.PMin box2.PMax && isLessOrEq box2.PMin box1.PMax
+
+// returns true if box1 contains box2
+let contains box1 box2 =
+    isLessOrEq box1.PMin box2.PMin && isLessOrEq box2.PMax box1.PMax
 
 let splitBox (box : Bounds) =
     let mid = box.PMin + (box.PMax - box.PMin) / 2.
