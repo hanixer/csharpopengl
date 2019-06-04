@@ -50,11 +50,26 @@ let union box1 box2 =
     { PMin = Vector3d(xmin, ymin, zmin)
       PMax = Vector3d(xmax, ymax, zmax) }
 
+let inline getMin (p1 : Vector3d) (p2 : Vector3d) =
+    let xmin = Math.Min(p1.X, p2.X)
+    let ymin = Math.Min(p1.Y, p2.Y)
+    let zmin = Math.Min(p1.Z, p2.Z)
+    Vector3d(xmin, ymin, zmin)
+
+let inline getMax (p1 : Vector3d) (p2 : Vector3d) =
+    let xmax = Math.Max(p1.X, p2.X)
+    let ymax = Math.Max(p1.Y, p2.Y)
+    let zmax = Math.Max(p1.Z, p2.Z)
+    Vector3d(xmax, ymax, zmax)
+
 let unionMany boxes =
-    match Seq.tryHead boxes with
-    | Some(box) ->
-        Seq.fold union box (Seq.tail boxes)
-    | _ -> failwith "unionMany: non empty seq is expected"
+    let mutable pmin = Vector3d(Double.MaxValue)
+    let mutable pmax = Vector3d(-Double.MaxValue)
+    for b in boxes do
+        pmin <- getMin pmin b.PMin
+        pmax <- getMax pmax b.PMax
+    { PMin = pmin
+      PMax = pmax }
 
 let centroid box =
     0.5 * box.PMin + 0.5 * box.PMax
