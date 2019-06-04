@@ -166,43 +166,52 @@ let makeOctree primitives =
 ////////////////////////////////////////////////////////////////////////////
 /// BVH
 type BVHPrimInfoMap = Collections.Generic.Dictionary<Primitive, Bounds.Bounds * Vector3d>
+type PrimInfo =
+    { Prim : Primitive
+      Bounds : Bounds.Bounds
+      Centroid : Vector3d }
 
 let makeLeafBVH prim bounds = BVHLeaf(prim, bounds)
 
 let makeInteriorBVH left right bounds = BVHInterior(left, right, bounds)
 
-let centroidBounds (primInfos : BVHPrimInfoMap) (prims : Primitive []) =
-    let fold bounds prim = Bounds.union bounds (fst primInfos.[prim])
-    Seq.fold fold (fst primInfos.[prims.[0]]) prims
+let centroidBounds (prims : PrimInfo []) =
+    let centroids = Seq.map (fun p -> p.Centroid) prims
+    Bounds.unionManyP centroids
 
-let rec makeBHVHelper (primInfos : BVHPrimInfoMap) (prims : Primitive []) =
+let rec makeBHVHelper (prims : PrimInfo []) =
     let axisComparisons =
-        [| fun (p : Primitive) -> (snd primInfos.[p]).X
-           fun (p : Primitive) -> (snd primInfos.[p]).Y
-           fun (p : Primitive) -> (snd primInfos.[p]).Z |]
+        [| fun (p : PrimInfo) -> p.Centroid.X
+           fun (p : PrimInfo) -> p.Centroid.Y
+           fun (p : PrimInfo) -> p.Centroid.Z |]
     let n = prims.Length
-    let bounds = Bounds.unionMany (Seq.map (fun prim -> fst primInfos.[prim]) prims)
-    if n = 1 then makeLeafBVH prims.[0] bounds
+    let bounds = Bounds.unionMany (Seq.map (fun prim -> prim.Bounds) prims)
+    if n = 1 then makeLeafBVH prims.[0].Prim bounds
     else
-        let centroidBounds = centroidBounds primInfos prims
+        let centroidBounds = centroidBounds prims
         let axis = Bounds.maximumExtent centroidBounds
         Array.sortInPlaceBy axisComparisons.[axis] prims
         let left, right = Array.splitAt (n / 2) prims
-        makeInteriorBVH (makeBHVHelper primInfos left) (makeBHVHelper primInfos right) bounds
+        makeInteriorBVH (makeBHVHelper left) (makeBHVHelper right) bounds
 
 let rec setOfPrims bvh =
     match bvh with
     | BVHLeaf(i, _) -> [i]
     | BVHInterior(l, r, _) -> List.append (setOfPrims l) (setOfPrims r)
 
+let makePrimInfos primitives =
+    let handle prim =
+        let bounds = worldBounds prim
+        { Prim = prim
+          Bounds = bounds
+          Centroid = Bounds.centroid bounds }
+    Seq.map handle primitives
+    |> Seq.toArray
+
 let makeBVH primitives =
     let stopwatch = Diagnostics.Stopwatch.StartNew() //creates and start the instance of Stopwatch
-    let primInfos = BVHPrimInfoMap()
-    for prim in primitives do
-        let bounds = worldBounds prim
-        let centroid = Bounds.centroid bounds
-        primInfos.Add(prim, (bounds, centroid))
-    let bvh = makeBHVHelper primInfos (Array.ofSeq primitives)
+    let primInfos = makePrimInfos primitives
+    let bvh = makeBHVHelper primInfos
     let result = BVHAccelerator(bvh)
     stopwatch.Stop()
     Console.WriteLine("BVH construction: {0}", stopwatch.ElapsedMilliseconds)

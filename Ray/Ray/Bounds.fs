@@ -71,6 +71,15 @@ let unionMany boxes =
     { PMin = pmin
       PMax = pmax }
 
+let unionManyP points =
+    let mutable pmin = Vector3d(Double.MaxValue)
+    let mutable pmax = Vector3d(-Double.MaxValue)
+    for p in points do
+        pmin <- getMin pmin p
+        pmax <- getMax pmax p
+    { PMin = pmin
+      PMax = pmax }
+
 let centroid box =
     0.5 * box.PMin + 0.5 * box.PMax
 
