@@ -50,6 +50,15 @@ let union box1 box2 =
     { PMin = Vector3d(xmin, ymin, zmin)
       PMax = Vector3d(xmax, ymax, zmax) }
 
+let centroid box =
+    0.5 * box.PMin + 0.5 * box.PMax
+
+let maximumExtent box =
+    let v = box.PMax - box.PMin
+    if v.X > v.Y && v.X > v.Z then 0
+    else if v.X > v.Z then 1
+    else 2
+
 let addPoint box point =
     union box { PMin = point
                 PMax = point }

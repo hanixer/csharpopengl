@@ -36,13 +36,14 @@ let makeSpheres m =
                 yield makeSphere m (x * 3) (y * 3) (z * 3) ]
 
 let makeScene (scene : Scene) =
-    let me = TriangleMesh.loadFromFile @"scenes\sphere.obj"
+    let me = TriangleMesh.loadFromFile @"scenes\teapot-low.obj"
     printfn "mesh faces = %d" me.FacesCount
     let m = Seq.head scene.Materials
     let mname = m.Key
     let listTriangles =
         (Seq.map (Object.Triangle >> (fun i -> GeometricPrimitive(i, mname))) (TriangleMesh.meshToList me))
         |> Seq.toList
+    let p9 = makeBVH listTriangles
     let p0 = GeometricPrimitive(Object.Sphere, mname)
     let p1 = makeTransformedPrimitive p0 (scale (Vector3d(0.25)))
     let p2 = makeTransformedPrimitive p0 (translate (Vector3d(2., 0., 0.)))
