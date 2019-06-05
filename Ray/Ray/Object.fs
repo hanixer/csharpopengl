@@ -111,7 +111,7 @@ let intersectRectangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
         None
 
 let intersectPlane ray =
-    intersectRectangle ray (Vector3d(-1.0, 0.0, 1.0)) (Vector3d(1.0, 0.0, 1.0)) (Vector3d(-1.0, 0.0, -1.0))
+    intersectRectangle ray (Vector3d(-1.0, 1.0, 0.0)) (Vector3d(1.0, 1.0, 0.0)) (Vector3d(-1.0, -1.0, 0.0))
 
 let intersectDisk ray =
     let t = (- ray.Origin.Z) / ray.Direction.Z

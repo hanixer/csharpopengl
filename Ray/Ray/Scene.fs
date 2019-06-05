@@ -260,27 +260,25 @@ let makeTrianglePrimitives objects material =
     Array.map (fun object -> GeometricPrimitive(object, material)) objects
 
 let constructPrimitive objectOpt material transform children =
-    let withChildren prim =
-        if List.isEmpty children then
-            prim
+    let geomPrim =
+        match objectOpt with
+        | Some(Object.TriangleObj(data)) ->
+            let objects = Object.makeTriangleShapes data
+            let primitives = makeTrianglePrimitives objects material
+            makeBVH primitives
+        | Some(object) ->
+            GeometricPrimitive(object, material)
+        | _ ->
+            PrimitiveList[]
+    let primAndChildren = 
+        if geomPrim <> PrimitiveList[] then
+            makeBVH (geomPrim :: children)
         else
-            makeBVH (prim::children)
-
-    let withTransform prim =
-        if transform = Transform.identityTransform then
-            withChildren prim
-        else
-            withChildren (makeTransformedPrimitive prim transform)
-
-    match objectOpt with
-    | Some(Object.TriangleObj(data)) ->
-        let objects = Object.makeTriangleShapes data
-        let primitives = makeTrianglePrimitives objects material
-        withTransform (makeBVH primitives)
-    | Some(object) ->
-        withTransform (GeometricPrimitive(object, material))
-    | _ ->
-        withChildren (PrimitiveList[])
+            makeBVH children
+    if transform = Transform.identityTransform then
+        primAndChildren
+    else
+        makeTransformedPrimitive primAndChildren transform
 
 let rec loadObject (xml : XmlNode) level =
     let xml = xml :?> XmlElement

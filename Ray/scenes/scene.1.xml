@@ -3,7 +3,8 @@
     <!-- Objects -->
     <object name="box">
       <translate x="0" y="0" z="12"/>
-      <object type="plane" name="WallBottom" material="wall">
+    </object>
+      <!-- <object type="plane" name="WallBottom" material="wall">
         <scale value="32"/>
         <translate z="-12"/>
       </object>
@@ -11,24 +12,23 @@
         <scale value="32"/>
         <rotate angle="180" x="1"/>
         <translate z="12"/>
-      </object>
-      <object type="plane" name="WallBack" material="wall">
+      </object> -->
+      <!-- <object type="plane" name="WallBack" material="wall">
         <scale value="32"/>
         <rotate angle="90" x="1"/>
         <translate y="20"/>
-      </object>
+      </object> -->
       <object type="plane" name="WallLeft" material="wallRed">
         <scale value="32"/>
-        <rotate angle="90" y="1"/>
+        <rotate angle="45" y="1"/>
         <translate x="-15"/>
       </object>
-      <object type="plane" name="WallRight" material="wallBlue">
+      <!-- <object type="plane" name="WallRight" material="wallBlue">
         <scale value="32"/>
         <rotate angle="-90" y="1"/>
         <translate x="15"/>
-      </object>
-    </object>
-    <object type="obj" name="teapot.obj" material="mtl1">
+      </object> -->
+    <!-- <object type="obj" name="teapot.obj" material="mtl1">
       <scale value="0.8"/>
       <rotate angle="-30" z="1"/>
       <translate x="2" y="5" z="0"/>
@@ -42,7 +42,7 @@
       <scale value="4"/>
       <rotate angle="30" y="1"/>
       <translate x="-8" y="-6" z="4"/>
-    </object>
+    </object> -->
  
     <!-- Materials -->
     <material type="blinn" name="wall">
@@ -85,7 +85,7 @@
     <position x="0" y="-60" z="12"/>
     <target x="0" y="0" z="12"/>
     <up x="0" y="0" z="1"/>
-    <fov value="30"/>
+    <fov value="90"/>
     <width value="800"/>
     <height value="600"/>
   </camera>

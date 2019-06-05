@@ -209,10 +209,13 @@ let makePrimInfos primitives =
     |> Seq.toArray
 
 let makeBVH primitives =
-    let stopwatch = Diagnostics.Stopwatch.StartNew() //creates and start the instance of Stopwatch
-    let primInfos = makePrimInfos primitives
-    let bvh = makeBHVHelper primInfos
-    let result = BVHAccelerator(bvh)
-    stopwatch.Stop()
-    Console.WriteLine("BVH construction: {0}", stopwatch.ElapsedMilliseconds)
-    result
+    if Seq.length primitives = 1 then
+        Seq.head primitives
+    else
+        let stopwatch = Diagnostics.Stopwatch.StartNew() //creates and start the instance of Stopwatch
+        let primInfos = makePrimInfos primitives
+        let bvh = makeBHVHelper primInfos
+        let result = BVHAccelerator(bvh)
+        stopwatch.Stop()
+        Console.WriteLine("BVH construction: {0}", stopwatch.ElapsedMilliseconds)
+        result
