@@ -276,7 +276,7 @@ let constructPrimitive objectOpt material transform children =
     | Some(Object.TriangleObj(data)) ->
         let objects = Object.makeTriangleShapes data
         let primitives = makeTrianglePrimitives objects material
-        makeBVH primitives
+        withTransform (makeBVH primitives)
     | Some(object) ->
         withTransform (GeometricPrimitive(object, material))
     | _ ->

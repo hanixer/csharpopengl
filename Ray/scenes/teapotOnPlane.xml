@@ -2,6 +2,12 @@
   <scene>
     <object type="plane" name="lom" material="notwhite">
       <!-- <translate z="-4"/> -->
+      <!-- <scale value="5" /> -->
+      <!-- <rotate x="1" angle="45" /> -->
+    </object>    
+    <object type="obj" name="teapot-low.obj" material="notwhite">
+      <rotate x="1" angle="-90" />
+      <scale value="0.1" />
     </object>
   </scene>
   <light type="ambient" name="ambientLight">
@@ -24,7 +30,7 @@
     <position x="5" y="5" z="5"/>
     <target x="0" y="0" z="0"/>
     <up x="0" y="1" z="0"/>
-    <fov value="90"/>
+    <fov value="30"/>
     <width value="400"/>
     <height value="400"/>
   </camera>
