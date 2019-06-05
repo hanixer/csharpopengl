@@ -22,7 +22,7 @@ let measure task =
     stopwatch.Stop()
     Console.WriteLine(stopwatch.ElapsedMilliseconds)
 
-let file = @"scenes\old\oneSphere.xml"
+let file = @"scenes\scene.xml"
 
 let makeSphere m x y z =
     let off = Vector3d(float x,float y,float z)
@@ -55,7 +55,7 @@ type Window1(width, height) =
 
     member this.Update() =
         let scene = loadSceneFromFile file
-        let scene = makeScene scene
+        // let scene = makeScene scene
         let zbuffer = Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap zbuffer scene } |> measure

@@ -15,6 +15,7 @@ type Object =
     | ObjectList of Object list
     | Plane
     | TriangleObj of TriangleMesh.Data
+    | TriangleObjPart of int * int * int * TriangleMesh.Data
 
 let quadratic a b c =
     let discrim = b * b - 4.0 * a * c
@@ -163,6 +164,11 @@ let rec intersect ray object =
     match object with
     | Triangle(a, b, c) ->
         intersectTriangle ray a b c
+    | TriangleObjPart(a, b, c, data) ->        
+        let p0 = data.Vertex(a)
+        let p1 = data.Vertex(b)
+        let p2 = data.Vertex(c)
+        intersectTriangle ray p0 p1 p2
     | Sphere ->
         let offset = ray.Origin
         let a = Vector3d.Dot(ray.Direction, ray.Direction)
@@ -256,6 +262,11 @@ let worldBounds object =
         let b0 = Bounds.makeBounds p0 p0
         let b1 = Bounds.addPoint b0 p1
         Bounds.addPoint b1 p2
+    | TriangleObjPart(a, b, c, data) ->        
+        let p0 = data.Vertex(a)
+        let p1 = data.Vertex(b)
+        let p2 = data.Vertex(c)
+        Bounds.unionManyP [ p0; p1; p2 ]
     | _ ->
         Bounds.makeBounds (Vector3d.One * -1.) Vector3d.One
 
@@ -275,3 +286,10 @@ let makeBox (p0 : Vector3d) (p1 : Vector3d) =
     let f4 = Rectangle(v4, v5, v7)
     let f5 = Rectangle(v0, v1, v3)
     ObjectList [f0; f1; f2; f3; f4; f5]
+
+let makeTriangleShapes (data : TriangleMesh.Data) =
+    Array.init data.FacesCount (fun faceIndex ->
+        let a = data.Faces.[faceIndex].[0]
+        let b = data.Faces.[faceIndex].[1]
+        let c = data.Faces.[faceIndex].[2]
+        TriangleObjPart(a, b, c, data))

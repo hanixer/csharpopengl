@@ -256,12 +256,15 @@ let getObjectFromType (xml : XmlElement) =
             None
     else None
 
+let makeTrianglePrimitives objects material =
+    Array.map (fun object -> GeometricPrimitive(object, material)) objects
+
 let constructPrimitive objectOpt material transform children =
     let withChildren prim =
         if List.isEmpty children then
             prim
         else
-            PrimitiveList(prim::children)
+            makeBVH (prim::children)
 
     let withTransform prim =
         if transform = Transform.identityTransform then
@@ -270,6 +273,10 @@ let constructPrimitive objectOpt material transform children =
             withChildren (makeTransformedPrimitive prim transform)
 
     match objectOpt with
+    | Some(Object.TriangleObj(data)) ->
+        let objects = Object.makeTriangleShapes data
+        let primitives = makeTrianglePrimitives objects material
+        makeBVH primitives
     | Some(object) ->
         withTransform (GeometricPrimitive(object, material))
     | _ ->
@@ -347,7 +354,7 @@ let loadScene (xml : XmlDocument) =
           LightsList = lightsList
           Environment = environment
           Samples = samples
-          Primitive = PrimitiveList primitives
+          Primitive = makeBVH primitives
          }
     else
         failwith "xml tag not found"

@@ -1,9 +1,9 @@
 <xml>
   <scene>
-    <!-- <object type="sphere" name="lom" material="notwhite"> -->
-    <!-- <scale value="1"/> -->
-    <!-- <translate x="0" y="2" z="-5"/> -->
-    <!-- </object> -->
+    <object type="sphere" name="lom" material="notwhite">
+    <scale value="1"/>
+    <translate x="0" y="2" z="-5"/>
+    </object>
   </scene>
   <light type="ambient" name="ambientLight">
     <intensity value="0.7"/>
