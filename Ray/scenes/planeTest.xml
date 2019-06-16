@@ -4,12 +4,9 @@
       <!-- <translate z="-4"/> -->
     </object>
   </scene>
-  <light type="ambient" name="ambientLight">
-    <intensity value="0.7"/>
-  </light>
-  <light type="direct" name="directionalLight">
-    <intensity value="0.1"/>
-    <direction x="0" y="-1" z="-1"/>
+  <light type="point" name="pointLight">
+    <intensity value="3000"/>
+    <position x="0" y="0" z="22"/>
   </light>
   <material type="blinn" name="notwhite">
     <diffuse r="1" g="0.5" b="0.5"/>
@@ -23,7 +20,7 @@
   <camera>
     <position x="5" y="5" z="5"/>
     <target x="0" y="0" z="0"/>
-    <up x="0" y="1" z="0"/>
+    <up x="0" y="0" z="1"/>
     <fov value="90"/>
     <width value="400"/>
     <height value="400"/>

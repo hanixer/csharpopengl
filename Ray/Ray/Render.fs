@@ -124,7 +124,7 @@ let render (bitmap : Bitmap) (zbuffer : float [,]) (scene : Scene) =
                 let sample = Vector2d(float c, float r) + (next2D sampler)
                 let ray = scene.Camera.Ray2 sample
                 let t, color = traceRay ray scene 0
-                zbuffer.[r, c] <- t
+                let color = Integrator.lightAlongRay scene ray
                 buf.[r, c] <- buf.[r,c] + color
             buf.[r, c] <- buf.[r, c] / float samples
         let percent = int(float r / float bitmap.Height * 1000.0)

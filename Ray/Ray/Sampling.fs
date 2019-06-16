@@ -49,6 +49,19 @@ let randomCosineDirection () =
     let x = Math.Cos phi * 2.0 * Math.Sqrt r2
     let y = Math.Sin phi * 2.0 * Math.Sqrt r2
     Vector3d(x, y, z)
-    
+
 let randomTwo() =
     (random.NextDouble(), random.NextDouble())
+
+let private tent xi =
+    if xi < 0.5 then
+        -1. + Math.Sqrt(2. * xi)
+    else
+        1. - Math.Sqrt(2. - 2.*xi)
+
+let squareToTent (p : Vector2d) =
+    Vector2d(tent p.X, tent p.Y)
+
+let squareToTentPdf (p : Vector2d) =
+    let prob (a : float) = 1. - Math.Abs(a)
+    prob p.X * prob p.Y

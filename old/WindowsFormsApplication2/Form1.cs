@@ -43,7 +43,38 @@ namespace WindowsFormsApplication1
             glControl.Size = new Size(Width / 2, Height / 2);
             glControl.OnPaintEvent += GlControl_OnPaintEvent;
             glControl.OnLoadEvent += GlControl_OnLoadEvent;
-            Controls.Add(glControl);            
+            Controls.Add(glControl);
+
+            this.Paint += Form1_Paint;    
+        }
+
+        private void Form1_Paint(object sender, PaintEventArgs e)
+        {
+            float centerX = 50;
+            float centerY = 200;
+            float width = 100;
+            float t = (float)trackBar1.Value / 100;
+            float s = (float)trackBar2.Value / 100;
+            float x = 1 - t;
+            float y = 1 - s;
+            using (var wha = new Pen(Color.Black, 2.0f))
+            using (var dfe = new Pen(Color.Red, 2.0f))
+            using (var g = this.CreateGraphics())
+            {
+                wha.DashStyle = System.Drawing.Drawing2D.DashStyle.Dash;
+                var bx = centerX + x * width;
+                var by = centerY;
+                var cx = bx;
+                var cy = centerY + y * width;
+                var wi = x * width;
+                var angle = ((float)Math.PI / 8) * (y / x);
+
+                angle = angle * 180 / (float)Math.PI;
+
+                g.DrawArc(dfe, centerX - wi, centerY - wi, wi * 2, wi* 2, 0, angle);
+                g.DrawLine(wha, centerX, centerY, bx, by);
+                g.DrawLine(wha, bx, by, cx, cy);
+            }
         }
 
         private void GlControl_OnLoadEvent(object sender, EventArgs e)
@@ -102,7 +133,8 @@ namespace WindowsFormsApplication1
             r = (1 - s) * q + s * c;
             pointQ.Set(q);
             pointR.Set(r);
-            lineCQ.Set(c, q);            
+            lineCQ.Set(c, q);
+            this.Invalidate();
         }
     }
 }

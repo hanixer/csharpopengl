@@ -8,7 +8,7 @@ open Sampling
 type Light =
     | AmbientLight of Vector3d
     | DirectLight of intensity : Vector3d * direction : Vector3d
-    | PointLight of intensity : Vector3d * position : Vector3d 
+    | PointLight of intensity : Vector3d * position : Vector3d
     | AmbientOccluder of intensity : Vector3d * minAmount : float
     | AreaLight of object : string
 
@@ -30,6 +30,16 @@ let lightDir light point =
     | PointLight(_, position) -> (point - position).Normalized()
     | AmbientOccluder(_) -> randomInHemisphere()
     | _ -> failwith "lightDir: not implemented"
+
+let lightPos light =
+    match light with
+    | PointLight(_, position) -> position
+    | _ -> Vector3d.Zero
+
+let energy light =
+    match light with
+    | PointLight(energy, _) -> energy
+    | _ -> Vector3d.Zero
 
 let isAmbient l = 
     match l with

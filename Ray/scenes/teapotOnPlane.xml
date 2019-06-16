@@ -4,18 +4,15 @@
       <!-- <translate z="-4"/> -->
       <!-- <scale value="5" /> -->
       <!-- <rotate x="1" angle="45" /> -->
-    </object>    
+    </object>
     <object type="obj" name="teapot-low.obj" material="notwhite">
       <rotate x="1" angle="-90" />
       <scale value="0.1" />
     </object>
   </scene>
-  <light type="ambient" name="ambientLight">
-    <intensity value="0.7"/>
-  </light>
-  <light type="direct" name="directionalLight">
-    <intensity value="0.1"/>
-    <direction x="0" y="-1" z="-1"/>
+  <light type="point" name="pointLight">
+    <intensity value="500"/>
+    <position x="0" y="0" z="22"/>
   </light>
   <material type="blinn" name="notwhite">
     <diffuse r="1" g="0.5" b="0.5"/>

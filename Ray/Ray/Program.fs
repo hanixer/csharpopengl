@@ -22,7 +22,7 @@ let measure task =
     stopwatch.Stop()
     Console.WriteLine(stopwatch.ElapsedMilliseconds)
 
-let file = @"scenes\scene.xml"
+let file = @"scenes\teapotOnPlane.xml"
 
 let makeSphere m x y z =
     let off = Vector3d(float x,float y,float z)
@@ -76,4 +76,7 @@ let main argv =
     let win = new Window1(800, 600)
     win.Update()
     win.Run()
+
+    use bmp = new Drawing.Bitmap(200, 200)
+    use g =Drawing.Graphics.FromImage(bmp)
     0 // return an integer exit code
