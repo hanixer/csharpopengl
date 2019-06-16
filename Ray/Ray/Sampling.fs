@@ -5,6 +5,16 @@ open OpenTK
 
 let private random = Random()
 
+type Sampler =
+    { Generator : Random
+      Count : int }
+
+let makeSampler n : Sampler =
+    { Generator = Random()
+      Count = n }
+
+let next2D (sampler : Sampler) =
+    Vector2d(sampler.Generator.NextDouble(), sampler.Generator.NextDouble())
 
 let randomInUnitSphere () =
     let points = Seq.initInfinite (fun _ -> 
@@ -65,3 +75,12 @@ let squareToTent (p : Vector2d) =
 let squareToTentPdf (p : Vector2d) =
     let prob (a : float) = 1. - Math.Abs(a)
     prob p.X * prob p.Y
+
+let squareToCosineHemisphere (sample : Vector2d) =
+    let r1 = sample.X
+    let r2 = sample.Y
+    let z = Math.Sqrt(1.0 - r2)
+    let phi = 2.0 * Math.PI * r1
+    let x = Math.Cos phi * 2.0 * Math.Sqrt r2
+    let y = Math.Sin phi * 2.0 * Math.Sqrt r2
+    Vector3d(x, y, z)

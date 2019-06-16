@@ -1,10 +1,5 @@
 <xml>
   <scene>
-    <object type="plane" name="lom" material="notwhite">
-      <!-- <translate z="-4"/> -->
-      <!-- <scale value="5" /> -->
-      <!-- <rotate x="1" angle="45" /> -->
-    </object>
     <object type="obj" name="teapot-low.obj" material="notwhite">
       <rotate x="1" angle="-90" />
       <scale value="0.1" />
@@ -12,16 +7,10 @@
   </scene>
   <light type="point" name="pointLight">
     <intensity value="500"/>
-    <position x="0" y="0" z="22"/>
+    <position x="0" y="10" z="0"/>
   </light>
   <material type="blinn" name="notwhite">
     <diffuse r="1" g="0.5" b="0.5"/>
-  </material>
-  <material type="blinn" name="white">
-    <diffuse value="1"/>
-  </material>
-  <material type="emissive" name="lightMat">
-    <color value="1"/>
   </material>
   <camera>
     <position x="5" y="5" z="5"/>

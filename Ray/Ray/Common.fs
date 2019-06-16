@@ -128,8 +128,3 @@ let drawBitmapOnBitmap (source : System.Drawing.Bitmap)
                     (float32 x, float32 y, float32 pixelSize, float32 pixelSize)
             graphics.FillRectangle(brush, rect)
 
-type Sampler = System.Random
-
-let makeSampler() : Sampler = System.Random()
-let next2D (sampler : Sampler) =
-    Vector2d(sampler.NextDouble(), sampler.NextDouble())
