@@ -10,6 +10,13 @@ type Integrator =
     | Simple
     | AmbientOcclusion
 
+// 12345
+// Pick one light
+// Sample a point on a light
+// Get emitted radiance
+// Compute visibility
+//
+
 // Li = (F/4pi^2) * max(0, cos(theta)) / |x - p| ^ 2 * visibility
 let lightAlongRaySimple  (scene : Scene.Scene) ray =
     let light = (Seq.head scene.Lights).Value

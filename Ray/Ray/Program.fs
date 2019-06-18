@@ -7,6 +7,7 @@ open OpenTK
 open OpenTK.Input
 open Node
 open Parser
+open Types
 
 let measure task =
     let stopwatch = Diagnostics.Stopwatch.StartNew() //creates and start the instance of Stopwatch
@@ -18,7 +19,7 @@ let file = @"scenes\ajax-ao.xml"
 
 let makeSphere m x y z =
     let off = Vector3d(float x,float y,float z)
-    makeTransformedPrimitive (GeometricPrimitive(Object.Sphere, m)) (Transform.translate off)
+    makeTransformedPrimitive (makeGeometricPrimitive Object.Sphere m) (Transform.translate off)
 
 let makeSpheres m =
     makeSphere m 1 1 1 ::
@@ -33,7 +34,7 @@ let makeScene (scene : Scene) =
     let m = Seq.head scene.Materials
     let mname = m.Key
     let listTriangles =
-        (Seq.map (Object.Triangle >> (fun i -> GeometricPrimitive(i, mname))) (TriangleMesh.meshToList me))
+        (Seq.map (Object.Triangle >> (fun i -> makeGeometricPrimitive i mname)) (TriangleMesh.meshToList me))
         |> Seq.toList
     let prim = Node.makeBVH listTriangles
     // let prim = PrimitiveList listTriangles

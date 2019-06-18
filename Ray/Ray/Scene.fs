@@ -11,6 +11,7 @@ open Material
 open Light
 open System.IO
 open Sampling
+open Types
 
 type Scene = {
     Camera : Camera

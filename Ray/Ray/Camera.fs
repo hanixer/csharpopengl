@@ -3,6 +3,7 @@ module Camera
 open System
 open OpenTK
 open Common
+open Types
 
 // World space - commons space for all objects and ray
 // Camera space - space in which camera is placed to origin, up direction is y, look direction is -z

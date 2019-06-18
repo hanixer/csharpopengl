@@ -3,18 +3,7 @@ module Common
 open System
 open OpenTK.Graphics.OpenGL
 open OpenTK
-
-type Ray =
-    { Origin : Vector3d
-      Direction : Vector3d
-      TMin : float
-      TMax : float }
-
-type HitInfo =
-    { T : float
-      Point : Vector3d
-      Normal : Vector3d
-      Material : string }
+open Types
 
 let makeRay o d = { Origin = o; Direction = d; TMin = 1e-4; TMax = System.Double.MaxValue }
 

@@ -1,8 +1,5 @@
 module Light
 open OpenTK
-open Common
-open Node
-open System
 open Sampling
 
 type Light =
@@ -11,8 +8,6 @@ type Light =
     | PointLight of intensity : Vector3d * position : Vector3d
     | AmbientOccluder of intensity : Vector3d * minAmount : float
     | AreaLight of object : string
-
-let private random = Random()
 
 let illuminate light hitPoint normal nodes =
     match light with
@@ -41,12 +36,12 @@ let energy light =
     | PointLight(energy, _) -> energy
     | _ -> Vector3d.Zero
 
-let isAmbient l = 
+let isAmbient l =
     match l with
     | AmbientLight _ -> true
     | _ -> false
 
-let isInShadow light point nodes =     
+let isInShadow light point nodes =
     failwith "should be reimplemented with new primitives"
     // let direction = -(lightDir light point)
     // let shadowRay = makeRay point direction
@@ -55,17 +50,17 @@ let isInShadow light point nodes =
     // | Some shadowHitInfo, PointLight(_, lightPos) ->
         // (shadowHitInfo.Point - point).Length < (lightPos - point).Length
     // | _ -> Option.isSome shadowHit
-    
-let samplePointOnLight light nodes =
-    match light with
-    | AreaLight(nodeName) ->
-        let node = Map.find nodeName nodes
-        samplePointAndNormOnNode node
-    | _ -> None    
 
-let getAreaOfLight light nodes =
-    match light with
-    | AreaLight(nodeName) ->
-        let node = Map.find nodeName nodes
-        getAreaOfNode node
-    | _ -> 0.0
+// let samplePointOnLight light nodes =
+//     match light with
+//     | AreaLight(nodeName) ->
+//         let node = Map.find nodeName nodes
+//         samplePointAndNormOnNode node
+//     | _ -> None
+
+// let getAreaOfLight light nodes =
+//     match light with
+//     | AreaLight(nodeName) ->
+//         let node = Map.find nodeName nodes
+//         getAreaOfNode node
+//     | _ -> 0.0

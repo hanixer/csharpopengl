@@ -5,23 +5,9 @@ open OpenTK
 open Object
 open Transform
 open Common
+open Types
 
-type OctreeNode =
-    { Children : OctreeNode []
-      Primitives : Primitive list
-      Bounds : Bounds.Bounds }
-
-and BVHNode =
-    | BVHLeaf of prim : Primitive * bounds : Bounds.Bounds
-    | BVHInterior of left : BVHNode * right : BVHNode * bounds : Bounds.Bounds
-
-and Primitive =
-    | GeometricPrimitive of Object * material : string // * AreaLight
-    | TransformedPrimitive of prim : Primitive * primToWorld : Transform * worldToPrim : Transform
-    | PrimitiveList of Primitive list
-    | OctreeAgregate of OctreeNode
-    | BVHAccelerator of BVHNode
-
+let makeGeometricPrimitive o m = GeometricPrimitive(o, m, None)
 let makeTransformedPrimitive prim primToWorld = TransformedPrimitive(prim, primToWorld, inverted primToWorld)
 let printVec (v : Vector3d) = printf "(%.2f, %.2f, %.2f) " v.X v.Y v.Z
 
@@ -31,9 +17,9 @@ let worldBoundsBVH bvh =
     | BVHInterior(_, _, bounds) -> bounds
 
 // returns bounding box of the primitive in world space
-let rec worldBounds primitive : Bounds.Bounds =
+let rec worldBounds primitive : Bounds =
     match primitive with
-    | GeometricPrimitive(object, _) -> Object.worldBounds object
+    | GeometricPrimitive(object, _, _) -> Object.worldBounds object
     | TransformedPrimitive(prim, primToWorld, _) ->
         let box = worldBounds prim
         Transform.bounds primToWorld box
@@ -46,7 +32,7 @@ and primitivesToBoxes (primitives : Primitive seq) =
 
 let rec intersect ray primitive =
     match primitive with
-    | GeometricPrimitive(object, material) ->
+    | GeometricPrimitive(object, material, areaLight) ->
         let hit = Object.intersect ray object
         Option.map (fun (hit : HitInfo) -> { hit with Material = material }) hit
     | TransformedPrimitive(child, primToWorld, worldToPrim) ->
@@ -88,7 +74,7 @@ let samplePointAndNormOnNode node = failwith "should be reimplemented with new p
 
 let getAreaOfNode node = failwith "should be reimplemented with new primitives"
 
-type PrimToBox = Collections.Generic.Dictionary<Primitive, Bounds.Bounds>
+type PrimToBox = Collections.Generic.Dictionary<Primitive, Bounds>
 
 let putPrimitivesInBox primitives (primToBox : PrimToBox) box =
     List.filter (fun primitive ->
@@ -96,7 +82,7 @@ let putPrimitivesInBox primitives (primToBox : PrimToBox) box =
         let result = Bounds.intersects box b2
         result) primitives
 
-let splitPrimsWithFullCover (box : Bounds.Bounds) prims (primToBox : PrimToBox) =
+let splitPrimsWithFullCover (box : Bounds) prims (primToBox : PrimToBox) =
     let fold (full, notFull) prim =
         let boxPrim = primToBox.[prim]
         // printf "boxPrim ="
@@ -110,16 +96,6 @@ let splitPrimsWithFullCover (box : Bounds.Bounds) prims (primToBox : PrimToBox) 
         else (full, prim :: notFull)
     List.fold fold ([], []) prims
 
-let rec printTriangle p =
-    match p with
-    | GeometricPrimitive(Object.Triangle(p0, p1, p2), _) ->
-        printf "Object.Triangle("
-        printf "Vector3d(%A, %A, %A)," p0.X p0.Y p0.Z
-        printf "Vector3d(%A, %A, %A)," p1.X p1.Y p1.Z
-        printf "Vector3d(%A, %A, %A)" p2.X p2.Y p2.Z
-        printfn ")"
-    | _ -> ()
-
 let rec primitivesSet node =
     let res = Collections.Generic.HashSet<Primitive>()
     for c in node.Children do
@@ -127,7 +103,7 @@ let rec primitivesSet node =
     res.UnionWith(node.Primitives)
     res
 
-let rec makeOctreeHelper maxDepth depth (box : Bounds.Bounds) primitives primToBox =
+let rec makeOctreeHelper maxDepth depth (box : Bounds) primitives primToBox =
     let vol = Bounds.volume box
     // printf "makeOctreeHelper %d " (Seq.length primitives)
     // printVec box.PMin
@@ -153,7 +129,7 @@ let rec makeOctreeHelper maxDepth depth (box : Bounds.Bounds) primitives primToB
           Bounds = box }
 
 let makeOctree primitives =
-    let m = Collections.Generic.Dictionary<Primitive, Bounds.Bounds>()
+    let m = Collections.Generic.Dictionary<Primitive, Bounds>()
     for p in primitives do
         m.Add(p, worldBounds p)
     let box = primitivesToBoxes primitives
@@ -165,10 +141,10 @@ let makeOctree primitives =
 
 ////////////////////////////////////////////////////////////////////////////
 /// BVH
-type BVHPrimInfoMap = Collections.Generic.Dictionary<Primitive, Bounds.Bounds * Vector3d>
+type BVHPrimInfoMap = Collections.Generic.Dictionary<Primitive, Bounds * Vector3d>
 type PrimInfo =
     { Prim : Primitive
-      Bounds : Bounds.Bounds
+      Bounds : Bounds
       Centroid : Vector3d }
 
 let makeLeafBVH prim bounds = BVHLeaf(prim, bounds)

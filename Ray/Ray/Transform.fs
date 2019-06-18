@@ -3,10 +3,7 @@ module Transform
 open OpenTK
 open System
 open Bounds
-
-type Transform =
-    { M : Matrix4d
-      Inv : Matrix4d }
+open Types
 
 // Transforms construction
 
@@ -131,11 +128,11 @@ let transformNormal (transform : Transform) (n : Vector3d) =
     let z = Vector4d.Dot(point4, m.Column2)
     Vector3d(x, y, z)
 
-let ray transform (r : Common.Ray) =
+let ray transform (r : Ray) =
     { r with Origin = transformPoint transform r.Origin
              Direction = transformVector transform.M r.Direction }
 
-let hitInfo transform (info : Common.HitInfo) =
+let hitInfo transform (info : HitInfo) =
       { info with Point = transformPoint transform info.Point 
                   Normal = (transformNormal transform info.Normal).Normalized() }
 

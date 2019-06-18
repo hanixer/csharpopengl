@@ -1,12 +1,8 @@
 module Bounds
 
 open OpenTK
-open Common
+open Types
 open System
-
-type Bounds =
-    { PMin : Vector3d
-      PMax : Vector3d }
 
 let mutable counter = 0
 

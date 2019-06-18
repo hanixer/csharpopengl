@@ -11,6 +11,7 @@ open OpenTK
 open Material
 open Light
 open System.IO
+open Types
 
 let printIdent level =
     for i = 1 to level do
@@ -245,7 +246,7 @@ let getObjectFromType (xml : XmlElement) =
     else None
 
 let makeTrianglePrimitives objects material =
-    Array.map (fun object -> GeometricPrimitive(object, material)) objects
+    Array.map (fun object -> makeGeometricPrimitive object material) objects
 
 let constructPrimitive objectOpt material transform children =
     let geomPrim =
@@ -255,7 +256,7 @@ let constructPrimitive objectOpt material transform children =
             let primitives = makeTrianglePrimitives objects material
             makeBVH primitives
         | Some(object) ->
-            GeometricPrimitive(object, material)
+            makeGeometricPrimitive object material
         | _ ->
             PrimitiveList[]
     let primAndChildren = 

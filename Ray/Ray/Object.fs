@@ -4,18 +4,7 @@ open System
 open OpenTK
 open Common
 open Sampling
-
-type Object = 
-    | Sphere
-    | Cylinder
-    | RectXYWithHoles of float * float // width, radius
-    | Triangle of Vector3d * Vector3d * Vector3d
-    | Disk
-    | Rectangle of Vector3d * Vector3d * Vector3d
-    | ObjectList of Object list
-    | Plane
-    | TriangleObj of TriangleMesh.Data
-    | TriangleObjPart of int * int * int * TriangleMesh.Data
+open Types
 
 let quadratic a b c =
     let discrim = b * b - 4.0 * a * c

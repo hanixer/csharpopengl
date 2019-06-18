@@ -3,9 +3,8 @@ open OpenTK
 open Light
 open Common
 open System
-open Node
-open System.Diagnostics
 open Sampling
+open Types
 
 type BlinnData = {
     DiffuseColor : Vector3d
@@ -65,17 +64,6 @@ let refract (rayDir : Vector3d) (normal : Vector3d) ior =
         let cosThetaT = Math.Sqrt(1.0 - sinThetaT2)
         let component2 = -n * cosThetaT
         let result = component1 + component2
-        // printfn "%A" dot
-        // printfn "%A" ior
-        // printfn "%A" cosThetaI
-        // printfn "%A" n
-        // printfn "%A" projected
-        // printfn "%A" vecDiff
-        // printfn "%A" component1
-        // printfn "%A" sinThetaI
-        // printfn "%A" sinThetaT
-        // printfn "%A" cosThetaT
-        // printfn "%A" component2
         result.Normalize()
         result
 
