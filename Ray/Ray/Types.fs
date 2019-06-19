@@ -32,23 +32,22 @@ type Transform =
     { M : Matrix4d
       Inv : Matrix4d }
 
-type BlinnData = {
-    DiffuseColor : Vector3d
-    SpecularColor : Vector3d
-    Glossiness : float
-    Reflection : Vector3d
-    Refraction : Vector3d
-    Ior : float
-    Absorption : Vector3d
-}
+type BlinnData =
+    { DiffuseColor : Vector3d
+      SpecularColor : Vector3d
+      Glossiness : float
+      Reflection : Vector3d
+      Refraction : Vector3d
+      Ior : float
+      Absorption : Vector3d }
 
 type Material =
     | Blinn of BlinnData
     | ReflectMaterial of Vector3d
     | Emissive of Vector3d
-    
+
 type Primitive =
-    | GeometricPrimitive of Object * material : string * areaLight : AreaLight2 option
+    | GeometricPrimitive of Object * material : Material * areaLight : AreaLight2 option
     | TransformedPrimitive of prim : Primitive * primToWorld : Transform * worldToPrim : Transform
     | PrimitiveList of Primitive list
     | OctreeAgregate of OctreeNode
@@ -67,8 +66,6 @@ type HitInfo =
     { T : float
       Point : Vector3d
       Normal : Vector3d
-      Material : string
       Prim : Primitive option }
 
-type Bsdf =
-    | Diffuse of color : Vector3d
+type Bsdf = Diffuse of color : Vector3d

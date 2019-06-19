@@ -6,7 +6,6 @@ open System
 open Sampling
 open Types
 
-
 let getAttenuation material =
     match material with
     | Blinn(blinn) -> blinn.DiffuseColor

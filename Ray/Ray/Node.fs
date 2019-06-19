@@ -27,14 +27,13 @@ let rec worldBounds primitive : Bounds =
     | OctreeAgregate(octree) -> octree.Bounds
     | BVHAccelerator(bvh) -> worldBoundsBVH bvh
 
-and primitivesToBoxes (primitives : Primitive seq) =
-    Bounds.unionMany (Seq.map worldBounds primitives)
+and primitivesToBoxes (primitives : Primitive seq) = Bounds.unionMany (Seq.map worldBounds primitives)
 
 let rec intersect ray primitive =
     match primitive with
     | GeometricPrimitive(object, material, areaLight) ->
         let hit = Object.intersect ray object
-        Option.map (fun (hit : HitInfo) -> { hit with Material = material; Prim = Some primitive }) hit
+        Option.map (fun (hit : HitInfo) -> { hit with Prim = Some primitive }) hit
     | TransformedPrimitive(child, primToWorld, worldToPrim) ->
         let rayPrim = Transform.ray worldToPrim ray
         let hit = intersect rayPrim child
@@ -71,7 +70,6 @@ let samplePointAndNormOnNode node = failwith "should be reimplemented with new p
 //                (transformPoint node.Transform point,
 //                 transformNormal node.Transform norm))
 //     | _ -> None
-
 let getAreaOfNode node = failwith "should be reimplemented with new primitives"
 
 type PrimToBox = Collections.Generic.Dictionary<Primitive, Bounds>
@@ -142,13 +140,13 @@ let makeOctree primitives =
 ////////////////////////////////////////////////////////////////////////////
 /// BVH
 type BVHPrimInfoMap = Collections.Generic.Dictionary<Primitive, Bounds * Vector3d>
+
 type PrimInfo =
     { Prim : Primitive
       Bounds : Bounds
       Centroid : Vector3d }
 
 let makeLeafBVH prim bounds = BVHLeaf(prim, bounds)
-
 let makeInteriorBVH left right bounds = BVHInterior(left, right, bounds)
 
 let centroidBounds (prims : PrimInfo []) =
@@ -160,6 +158,7 @@ let rec makeBHVHelper (prims : PrimInfo []) =
         [| fun (p : PrimInfo) -> p.Centroid.X
            fun (p : PrimInfo) -> p.Centroid.Y
            fun (p : PrimInfo) -> p.Centroid.Z |]
+
     let n = prims.Length
     let bounds = Bounds.unionMany (Seq.map (fun prim -> prim.Bounds) prims)
     if n = 1 then makeLeafBVH prims.[0].Prim bounds
@@ -172,7 +171,7 @@ let rec makeBHVHelper (prims : PrimInfo []) =
 
 let rec setOfPrims bvh =
     match bvh with
-    | BVHLeaf(i, _) -> [i]
+    | BVHLeaf(i, _) -> [ i ]
     | BVHInterior(l, r, _) -> List.append (setOfPrims l) (setOfPrims r)
 
 let makePrimInfos primitives =
@@ -181,12 +180,10 @@ let makePrimInfos primitives =
         { Prim = prim
           Bounds = bounds
           Centroid = Bounds.centroid bounds }
-    Seq.map handle primitives
-    |> Seq.toArray
+    Seq.map handle primitives |> Seq.toArray
 
 let makeBVH primitives =
-    if Seq.length primitives = 1 then
-        Seq.head primitives
+    if Seq.length primitives = 1 then Seq.head primitives
     else
         let stopwatch = Diagnostics.Stopwatch.StartNew() //creates and start the instance of Stopwatch
         let primInfos = makePrimInfos primitives
@@ -198,6 +195,10 @@ let makeBVH primitives =
 
 let emitted prim =
     match prim with
-    | GeometricPrimitive(_, _, Some(light)) ->
-        Light.emitted light
+    | GeometricPrimitive(_, _, Some(light)) -> Light.emitted light
     | _ -> Vector3d.Zero
+
+let getMaterial prim =
+    match prim with
+    | GeometricPrimitive(_, m, _) -> m
+    | _ -> failwith "material is available only for geo prim"

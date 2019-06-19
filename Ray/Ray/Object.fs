@@ -26,7 +26,6 @@ let defaultHitInfo = {
     T = 0.0
     Point = Vector3d.Zero
     Normal = Vector3d.Zero
-    Material = ""
     Prim = None
 }
 

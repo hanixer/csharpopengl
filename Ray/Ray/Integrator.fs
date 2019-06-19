@@ -20,6 +20,7 @@ type Integrator =
 let whitted (scene : Scene.Scene) ray =
     match Node.intersect ray scene.Primitive with
     | Some(hitInfo) ->
+        assert (hitInfo.Prim.IsSome)
         let light = pickOne scene.AreaLights
         let direct = Option.defaultValue Vector3d.Zero <| Option.map Node.emitted hitInfo.Prim
         let (lightPoint, lightNorm) = Light.sample light (Sampling.next2D scene.Sampler)
@@ -29,7 +30,8 @@ let whitted (scene : Scene.Scene) ray =
         let distanceSq = wi.LengthSquared
         wi.Normalize()
         let geoTerm = (Vector3d.Dot(hitInfo.Normal, wi) * Vector3d.Dot(lightNorm, -wi)) / distanceSq
-        let bsdf = Diffuse(Vector3d(1.))
+        let material = Node.getMaterial hitInfo.Prim.Value
+        let bsdf = Material.computeBsdf material
         let attenuation = Material.evaluate bsdf -ray.Direction wi
         let reflected = attenuation * geoTerm * emitted / lightPdf
         direct + reflected

@@ -34,7 +34,7 @@ let makeScene (scene : Scene) =
     let mname = m.Key
     let numSamples = 10000
     let sampler = Sampling.makeSampler 1
-    let sphere = makeGeometricPrimitive Object.Sphere mname
+    let sphere = makeGeometricPrimitive Object.Sphere m.Value
     let spheres =
         Seq.init numSamples (fun i ->
             let sample = Sampling.next2D sampler
