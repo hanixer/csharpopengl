@@ -1,6 +1,7 @@
 module Light
 open OpenTK
 open Sampling
+open Types
 
 type Light =
     | AmbientLight of Vector3d
@@ -64,3 +65,14 @@ let isInShadow light point nodes =
 //         let node = Map.find nodeName nodes
 //         getAreaOfNode node
 //     | _ -> 0.0
+
+let emitted (light : AreaLight2) =
+    light.Radiance
+
+// Returns a point, a normal
+let sample areaLight (sample : Vector2d) =
+    Object.sample areaLight.Object sample
+    |> Option.defaultValue (Vector3d.Zero, Vector3d.UnitZ)
+
+let area areaLight =
+    Object.getAreaOfObject areaLight.Object

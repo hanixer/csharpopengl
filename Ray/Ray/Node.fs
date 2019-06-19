@@ -34,7 +34,7 @@ let rec intersect ray primitive =
     match primitive with
     | GeometricPrimitive(object, material, areaLight) ->
         let hit = Object.intersect ray object
-        Option.map (fun (hit : HitInfo) -> { hit with Material = material }) hit
+        Option.map (fun (hit : HitInfo) -> { hit with Material = material; Prim = Some primitive }) hit
     | TransformedPrimitive(child, primToWorld, worldToPrim) ->
         let rayPrim = Transform.ray worldToPrim ray
         let hit = intersect rayPrim child
@@ -195,3 +195,9 @@ let makeBVH primitives =
         stopwatch.Stop()
         Console.WriteLine("BVH construction: {0}", stopwatch.ElapsedMilliseconds)
         result
+
+let emitted prim =
+    match prim with
+    | GeometricPrimitive(_, _, Some(light)) ->
+        Light.emitted light
+    | _ -> Vector3d.Zero

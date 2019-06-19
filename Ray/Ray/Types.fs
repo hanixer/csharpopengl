@@ -12,12 +12,6 @@ type Bounds =
     { PMin : Vector3d
       PMax : Vector3d }
 
-type HitInfo =
-    { T : float
-      Point : Vector3d
-      Normal : Vector3d
-      Material : string }
-
 type Object =
     | Sphere
     | Cylinder
@@ -38,18 +32,43 @@ type Transform =
     { M : Matrix4d
       Inv : Matrix4d }
 
-type OctreeNode =
-    { Children : OctreeNode []
-      Primitives : Primitive list
-      Bounds : Bounds }
+type BlinnData = {
+    DiffuseColor : Vector3d
+    SpecularColor : Vector3d
+    Glossiness : float
+    Reflection : Vector3d
+    Refraction : Vector3d
+    Ior : float
+    Absorption : Vector3d
+}
 
-and BVHNode =
-    | BVHLeaf of prim : Primitive * bounds : Bounds
-    | BVHInterior of left : BVHNode * right : BVHNode * bounds : Bounds
-
-and Primitive =
+type Material =
+    | Blinn of BlinnData
+    | ReflectMaterial of Vector3d
+    | Emissive of Vector3d
+    
+type Primitive =
     | GeometricPrimitive of Object * material : string * areaLight : AreaLight2 option
     | TransformedPrimitive of prim : Primitive * primToWorld : Transform * worldToPrim : Transform
     | PrimitiveList of Primitive list
     | OctreeAgregate of OctreeNode
     | BVHAccelerator of BVHNode
+
+and BVHNode =
+    | BVHLeaf of prim : Primitive * bounds : Bounds
+    | BVHInterior of left : BVHNode * right : BVHNode * bounds : Bounds
+
+and OctreeNode =
+    { Children : OctreeNode []
+      Primitives : Primitive list
+      Bounds : Bounds }
+
+type HitInfo =
+    { T : float
+      Point : Vector3d
+      Normal : Vector3d
+      Material : string
+      Prim : Primitive option }
+
+type Bsdf =
+    | Diffuse of color : Vector3d

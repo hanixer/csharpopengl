@@ -84,3 +84,11 @@ let squareToCosineHemisphere (sample : Vector2d) =
     let x = Math.Cos phi * 2.0 * Math.Sqrt r2
     let y = Math.Sin phi * 2.0 * Math.Sqrt r2
     Vector3d(x, y, z)
+
+let squareToCircle (sample : Vector2d) =
+    let r = Math.Sqrt(sample.X)
+    let theta = 2. * Math.PI * sample.Y
+    let x = r * Math.Cos(theta)
+    let y = r * Math.Sin(theta)
+    Vector2d(x, y)
+

@@ -259,7 +259,7 @@ let constructPrimitive objectOpt material transform children =
             makeGeometricPrimitive object material
         | _ ->
             PrimitiveList[]
-    let primAndChildren = 
+    let primAndChildren =
         if geomPrim <> PrimitiveList[] then
             makeBVH (geomPrim :: children)
         else
@@ -342,6 +342,7 @@ let loadScene (xml : XmlDocument) =
           Scene.Environment = environment
           Scene.Sampler = Sampling.makeSampler samples
           Scene.Primitive = makeBVH primitives
+          Scene.AreaLights = [||]
          }
     else
         failwith "xml tag not found"

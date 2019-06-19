@@ -20,7 +20,7 @@ type Scene = {
     LightsList : Light list
     Environment : Vector3d
     Sampler : Sampler
-    // AreaLights : Node list
+    AreaLights : AreaLight2 []
     Primitive : Primitive
 }
 

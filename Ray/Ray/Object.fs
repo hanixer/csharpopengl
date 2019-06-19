@@ -27,6 +27,7 @@ let defaultHitInfo = {
     Point = Vector3d.Zero
     Normal = Vector3d.Zero
     Material = ""
+    Prim = None
 }
 
 // (1 - beta - gamma) * a + beta * b + gamma * c = o + t * d
@@ -223,6 +224,22 @@ let samplePointAndNormOnObject object =
     match object with
     | Disk ->
         let norm = Vector3d(0.0, 0.0, 1.0)
+        Some(randomInDisk(), norm)
+    | Sphere ->
+        let point = randomInHemisphere2()
+        let norm = point.Normalized()
+        Some(randomInHemisphere2(), norm)
+    | Rectangle(p0, p1, p2) ->
+        samplePointRectangle p0 p1 p2
+    | Plane ->
+        samplePointRectangle (Vector3d(-1.0, 0.0, 1.0)) (Vector3d(1.0, 0.0, 1.0)) (Vector3d(-1.0, 0.0, -1.0))
+    | _ -> None
+
+let sample object (sample : Vector2d) =
+    match object with
+    | Disk ->
+        let norm = Vector3d(0.0, 0.0, 1.0)
+        let p = squareToCircle sample
         Some(randomInDisk(), norm)
     | Sphere ->
         let point = randomInHemisphere2()

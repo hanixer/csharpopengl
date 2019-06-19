@@ -107,7 +107,7 @@ let render (bitmap : Bitmap) (scene : Scene) integrator =
             for s = 0 to samples - 1 do
                 let sample = Vector2d(float c, float r) + (next2D scene.Sampler)
                 let ray = scene.Camera.Ray2 sample
-                let color = Integrator.lightAlongRay integrator scene ray
+                let color = Integrator.estimateRadiance integrator scene ray
                 buf.[r, c] <- buf.[r, c] + color
             buf.[r, c] <- buf.[r, c] / float samples
         let percent = int (float r / float bitmap.Height * 1000.0)

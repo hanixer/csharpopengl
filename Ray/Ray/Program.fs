@@ -8,6 +8,7 @@ open OpenTK.Input
 open Node
 open Parser
 open Types
+open Object
 
 let measure task =
     let stopwatch = Diagnostics.Stopwatch.StartNew() //creates and start the instance of Stopwatch
@@ -15,7 +16,7 @@ let measure task =
     stopwatch.Stop()
     Console.WriteLine(stopwatch.ElapsedMilliseconds)
 
-let file = @"scenes\ajax-ao.xml"
+let file = @"scenes\teapot.xml"
 
 let makeSphere m x y z =
     let off = Vector3d(float x,float y,float z)
@@ -29,16 +30,21 @@ let makeSpheres m =
                 yield makeSphere m (x * 3) (y * 3) (z * 3) ]
 
 let makeScene (scene : Scene) =
-    let me = TriangleMesh.loadFromFile @"test-images\ajax.obj"
-    printfn "mesh faces = %d" me.FacesCount
     let m = Seq.head scene.Materials
     let mname = m.Key
-    let listTriangles =
-        (Seq.map (Object.Triangle >> (fun i -> makeGeometricPrimitive i mname)) (TriangleMesh.meshToList me))
-        |> Seq.toList
-    let prim = Node.makeBVH listTriangles
+    let numSamples = 10000
+    let sampler = Sampling.makeSampler 1
+    let sphere = makeGeometricPrimitive Object.Sphere mname
+    let spheres =
+        Seq.init numSamples (fun i ->
+            let sample = Sampling.next2D sampler
+            let circle = Sampling.squareToCircle sample
+            let s = Transform.scale (Vector3d(0.05))
+            let t = Transform.translate (Vector3d(circle.X, circle.Y, 0.))
+            makeTransformedPrimitive sphere (Transform.compose t s))
+    let bvh = makeBVH spheres
     // let prim = PrimitiveList listTriangles
-    { scene with Primitive = prim }
+    { scene with Primitive = bvh }
 
 type Window1(width, height) =
     inherit Window(width, height)
@@ -48,7 +54,7 @@ type Window1(width, height) =
 
     member this.Update() =
         let scene, integrator = loadSceneAndIntegratorFromFile file
-        // let scene = makeScene scene
+        let scene = makeScene scene
         let zbuffer = Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap scene integrator } |> measure

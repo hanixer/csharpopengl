@@ -5,6 +5,7 @@ open OpenTK
 open Light
 open Sampling
 open Common
+open Types
 
 type Integrator =
     | Simple
@@ -16,9 +17,26 @@ type Integrator =
 // Get emitted radiance
 // Compute visibility
 //
+let whitted (scene : Scene.Scene) ray =
+    match Node.intersect ray scene.Primitive with
+    | Some(hitInfo) ->
+        let light = pickOne scene.AreaLights
+        let direct = Option.defaultValue Vector3d.Zero <| Option.map Node.emitted hitInfo.Prim
+        let (lightPoint, lightNorm) = Light.sample light (Sampling.next2D scene.Sampler)
+        let lightPdf = 1. / Light.area light
+        let emitted = light.Radiance
+        let wi = lightPoint - hitInfo.Point
+        let distanceSq = wi.LengthSquared
+        wi.Normalize()
+        let geoTerm = (Vector3d.Dot(hitInfo.Normal, wi) * Vector3d.Dot(lightNorm, -wi)) / distanceSq
+        let bsdf = Diffuse(Vector3d(1.))
+        let attenuation = Material.evaluate bsdf -ray.Direction wi
+        let reflected = attenuation * geoTerm * emitted / lightPdf
+        direct + reflected
+    | _ -> Vector3d.Zero
 
 // Li = (F/4pi^2) * max(0, cos(theta)) / |x - p| ^ 2 * visibility
-let lightAlongRaySimple  (scene : Scene.Scene) ray =
+let simple (scene : Scene.Scene) ray =
     let light = (Seq.head scene.Lights).Value
     match Node.intersect ray scene.Primitive with
     | Some(hitInfo) ->
@@ -35,10 +53,9 @@ let lightAlongRaySimple  (scene : Scene.Scene) ray =
             let res = energy * Math.Max(0., cosTheta) / distanceSq
             // (hitInfo.Normal + Vector3d.One)* 0.5
             res
-            // (dirToLight + Vector3d.One)* 0.5
-
+        // (dirToLight + Vector3d.One)* 0.5
         | _ -> Vector3d.Zero
-     | _ -> Vector3d.Zero
+    | _ -> Vector3d.Zero
 
 let ambientOcclusion (scene : Scene.Scene) ray =
     match Node.intersect ray scene.Primitive with
@@ -47,7 +64,10 @@ let ambientOcclusion (scene : Scene.Scene) ray =
         let sampleDir = squareToCosineHemisphere sample2D
         let uvw = buildOrthoNormalBasis hitInfo.Normal
         let shadowRayDir = localOrthoNormalBasis sampleDir uvw
-        let shadowRay = { ray with Direction = shadowRayDir ; Origin = hitInfo.Point }
+
+        let shadowRay =
+            { ray with Direction = shadowRayDir
+                       Origin = hitInfo.Point }
         match Node.intersect shadowRay scene.Primitive with
         | None ->
             let cosTheta = Vector3d.Dot(hitInfo.Normal.Normalized(), shadowRayDir)
@@ -55,7 +75,7 @@ let ambientOcclusion (scene : Scene.Scene) ray =
         | _ -> Vector3d.Zero
     | _ -> Vector3d.Zero
 
-let lightAlongRay integrator (scene : Scene.Scene) ray =
+let estimateRadiance integrator (scene : Scene.Scene) ray =
     match integrator with
-    | Simple -> lightAlongRaySimple scene ray
+    | Simple -> simple scene ray
     | AmbientOcclusion -> ambientOcclusion scene ray

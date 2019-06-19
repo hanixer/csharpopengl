@@ -6,20 +6,6 @@ open System
 open Sampling
 open Types
 
-type BlinnData = {
-    DiffuseColor : Vector3d
-    SpecularColor : Vector3d
-    Glossiness : float
-    Reflection : Vector3d
-    Refraction : Vector3d
-    Ior : float
-    Absorption : Vector3d
-}
-
-type Material =
-    | Blinn of BlinnData
-    | ReflectMaterial of Vector3d
-    | Emissive of Vector3d
 
 let getAttenuation material =
     match material with
@@ -125,3 +111,15 @@ let defaultBlinn = {
     Ior = 0.0
     Absorption = Vector3d.Zero
 }
+
+let computeBsdf material =
+    match material with
+    | Blinn(data) -> Diffuse(data.DiffuseColor)
+    | _ -> failwith "computeBsdf: not implemented"
+
+let evaluate bsdf (wo : Vector3d) (wi : Vector3d) =
+    assert (wo.Length = 1.)
+    assert (wi.Length = 1.)
+    match bsdf with
+    | Diffuse color ->
+        color / Math.PI

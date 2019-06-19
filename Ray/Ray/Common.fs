@@ -117,3 +117,8 @@ let drawBitmapOnBitmap (source : System.Drawing.Bitmap)
                     (float32 x, float32 y, float32 pixelSize, float32 pixelSize)
             graphics.FillRectangle(brush, rect)
 
+let private random = Random()
+
+let pickOne array =
+    let index = random.Next(0, Array.length array)
+    array.[index]
