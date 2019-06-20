@@ -217,7 +217,8 @@ let getObjectFromType (xml : XmlElement) =
             Some Object.Cylinder
         | "disk" ->
             printf " - Disk"
-            Some Object.Disk
+            let radius = select xml "./radius" (fun elem -> readFloating elem "value" 1.) 1.
+            Some(Object.Disk(radius))
         | "rectWithHoles" ->
             printf " - rect with holes"
             let radius = readFloating xml "radius" 0.1

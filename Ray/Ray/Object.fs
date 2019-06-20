@@ -104,9 +104,8 @@ let intersectRectangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
 let intersectPlane ray =
     intersectRectangle ray (Vector3d(-1.0, 1.0, 0.0)) (Vector3d(1.0, 1.0, 0.0)) (Vector3d(-1.0, -1.0, 0.0))
 
-let intersectDisk ray =
+let intersectDisk ray radius =
     let t = (- ray.Origin.Z) / ray.Direction.Z
-    let radius = 1.0
     if t > epsilon then
         let point = pointOnRay ray t
         if point.X * point.X + point.Y * point.Y < radius then
@@ -196,8 +195,8 @@ let rec intersect ray object =
             None
     | RectXYWithHoles(width, radius) ->
         intersectRectWithHoles ray width radius
-    | Disk ->
-        intersectDisk ray
+    | Disk(radius) ->
+        intersectDisk ray radius
     | Rectangle(p0, p1, p2) ->
         intersectRectangle ray p0 p1 p2
     | ObjectList objs ->
@@ -221,9 +220,9 @@ let samplePointRectangle (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d)=
 
 let samplePointAndNormOnObject object =
     match object with
-    | Disk ->
+    | Disk(radius) ->
         let norm = Vector3d(0.0, 0.0, 1.0)
-        Some(randomInDisk(), norm)
+        Some(randomInDisk() * radius, norm)
     | Sphere ->
         let point = randomInHemisphere2()
         let norm = point.Normalized()
@@ -234,10 +233,10 @@ let samplePointAndNormOnObject object =
 
 let sample object (sample : Vector2d) =
     match object with
-    | Disk ->
+    | Disk(radius) ->
         let norm = Vector3d(0.0, 0.0, 1.0)
-        let p = squareToCircle sample
-        Some(randomInDisk(), norm)
+        let p = squareToCircle sample * radius
+        Some(Vector3d(p.X, p.Y, 0.), norm)
     | Sphere ->
         let point = randomInHemisphere2()
         let norm = point.Normalized()
@@ -248,7 +247,7 @@ let sample object (sample : Vector2d) =
 
 let getAreaOfObject object =
     match object with
-    | Disk -> 2.0 * Math.PI
+    | Disk(radius) -> 2.0 * Math.PI * radius * radius
     | Sphere -> 4.0 * Math.PI
     | Rectangle(p0, p1, p2) ->
         let d1 = p1 - p0

@@ -17,7 +17,7 @@ type Object =
     | Cylinder
     | RectXYWithHoles of float * float // width, radius
     | Triangle of Vector3d * Vector3d * Vector3d
-    | Disk
+    | Disk of float
     | Rectangle of Vector3d * Vector3d * Vector3d
     | ObjectList of Object list
     | TriangleObj of TriangleMesh.Data

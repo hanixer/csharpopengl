@@ -38,8 +38,8 @@
     <!-- Lights -->
     <light2 type="area" name="areaLight1">
       <rotate angle="90" x="1" />
-      <translate y="2" />
-      <object type="disk" radius="3" />
+      <translate y="5" />
+      <object type="disk" radius="0.05" />
     </light2>
   </scene>
 
