@@ -8,15 +8,20 @@
     <object type="sphere" name="sphere2" material="wall">
       <scale value="0.25" />
     </object>
-
-    <!-- <object type="plane" name="WallBottom" material="wall">
-      <side value="10" />
-    </object> -->
-    <object type="rectangle" name="wall" material="wall">
-      <p0 x="-2" y="2" z="0"/>
-      <p1 x="-2" y="-2" z="0"/>
-      <p2 x="2" y="2" z="0"/>
+    <object type="sphere" name="sphere2" material="wall">
+      <scale value="0.25" />
+      <translate x="-1" y="1" z="0" />
     </object>
+    <object type="sphere" name="sphere2" material="wall">
+      <scale value="0.25" />
+      <translate x="1" y="1" z="0" />
+    </object>
+
+    <object type="plane" name="WallBottom" material="wall">
+      <side value="1.5" />
+      <rotate x="1" angle="-90" />
+    </object>
+
 
     <!-- <object type="triangle" name="triangle1" material="wall">
       <p0 x="-1" y="1" z="0"/>

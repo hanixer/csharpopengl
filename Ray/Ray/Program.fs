@@ -43,8 +43,9 @@ let makeScene (scene : Scene) =
             let t = Transform.translate (Vector3d(circle.X, circle.Y, 0.))
             makeTransformedPrimitive sphere (Transform.compose t s))
     let bvh = makeBVH spheres
+    let rect = makeGeometricPrimitive (Object.Rectangle((Vector3d(-1.0, 1.0, 0.0)), (Vector3d(1.0, 1.0, 0.0)), (Vector3d(-1.0, -1.0, 0.0)))) m.Value
     // let prim = PrimitiveList listTriangles
-    { scene with Primitive = bvh }
+    { scene with Primitive = rect }
 
 type Window1(width, height) =
     inherit Window(width, height)
