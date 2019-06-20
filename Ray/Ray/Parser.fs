@@ -190,7 +190,8 @@ let getObjectFromType (xml : XmlElement) =
             Some Object.Sphere
         | "plane" ->
             printf " - Plane"
-            Some(Object.Plane)
+            let side = select xml "./side" (fun elem -> readFloating elem "value" 1.) 1.
+            Some(Object.makePlane side)
         | "triangle" ->
             printf " - Triangle"
             let vz = Vector3d.Zero

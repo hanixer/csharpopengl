@@ -84,18 +84,20 @@ let intersectRectangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
     let v2 = p2 - p0
     let normal = Vector3d.Cross(v1, v2)
     normal.Normalize()
-    let t = Vector3d.Dot(p0 - ray.Origin, normal) / Vector3d.Dot(ray.Direction, normal)
+    let t = Vector3d.Dot(-ray.Origin, normal) / Vector3d.Dot(ray.Direction, normal)
+    let t = (-ray.Origin.Z) / ray.Direction.Z
     if t > epsilon then
         let point = pointOnRay ray t
         let d = point - p0
         let dDotV2 = Vector3d.Dot(d, v2)
         let dDotV1 = Vector3d.Dot(d, v1)
-        if dDotV2 < 0.0 || dDotV2 > v2.LengthSquared then
-            None
-        else if dDotV1 < 0.0 || dDotV1 > v1.LengthSquared then
-            None
-        else
-            Some {defaultHitInfo with T = t; Point = point; Normal = normal}
+        // if dDotV2 < 0.0 || dDotV2 > v2.LengthSquared then
+        //     None
+        // else if dDotV1 < 0.0 || dDotV1 > v1.LengthSquared then
+        //     None
+        // else
+        //     Some {defaultHitInfo with T = t; Point = point; Normal = normal}
+        Some {defaultHitInfo with T = t; Point = point; Normal = normal}
     else
         None
 
@@ -198,8 +200,6 @@ let rec intersect ray object =
         intersectDisk ray
     | Rectangle(p0, p1, p2) ->
         intersectRectangle ray p0 p1 p2
-    | Plane ->
-        intersectPlane ray
     | ObjectList objs ->
         Seq.map (fun object -> intersect ray object) objs
         |> Seq.minBy (fun h ->
@@ -230,8 +230,6 @@ let samplePointAndNormOnObject object =
         Some(randomInHemisphere2(), norm)
     | Rectangle(p0, p1, p2) ->
         samplePointRectangle p0 p1 p2
-    | Plane ->
-        samplePointRectangle (Vector3d(-1.0, 0.0, 1.0)) (Vector3d(1.0, 0.0, 1.0)) (Vector3d(-1.0, 0.0, -1.0))
     | _ -> None
 
 let sample object (sample : Vector2d) =
@@ -246,8 +244,6 @@ let sample object (sample : Vector2d) =
         Some(randomInHemisphere2(), norm)
     | Rectangle(p0, p1, p2) ->
         samplePointRectangle p0 p1 p2
-    | Plane ->
-        samplePointRectangle (Vector3d(-1.0, 0.0, 1.0)) (Vector3d(1.0, 0.0, 1.0)) (Vector3d(-1.0, 0.0, -1.0))
     | _ -> None
 
 let getAreaOfObject object =
@@ -258,7 +254,6 @@ let getAreaOfObject object =
         let d1 = p1 - p0
         let d2 = p2 - p0
         d1.Length * d2.Length
-    | Plane -> 4.0
     | _ -> 0.0
 
 let worldBounds object =
@@ -298,3 +293,9 @@ let makeTriangleShapes (data : TriangleMesh.Data) =
         let b = data.Faces.[faceIndex].[1]
         let c = data.Faces.[faceIndex].[2]
         TriangleObjPart(a, b, c, data))
+
+let makePlane side =
+    let p0 = Vector3d(-side, side, 0.0)
+    let p1 = Vector3d(side, side, 0.0)
+    let p2 = Vector3d(-side, -side, 0.0)
+    Rectangle(p0, p1, p2)

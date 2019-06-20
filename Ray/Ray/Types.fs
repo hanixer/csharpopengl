@@ -20,7 +20,6 @@ type Object =
     | Disk
     | Rectangle of Vector3d * Vector3d * Vector3d
     | ObjectList of Object list
-    | Plane
     | TriangleObj of TriangleMesh.Data
     | TriangleObjPart of int * int * int * TriangleMesh.Data
 
