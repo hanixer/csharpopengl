@@ -236,7 +236,7 @@ let getObjectFromType (xml : XmlElement) =
 let makeTrianglePrimitives objects material =
     Array.map (fun object -> makeGeometricPrimitive object material) objects
 
-let loadLight2 (xml : XmlNode) =
+let loadLight2 primitives (xml : XmlNode) =
     let xml = xml :?> XmlElement
     let name =
         let nameAttr = xml.Attributes.["name"]
@@ -252,9 +252,13 @@ let loadLight2 (xml : XmlNode) =
             | _ -> Sphere
         let transform = loadTransform xml 0
         let intensity = readColor (xml.SelectSingleNode "./intensity") Vector3d.One
-        { Object = object
-          Radiance = intensity
-          ObjToWorld = transform }
+        let light =
+            { Object = object
+              Radiance = intensity
+              ObjToWorld = transform }
+        let prim = GeometricPrimitive(object, (Blinn{Material.defaultBlinn with DiffuseColor = Vector3d.Zero}), Some(light))
+        let prim = makeTransformedPrimitive prim transform
+        light, prim
     | _ ->
         failwith "wrong light type"
 
@@ -345,9 +349,12 @@ let loadScene (xml : XmlDocument) =
         let lights2 =
             xml.GetElementsByTagName "light2"
             |> Seq.cast<XmlElement>
-            |> Seq.map loadLight2
+            |> Seq.map (loadLight2 primitives)
 
-        let nodesMap = Map.empty //List.collect getNodePairs nodes |> Map.ofList
+        let primitives =
+            Seq.map snd lights2
+            |> Seq.append primitives
+
         let environment = readColor (xml.SelectSingleNode "scene/environment") Vector3d.Zero
         let samples = readFloating (xml.SelectSingleNode "scene/samples") "value" 1.0 |> int
         printfn "samples %A" samples
@@ -358,7 +365,7 @@ let loadScene (xml : XmlDocument) =
           Scene.Environment = environment
           Scene.Sampler = Sampling.makeSampler samples
           Scene.Primitive = makeBVH primitives
-          Scene.AreaLights = Seq.toArray lights2 }
+          Scene.AreaLights = Seq.toArray (Seq.map fst lights2) }
     else failwith "xml tag not found"
 
 let loadIntegrator (xml : XmlDocument) =
