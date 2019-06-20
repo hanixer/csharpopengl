@@ -10,6 +10,7 @@ open Types
 type Integrator =
     | Simple
     | AmbientOcclusion
+    | Whitted
 
 // 12345
 // Pick one light
@@ -29,12 +30,17 @@ let whitted (scene : Scene.Scene) ray =
         let wi = lightPoint - hitInfo.Point
         let distanceSq = wi.LengthSquared
         wi.Normalize()
-        let geoTerm = (Vector3d.Dot(hitInfo.Normal, wi) * Vector3d.Dot(lightNorm, -wi)) / distanceSq
+        let cosHit = Vector3d.Dot(hitInfo.Normal, wi)
+        let cosLight = Vector3d.Dot(lightNorm, -wi)
+        let geoTerm = Math.Max(0., cosHit * cosLight) / distanceSq
         let material = Node.getMaterial hitInfo.Prim.Value
         let bsdf = Material.computeBsdf material
         let attenuation = Material.evaluate bsdf -ray.Direction wi
         let reflected = attenuation * geoTerm * emitted / lightPdf
-        direct + reflected
+        let res = direct + reflected
+        assert (res.X >= 0.)
+        // printfn "%A" res
+        res
     | _ -> Vector3d.Zero
 
 // Li = (F/4pi^2) * max(0, cos(theta)) / |x - p| ^ 2 * visibility
@@ -81,3 +87,4 @@ let estimateRadiance integrator (scene : Scene.Scene) ray =
     match integrator with
     | Simple -> simple scene ray
     | AmbientOcclusion -> ambientOcclusion scene ray
+    | Whitted -> whitted scene ray

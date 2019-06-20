@@ -32,7 +32,7 @@ let defaultHitInfo = {
 // (1 - beta - gamma) * a + beta * b + gamma * c = o + t * d
 // a + beta * (b - a) + gamma * (c - gamma) = o + t * d
 // beta * (b - a) + gamma * (c - a) - t * d = o - a
-// | a b c | | beta  |   | d | 
+// | a b c | | beta  |   | d |
 // | e f g | | gamma | = | h |
 // | i j k | | t     |   | l |
 // a = (b.x - a.x)

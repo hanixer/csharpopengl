@@ -47,11 +47,14 @@ let readColor (xml : XmlNode) (defaultVec : Vector3d) =
         Vector3d(x, y, z) * value
     else defaultVec
 
-let select (xml : XmlElement) name selector defaultV =
+let trySelect (xml : XmlElement) name selector =
     xml.SelectNodes name
     |> Seq.cast<XmlElement>
     |> Seq.tryHead
     |> Option.map selector
+
+let select (xml : XmlElement) name selector defaultV =
+    trySelect xml name selector
     |> Option.defaultValue defaultV
 
 let getChildElements (xml : XmlElement) =
@@ -231,6 +234,28 @@ let getObjectFromType (xml : XmlElement) =
 let makeTrianglePrimitives objects material =
     Array.map (fun object -> makeGeometricPrimitive object material) objects
 
+let loadLight2 (xml : XmlNode) =
+    let xml = xml :?> XmlElement
+    let name =
+        let nameAttr = xml.Attributes.["name"]
+        if not (isNull nameAttr) then nameAttr.InnerText
+        else ""
+    printf "light [%s]" name
+    match xml.Attributes.["type"].Value with
+    | "area" ->
+        printfn " - Area"
+        let object =
+            match trySelect xml "./object" getObjectFromType with
+            | Some(Some(o)) -> o
+            | _ -> Sphere
+        let transform = loadTransform xml 0
+        let intensity = readColor (xml.SelectSingleNode "./intensity") Vector3d.One
+        { Object = object
+          Radiance = intensity
+          ObjToWorld = transform }
+    | _ ->
+        failwith "wrong light type"
+
 let constructPrimitive objectOpt material transform children =
     let geomPrim =
         match objectOpt with
@@ -315,6 +340,11 @@ let loadScene (xml : XmlDocument) =
             |> Map.toList
             |> List.map snd
 
+        let lights2 =
+            xml.GetElementsByTagName "light2"
+            |> Seq.cast<XmlElement>
+            |> Seq.map loadLight2
+
         let nodesMap = Map.empty //List.collect getNodePairs nodes |> Map.ofList
         let environment = readColor (xml.SelectSingleNode "scene/environment") Vector3d.Zero
         let samples = readFloating (xml.SelectSingleNode "scene/samples") "value" 1.0 |> int
@@ -326,7 +356,7 @@ let loadScene (xml : XmlDocument) =
           Scene.Environment = environment
           Scene.Sampler = Sampling.makeSampler samples
           Scene.Primitive = makeBVH primitives
-          Scene.AreaLights = [||] }
+          Scene.AreaLights = Seq.toArray lights2 }
     else failwith "xml tag not found"
 
 let loadIntegrator (xml : XmlDocument) =
@@ -337,6 +367,7 @@ let loadIntegrator (xml : XmlDocument) =
         match el.Attributes.["type"].Value with
         | "ao" -> Integrator.AmbientOcclusion
         | "simple" -> def
+        | "whitted" -> Integrator.Whitted
         | _ -> def
 
 let loadSceneAndIntegratorFromFile (filename : string) =

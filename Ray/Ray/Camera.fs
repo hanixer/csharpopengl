@@ -31,7 +31,7 @@ type Camera(lookFrom : Vector3d, lookAt : Vector3d, upInput : Vector3d, fov : fl
     member __.Width = width
     member __.Height = height
 
-    member __.Ray2 (rasterSample : Vector2d) =
+    member __.Ray (rasterSample : Vector2d) =
         let rasterP = Vector3d(rasterSample)
         let cameraP = Transform.transformPoint rasterToCamera rasterP
         let worldP = Transform.transformPoint cameraToWorld cameraP

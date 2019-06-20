@@ -106,7 +106,7 @@ let render (bitmap : Bitmap) (scene : Scene) integrator =
         for c = 0 to w - 1 do
             for s = 0 to samples - 1 do
                 let sample = Vector2d(float c, float r) + (next2D scene.Sampler)
-                let ray = scene.Camera.Ray2 sample
+                let ray = scene.Camera.Ray sample
                 let color = Integrator.estimateRadiance integrator scene ray
                 buf.[r, c] <- buf.[r, c] + color
             buf.[r, c] <- buf.[r, c] / float samples

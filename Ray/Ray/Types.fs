@@ -24,13 +24,14 @@ type Object =
     | TriangleObj of TriangleMesh.Data
     | TriangleObjPart of int * int * int * TriangleMesh.Data
 
-type AreaLight2 =
-    { Object : Object
-      Radiance : Vector3d }
-
 type Transform =
     { M : Matrix4d
       Inv : Matrix4d }
+
+type AreaLight2 =
+    { Object : Object
+      Radiance : Vector3d
+      ObjToWorld : Transform }
 
 type BlinnData =
     { DiffuseColor : Vector3d

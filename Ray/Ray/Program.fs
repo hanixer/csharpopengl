@@ -16,7 +16,7 @@ let measure task =
     stopwatch.Stop()
     Console.WriteLine(stopwatch.ElapsedMilliseconds)
 
-let file = @"scenes\teapot.xml"
+let file = @"scenes\scene.1.xml"
 
 let makeSphere m x y z =
     let off = Vector3d(float x,float y,float z)
@@ -54,7 +54,7 @@ type Window1(width, height) =
 
     member this.Update() =
         let scene, integrator = loadSceneAndIntegratorFromFile file
-        let scene = makeScene scene
+        // let scene = makeScene scene
         let zbuffer = Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap scene integrator } |> measure

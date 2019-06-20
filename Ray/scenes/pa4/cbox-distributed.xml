@@ -2,16 +2,10 @@
   <integrator type="whitted" />
 
   <scene>
-    <samples value="20" />
+    <samples value="200" />
 
     <!-- Objects -->
     <object type="sphere" name="sphere2" material="wall">
-    </object>
-
-    <object type="plane" name="WallBottom" material="wall">
-      <rotate angle="60" x="1" />
-      <!-- <scale value="32"/> -->
-      <!-- <translate z="-12"/> -->
     </object>
 
     <!-- Materials -->

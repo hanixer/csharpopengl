@@ -117,8 +117,9 @@ let computeBsdf material =
     | _ -> failwith "computeBsdf: not implemented"
 
 let evaluate bsdf (wo : Vector3d) (wi : Vector3d) =
-    assert (wo.Length = 1.)
-    assert (wi.Length = 1.)
+    let eps = 0.00000001
+    assert (Math.Abs(wo.Length - 1.) < eps)
+    assert (Math.Abs(wi.Length - 1.) < eps)
     match bsdf with
     | Diffuse color ->
         color / Math.PI
