@@ -30,12 +30,12 @@
     <light2 type="area" name="areaLight1">
       <rotate angle="90" x="1" />
       <translate y="5" z="-5" />
-      <object type="disk">
+      <!-- <object type="disk"> -->
         <!-- <radius value="5" /> -->
-      </object>
-      <!-- <object type="plane"> -->
-        <!-- <side value="5" /> -->
       <!-- </object> -->
+      <object type="plane">
+        <side value="5" />
+      </object>
     </light2>
   </scene>
 

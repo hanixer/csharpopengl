@@ -35,15 +35,14 @@ let whitted (scene : Scene.Scene) ray =
         let direct = Option.defaultValue Vector3d.Zero <| Option.map Node.emitted hit.Prim
         let (lightPoint, lightNorm) = Light.sample light (Sampling.next2D scene.Sampler)
         let lightPdf = 1. / Light.area light
-        let lightPdf = 1. 
         let emitted = light.Radiance
         let wi = lightPoint - hit.Point
         let distanceSq = wi.LengthSquared
         wi.Normalize()
-        let cosHit = Vector3d.Dot(hit.Normal, wi)
-        let cosLight = Vector3d.Dot(lightNorm, -wi)
+        let cosHit = Math.Max(0., Vector3d.Dot(hit.Normal, wi))
+        let cosLight = Math.Max(0., Vector3d.Dot(lightNorm, -wi))
         let visibility = if isVisible scene hit.Point lightPoint wi lightNorm then 1. else 0.
-        let geoTerm = visibility * Math.Max(0., cosHit * cosLight) / distanceSq
+        let geoTerm = visibility * cosHit * cosLight / distanceSq
         let material = Node.getMaterial hit.Prim.Value
         let bsdf = Material.computeBsdf material
         let attenuation = Material.evaluate bsdf -ray.Direction wi
@@ -53,11 +52,12 @@ let whitted (scene : Scene.Scene) ray =
             // printfn "%A %A %A %A" cosHit cosLight visibility geoTerm
         assert (res.X >= 0.)
         // printfn "%A" res
-        // res
+        res
         // (wi + Vector3d.One) * 0.5
         // (hit.Normal + Vector3d.One) * 0.5
-        // (Vector3d(cosLight) + Vector3d.One) * 0.5
-        Vector3d(visibility)
+        // (Vector3d(cosHit) + Vector3d.One) * 0.5
+        // (Vector3d(geoTerm) + Vector3d.One) * 0.5
+        // Vector3d(visibility)
     | _ -> Vector3d.Zero
 
 // Li = (F/4pi^2) * max(0, cos(theta)) / |x - p| ^ 2 * visibility
