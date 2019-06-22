@@ -36,7 +36,7 @@ let randomInHemisphere () =
     let r2 = random.NextDouble()
     let phi = 2.0 * Math.PI * r1
     let theta = Math.Acos(1.0 - r2)
-    let x  = Math.Sin theta * Math.Cos phi
+    let x = Math.Sin theta * Math.Cos phi
     let y = Math.Sin theta * Math.Sin phi
     let z = Math.Cos theta
     Vector3d(x, z, y)
@@ -92,3 +92,11 @@ let squareToCircle (sample : Vector2d) =
     let y = r * Math.Sin(theta)
     Vector2d(x, y)
 
+let squareToCone (sample : Vector2d) cosThetaMax =
+    let cosTheta = 1. - sample.[0] + sample.[0] * cosThetaMax
+    let sinTheta = Math.Sqrt(1. - cosTheta * cosTheta)
+    let phi = 2. * Math.PI * sample.[1]
+    let x = sinTheta * Math.Cos phi
+    let y = sinTheta * Math.Sin phi
+    let z = cosTheta
+    Vector3d(x, y, z)

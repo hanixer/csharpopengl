@@ -16,7 +16,7 @@ let measure task =
     stopwatch.Stop()
     Console.WriteLine(stopwatch.ElapsedMilliseconds)
 
-let file = @"scenes\pa4\cbox-distributed.xml"
+let file = @"scenes\scene.1.xml"
 
 let makeSphere m x y z =
     let off = Vector3d(float x,float y,float z)
@@ -34,18 +34,17 @@ let makeScene (scene : Scene) =
     let mname = m.Key
     let numSamples = 10000
     let sampler = Sampling.makeSampler 1
-    let sphere = makeGeometricPrimitive Object.Sphere m.Value
+    let sphere = makeGeometricPrimitive Object.Sphere (Blinn {Material.defaultBlinn with DiffuseColor = Vector3d.UnitX * 0.3})
     let spheres =
         Seq.init numSamples (fun i ->
             let sample = Sampling.next2D sampler
-            let circle = Sampling.squareToCircle sample
-            let s = Transform.scale (Vector3d(0.05))
-            let t = Transform.translate (Vector3d(circle.X, circle.Y, 0.))
+            let cone = Sampling.squareToCone sample (Math.Cos(Math.PI / 3.))
+            let s = Transform.scale (Vector3d(0.01))
+            let t = Transform.translate (Vector3d(cone.X, cone.Z, cone.Y))
             makeTransformedPrimitive sphere (Transform.compose t s))
-    let bvh = makeBVH spheres
-    let rect = makeGeometricPrimitive (Object.Rectangle((Vector3d(-1.0, 1.0, 0.0)), (Vector3d(1.0, 1.0, 0.0)), (Vector3d(-1.0, -1.0, 0.0)))) m.Value
-    // let prim = PrimitiveList listTriangles
-    { scene with Primitive = rect }
+
+    let bvh = makeBVH (Seq.append [scene.Primitive] spheres)
+    { scene with Primitive = bvh }
 
 type Window1(width, height) =
     inherit Window(width, height)
@@ -55,7 +54,7 @@ type Window1(width, height) =
 
     member this.Update() =
         let scene, integrator = loadSceneAndIntegratorFromFile file
-        // let scene = makeScene scene
+        let scene = makeScene scene
         let zbuffer = Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap scene integrator } |> measure

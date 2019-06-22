@@ -2,7 +2,7 @@
   <integrator type="whitted" />
 
   <scene>
-    <samples value="1" />
+    <samples value="512" />
 
     <!-- Objects -->
     <object type="obj" name="meshes/walls.obj" material="wall">

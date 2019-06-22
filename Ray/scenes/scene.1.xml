@@ -6,13 +6,13 @@
 
     <!-- Objects -->
     <object type="sphere" name="sphere2" material="wall">
-      <translate x="0" y="1" z="1" />
+      <!-- <translate x="0" y="1" z="1" /> -->
     </object>
 
-    <object type="plane" name="WallBottom" material="wall">
+    <!-- <object type="plane" name="WallBottom" material="wall">
       <side value="10" />
       <rotate x="1" angle="-90" />
-    </object>
+    </object> -->
 
     <!-- <object type="triangle" name="triangle1" material="wall">
       <p0 x="-1" y="1" z="0"/>
@@ -29,12 +29,12 @@
     <!-- Lights -->
     <light2 type="area" name="areaLight1">
       <rotate angle="90" x="1" />
-      <translate y="5" z="-5" />
+      <translate y="50" z="-5" />
       <!-- <object type="disk"> -->
-        <!-- <radius value="5" /> -->
+      <!-- <radius value="5" /> -->
       <!-- </object> -->
       <object type="plane">
-        <side value="5" />
+        <side value="50" />
       </object>
     </light2>
   </scene>
@@ -44,7 +44,7 @@
     <position x="20" y="20" z="20"/>
     <target x="0" y="0" z="0"/>
     <up x="0" y="1" z="0"/>
-    <fov value="30"/>
+    <fov value="5"/>
     <width value="400"/>
     <height value="400"/>
   </camera>

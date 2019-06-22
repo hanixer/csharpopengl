@@ -1,0 +1,54 @@
+<xml>
+  <integrator type="whitted" />
+
+  <scene>
+    <samples value="1" />
+
+    <!-- Objects -->
+    <!--
+            Pineapple SVG:
+            CC BY-NC 4.0 Licence
+            "Pineapple Black And White" (http://clipartmag.com/pineapple-black-and-white)
+            http://clipartmag.com/pineapple-black-and-white#pineapple-black-and-white-2.jpg
+         -->
+    <object type="obj" name="meshes/logo.obj" material="logo">
+    </object>
+    <!-- <object type="obj" name="meshes/rightwall.obj" material="rightwall">
+    </object>
+    <object type="obj" name="meshes/leftwall.obj" material="leftwall">
+    </object>
+    <object type="obj" name="meshes/sphere1.obj" material="white">
+    </object>
+    <object type="obj" name="meshes/sphere2.obj" material="white">
+    </object> -->
+
+    <!-- Materials -->
+    <material type="blinn" name="logo">
+      <diffuse r="0.5" g="0.5" b="0.5"/>
+    </material>
+
+    <!-- Lights -->
+    <light2 type="area" name="areaLight1">
+      <radiance r="60" g="200" b="120" />
+      <translate x="-5" y="5" z="2" />
+      <object type="sphere">
+        <!-- <side value="5" /> -->
+      </object>
+    </light2>
+    <light2 type="area" name="areaLight2">
+      <radiance r="80" g="80" b="800" />
+      <translate x="5" y="5" z="2" />
+      <object type="sphere">
+      </object>
+    </light2>
+  </scene>
+
+  <camera>
+    <position x="2.668" y="1.078" z="6.668"/>
+    <target x="-0.841" y="0.85" z="-0.051" />
+    <up x="0" y="1" z="0"/>
+    <fov value="70"/>
+    <width value="768"/>
+    <height value="384"/>
+  </camera>
+</xml>
