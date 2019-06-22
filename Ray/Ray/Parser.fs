@@ -251,10 +251,10 @@ let loadLight2 primitives (xml : XmlNode) =
             | Some(Some(o)) -> o
             | _ -> Sphere
         let transform = loadTransform xml 0
-        let intensity = readColor (xml.SelectSingleNode "./intensity") Vector3d.One
+        let radiance = readColor (xml.SelectSingleNode "./radiance") Vector3d.One
         let light =
             { Object = object
-              Radiance = intensity
+              Radiance = radiance
               ObjToWorld = transform }
         let prim = GeometricPrimitive(object, (Blinn{Material.defaultBlinn with DiffuseColor = Vector3d.Zero}), Some(light))
         let prim = makeTransformedPrimitive prim transform

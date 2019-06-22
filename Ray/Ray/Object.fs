@@ -27,10 +27,12 @@ let defaultHitInfo = {
     Point = Vector3d.Zero
     Normal = Vector3d.Zero
     Prim = None
+    U = 0.0
+    V = 0.0
 }
 
 // (1 - beta - gamma) * a + beta * b + gamma * c = o + t * d
-// a + beta * (b - a) + gamma * (c - gamma) = o + t * d
+// a + beta * (b - a) + gamma * (c - a) = o + t * d
 // beta * (b - a) + gamma * (c - a) - t * d = o - a
 // | a b c | | beta  |   | d |
 // | e f g | | gamma | = | h |
@@ -67,17 +69,35 @@ let intersectTriangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
         let inline inRange r = r > 0.0 && r < 1.0
         if inRange alpha && inRange beta && inRange gamma && t > epsilon then
             let point = pointOnRay ray t
-            Some {defaultHitInfo with T = t; Point = point; Normal = normal}
+            Some {defaultHitInfo with T = t; Point = point; Normal = normal; U = beta; V = gamma}
         else
             None
 
 let intersectTriangleObj ray (data : TriangleMesh.Data) =
-    Seq.map (fun (face : TriangleMesh.Face) ->
-        let p0 = data.Vertex(face.[0])
-        let p1 = data.Vertex(face.[1])
-        let p2 = data.Vertex(face.[2])
-        intersectTriangle ray p0 p1 p2 ) data.Faces
-    |> tryFindBestHitInfo
+    failwith "not implemented. triangle obj part should be used instead"
+
+let intersectTriangleObjPart ray a b c (data : TriangleMesh.Data) =
+    let p0 = data.Vertex(a)
+    let p1 = data.Vertex(b)
+    let p2 = data.Vertex(c)
+    let adaptNormal hit =
+        let boundsOk = a <= data.NormalsCount && b <= data.NormalsCount && c <= data.NormalsCount
+        match hit with
+        | Some(hit) when boundsOk ->
+            let n0 = Vector3d.Cross(p1 - p0, p2 - p0).Normalized()
+            let n1 = Vector3d.Cross(p2 - p1, p0 - p1).Normalized()
+            let n2 = Vector3d.Cross(p0 - p2, p1 - p2).Normalized()
+            let n0 = data.Normal(a)
+            let n1 = data.Normal(b)
+            let n2 = data.Normal(c)
+            let alpha = 1. - hit.U - hit.V
+            let n = n0 * alpha + n1 * hit.U + n2 * hit.V
+            Some { hit with Normal = n2 }
+            // Some(hit)
+        | _ -> hit
+
+    intersectTriangle ray p0 p1 p2
+    |> adaptNormal
 
 let intersectRectangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
     let v1 = p1 - p0
@@ -154,11 +174,8 @@ let rec intersect ray object =
     match object with
     | Triangle(a, b, c) ->
         intersectTriangle ray a b c
-    | TriangleObjPart(a, b, c, data) ->        
-        let p0 = data.Vertex(a)
-        let p1 = data.Vertex(b)
-        let p2 = data.Vertex(c)
-        intersectTriangle ray p0 p1 p2
+    | TriangleObjPart(a, b, c, data) ->
+        intersectTriangleObjPart ray a b c data
     | Sphere ->
         let offset = ray.Origin
         let a = Vector3d.Dot(ray.Direction, ray.Direction)

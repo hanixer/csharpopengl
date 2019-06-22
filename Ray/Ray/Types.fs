@@ -66,6 +66,8 @@ type HitInfo =
     { T : float
       Point : Vector3d
       Normal : Vector3d
-      Prim : Primitive option }
+      Prim : Primitive option
+      U : float
+      V : float }
 
 type Bsdf = Diffuse of color : Vector3d

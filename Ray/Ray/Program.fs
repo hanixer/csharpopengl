@@ -16,7 +16,7 @@ let measure task =
     stopwatch.Stop()
     Console.WriteLine(stopwatch.ElapsedMilliseconds)
 
-let file = @"scenes\scene.1.xml"
+let file = @"scenes\pa4\cbox-distributed.xml"
 
 let makeSphere m x y z =
     let off = Vector3d(float x,float y,float z)

@@ -2,32 +2,51 @@
   <integrator type="whitted" />
 
   <scene>
-    <samples value="200" />
+    <samples value="1" />
 
     <!-- Objects -->
-    <object type="sphere" name="sphere2" material="wall">
+    <!-- <object type="obj" name="meshes/walls.obj" material="wall"> -->
+    <!-- </object> -->
+    <!-- <object type="obj" name="meshes/rightwall.obj" material="rightwall"> -->
+    <!-- </object> -->
+    <!-- <object type="obj" name="meshes/leftwall.obj" material="leftwall"> -->
+    <!-- </object> -->
+    <object type="obj" name="meshes/spherelow.obj" material="white">
     </object>
+    <!-- <object type="obj" name="meshes/sphere2.obj" material="white"> -->
+    <!-- </object> -->
 
     <!-- Materials -->
     <material type="blinn" name="wall">
-      <diffuse r="0.5" g="1" b="1"/>
-      <specular value="0"/>
+      <diffuse r="0.725" g="0.71" b="0.68"/>
+    </material>
+    <material type="blinn" name="rightwall">
+      <diffuse r="0.161" g="0.133" b="0.427"/>
+    </material>
+    <material type="blinn" name="leftwall">
+      <diffuse r="0.630" g="0.065" b="0.05"/>
+    </material>
+    <material type="blinn" name="white">
+      <diffuse value="1" />
     </material>
 
     <!-- Lights -->
     <light2 type="area" name="areaLight1">
+      <radiance value="40" />
       <rotate angle="90" x="1" />
-      <translate y="2" />
-      <object type="disk" radius="3" />
+      <translate y="1.58" />
+      <object type="plane">
+        <side value="0.25" />
+      </object>
     </light2>
   </scene>
 
   <camera>
-    <position x="5" y="5" z="5"/>
-    <target x="0" y="0" z="0"/>
+    <position x="0" y="0.919769" z="5.41159"/>
+    <target x="0.05" y="0.76" z="4.411980" />
     <up x="0" y="1" z="0"/>
-    <fov value="30"/>
-    <width value="400"/>
-    <height value="400"/>
+    <fov value="20"/>
+    <width value="800"/>
+    <height value="600"/>
   </camera>
 </xml>

@@ -54,7 +54,7 @@ let whitted (scene : Scene.Scene) ray =
         // printfn "%A" res
         res
         // (wi + Vector3d.One) * 0.5
-        // (hit.Normal + Vector3d.One) * 0.5
+        (hit.Normal + Vector3d.One) * 0.5
         // (Vector3d(cosHit) + Vector3d.One) * 0.5
         // (Vector3d(geoTerm) + Vector3d.One) * 0.5
         // Vector3d(visibility)

@@ -7,15 +7,16 @@ open Types
 
 let makeRay o d = { Origin = o; Direction = d; TMin = 1e-4; TMax = System.Double.MaxValue }
 
+let compareHitInfo prev curr =
+    match (prev, curr) with
+    | Some b, Some h ->
+        if h.T < b.T then curr
+        else prev
+    | _, Some _ -> curr
+    | _ -> prev
+
 let tryFindBestHitInfo hitInfos =
-    let fold best hitInfo =
-        match (best, hitInfo) with
-        | Some b, Some h ->
-            if h.T < b.T then hitInfo
-            else best
-        | _, Some _ -> hitInfo
-        | _ -> best
-    let result = Seq.fold fold None hitInfos
+    let result = Seq.fold compareHitInfo None hitInfos
     result
 
 let mutable debugFlag = false
