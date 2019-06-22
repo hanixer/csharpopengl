@@ -21,7 +21,7 @@ type Object =
     | Rectangle of Vector3d * Vector3d * Vector3d
     | ObjectList of Object list
     | TriangleObj of TriangleMesh.Data
-    | TriangleObjPart of int * int * int * TriangleMesh.Data
+    | TriangleObjPart of face : int * data : TriangleMesh.Data
 
 type Transform =
     { M : Matrix4d

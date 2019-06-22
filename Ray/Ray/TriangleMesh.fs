@@ -10,7 +10,11 @@ type Data(v : Vector3d [], f : Face [], vn : Vector3d [], fn : Face [], VT : Vec
     member __.FacesCount = f.Length
     member __.NormalsCount = vn.Length
     member __.Vertex(i : int) = v.[i - 1]
+    member __.Vertex(face : int, i : int) =
+        v.[f.[face].[i] - 1]
     member __.Normal(i : int) = vn.[i - 1]
+    member __.Normal(face : int, i : int) =
+        vn.[fn.[face].[i] - 1]
     member __.Faces = f
     member __.NormalFace = fn
     override __.ToString() = "nothing"
@@ -18,7 +22,7 @@ type Data(v : Vector3d [], f : Face [], vn : Vector3d [], fn : Face [], VT : Vec
 let private toVector3d (v : ObjLoader.Loader.Data.VertexData.Vertex) =
     Vector3d(float v.X, float v.Y, float v.Z)
 let private normalToVector3d (v : ObjLoader.Loader.Data.VertexData.Normal) =
-    Vector3d(float v.X, float v.Z, -(float v.Y))
+    Vector3d(float v.X, float v.Y, float v.Z)
 let private vtToVector3d (v : ObjLoader.Loader.Data.VertexData.Texture) = Vector3d(float v.X, float v.Y, 0.0)
 
 let private loadResultToMesh (lr : LoadResult) =

@@ -101,7 +101,7 @@ let render (bitmap : Bitmap) (scene : Scene) integrator =
     let w = bitmap.Width
     let h = bitmap.Height
     let samples = scene.Sampler.Count
-    // Parallel.For(0, bitmap.Height, fun r ->
+    // System.Threading.Tasks.Parallel.For(0, bitmap.Height, fun r ->
     for r = 0 to bitmap.Height - 1 do
         for c = 0 to w - 1 do
             for s = 0 to samples - 1 do
@@ -110,8 +110,8 @@ let render (bitmap : Bitmap) (scene : Scene) integrator =
                 let color = Integrator.estimateRadiance integrator scene ray
                 buf.[r, c] <- buf.[r, c] + color
             buf.[r, c] <- buf.[r, c] / float samples
-        let percent = int (float r / float bitmap.Height * 1000.0)
-        if percent % 50 = 0 then printfn "%A%%" (percent / 10)
+        // let percent = int (float r / float h * 1000.0)
+        // if percent % 50 = 0 then printfn "%A%%" (percent / 10)
         ()
     // ) |> ignore
     Array2D.iteri (fun r c x -> setPixel bitmap c r (clamp x)) buf

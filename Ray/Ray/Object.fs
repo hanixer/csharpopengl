@@ -76,23 +76,22 @@ let intersectTriangle ray (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) =
 let intersectTriangleObj ray (data : TriangleMesh.Data) =
     failwith "not implemented. triangle obj part should be used instead"
 
-let intersectTriangleObjPart ray a b c (data : TriangleMesh.Data) =
-    let p0 = data.Vertex(a)
-    let p1 = data.Vertex(b)
-    let p2 = data.Vertex(c)
+let intersectTriangleObjPart ray face (data : TriangleMesh.Data) =
+    let p0 = data.Vertex(face, 0)
+    let p1 = data.Vertex(face, 1)
+    let p2 = data.Vertex(face, 2)
     let adaptNormal hit =
-        let boundsOk = a <= data.NormalsCount && b <= data.NormalsCount && c <= data.NormalsCount
         match hit with
-        | Some(hit) when boundsOk ->
-            let n0 = Vector3d.Cross(p1 - p0, p2 - p0).Normalized()
-            let n1 = Vector3d.Cross(p2 - p1, p0 - p1).Normalized()
-            let n2 = Vector3d.Cross(p0 - p2, p1 - p2).Normalized()
-            let n0 = data.Normal(a)
-            let n1 = data.Normal(b)
-            let n2 = data.Normal(c)
+        | Some(hit) when data.NormalsCount > 0 ->
+            let n0 = data.Normal(face, 0)
+            let n1 = data.Normal(face, 1)
+            let n2 = data.Normal(face, 2)
+            // let n0 = Vector3d.Cross(p1 - p0, p2 - p0).Normalized()
+            // let n1 = Vector3d.Cross(p2 - p1, p0 - p1).Normalized()
+            // let n2 = Vector3d.Cross(p0 - p2, p1 - p2).Normalized()
             let alpha = 1. - hit.U - hit.V
             let n = n0 * alpha + n1 * hit.U + n2 * hit.V
-            Some { hit with Normal = n2 }
+            Some { hit with Normal = n }
             // Some(hit)
         | _ -> hit
 
@@ -174,8 +173,8 @@ let rec intersect ray object =
     match object with
     | Triangle(a, b, c) ->
         intersectTriangle ray a b c
-    | TriangleObjPart(a, b, c, data) ->
-        intersectTriangleObjPart ray a b c data
+    | TriangleObjPart(face, data) ->
+        intersectTriangleObjPart ray face data
     | Sphere ->
         let offset = ray.Origin
         let a = Vector3d.Dot(ray.Direction, ray.Direction)
@@ -267,10 +266,10 @@ let worldBounds object =
         Bounds.addPoint b1 p2
     | Rectangle(p0, p1, p2) ->
         Bounds.unionManyP [ p0; p1; p2 ]
-    | TriangleObjPart(a, b, c, data) ->
-        let p0 = data.Vertex(a)
-        let p1 = data.Vertex(b)
-        let p2 = data.Vertex(c)
+    | TriangleObjPart(face, data) ->
+        let p0 = data.Vertex(face, 0)
+        let p1 = data.Vertex(face, 1)
+        let p2 = data.Vertex(face, 2)
         Bounds.unionManyP [ p0; p1; p2 ]
     | Disk(radius) ->
         Bounds.unionManyP [ Vector3d(-radius, -radius, 0.); Vector3d(radius, radius, 0.) ]
@@ -296,10 +295,7 @@ let makeBox (p0 : Vector3d) (p1 : Vector3d) =
 
 let makeTriangleShapes (data : TriangleMesh.Data) =
     Array.init data.FacesCount (fun faceIndex ->
-        let a = data.Faces.[faceIndex].[0]
-        let b = data.Faces.[faceIndex].[1]
-        let c = data.Faces.[faceIndex].[2]
-        TriangleObjPart(a, b, c, data))
+        TriangleObjPart(faceIndex, data))
 
 let makePlane side =
     let p0 = Vector3d(-side, side, 0.0)

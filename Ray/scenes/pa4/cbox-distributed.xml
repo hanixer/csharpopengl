@@ -5,16 +5,16 @@
     <samples value="1" />
 
     <!-- Objects -->
-    <!-- <object type="obj" name="meshes/walls.obj" material="wall"> -->
-    <!-- </object> -->
-    <!-- <object type="obj" name="meshes/rightwall.obj" material="rightwall"> -->
-    <!-- </object> -->
-    <!-- <object type="obj" name="meshes/leftwall.obj" material="leftwall"> -->
-    <!-- </object> -->
-    <object type="obj" name="meshes/spherelow.obj" material="white">
+    <object type="obj" name="meshes/walls.obj" material="wall">
     </object>
-    <!-- <object type="obj" name="meshes/sphere2.obj" material="white"> -->
-    <!-- </object> -->
+    <object type="obj" name="meshes/rightwall.obj" material="rightwall">
+    </object>
+    <object type="obj" name="meshes/leftwall.obj" material="leftwall">
+    </object>
+    <object type="obj" name="meshes/sphere1.obj" material="white">
+    </object>
+    <object type="obj" name="meshes/sphere2.obj" material="white">
+    </object>
 
     <!-- Materials -->
     <material type="blinn" name="wall">
@@ -43,9 +43,9 @@
 
   <camera>
     <position x="0" y="0.919769" z="5.41159"/>
-    <target x="0.05" y="0.76" z="4.411980" />
+    <target x="0" y="0.893051" z="4.411980" />
     <up x="0" y="1" z="0"/>
-    <fov value="20"/>
+    <fov value="20.7856"/>
     <width value="800"/>
     <height value="600"/>
   </camera>
