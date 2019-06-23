@@ -22,7 +22,7 @@ let isVisible (scene : Scene.Scene) origin target w n =
     let ray = makeRay origin w
     let epsilon = 0.0001
     match Node.intersect ray scene.Primitive with
-    | Some(hit) -> 
+    | Some(hit) ->
         let diff = hit.Point - target
         diff.Length < epsilon
     | _ -> false
@@ -33,8 +33,9 @@ let whitted (scene : Scene.Scene) ray =
         assert (hit.Prim.IsSome)
         let light = pickOne scene.AreaLights
         let direct = Option.defaultValue Vector3d.Zero <| Option.map Node.emitted hit.Prim
-        let (lightPoint, lightNorm) = Light.sample light (Sampling.next2D scene.Sampler)
-        let lightPdf = 1. / Light.area light
+        let (lightPoint, lightNorm) = Light.sampleWithPoint light (Sampling.next2D scene.Sampler) hit.Point
+        let lightPdf = Light.sampleWithPointPdf light hit.Point
+        // let lightPdf = 0.05
         let emitted = light.Radiance
         let wi = lightPoint - hit.Point
         let distanceSq = wi.LengthSquared
@@ -48,13 +49,11 @@ let whitted (scene : Scene.Scene) ray =
         let attenuation = Material.evaluate bsdf -ray.Direction wi
         let reflected = attenuation * geoTerm * emitted / lightPdf
         let res = direct + reflected
-        // if direct.X < 1. then
-            // printfn "%A %A %A %A" cosHit cosLight visibility geoTerm
         assert (res.X >= 0.)
-        // printfn "%A" res
         res
         // (wi + Vector3d.One) * 0.5
         // (hit.Normal + Vector3d.One) * 0.5
+        // (lightNorm + Vector3d.One) * 0.5
         // (Vector3d(cosHit) + Vector3d.One) * 0.5
         // (Vector3d(geoTerm) + Vector3d.One) * 0.5
         // Vector3d(visibility)

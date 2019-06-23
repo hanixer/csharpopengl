@@ -38,12 +38,14 @@ let makeScene (scene : Scene) =
     let spheres =
         Seq.init numSamples (fun i ->
             let sample = Sampling.next2D sampler
-            let cone = Sampling.squareToCone sample (Math.Cos(Math.PI / 3.))
-            let s = Transform.scale (Vector3d(0.01))
-            let t = Transform.translate (Vector3d(cone.X, cone.Z, cone.Y))
+            let lig = scene.AreaLights.[0]
+            let p, _ = Light.sampleWithPoint lig sample Vector3d.Zero
+            let s = Transform.scale (Vector3d(0.1))
+            let t = Transform.translate p
             makeTransformedPrimitive sphere (Transform.compose t s))
 
     let bvh = makeBVH (Seq.append [scene.Primitive] spheres)
+    // let bvh = makeBVH (Seq.append [] spheres)
     { scene with Primitive = bvh }
 
 type Window1(width, height) =
@@ -54,7 +56,7 @@ type Window1(width, height) =
 
     member this.Update() =
         let scene, integrator = loadSceneAndIntegratorFromFile file
-        let scene = makeScene scene
+        // let scene = makeScene scene
         let zbuffer = Array2D.create scene.Camera.Height scene.Camera.Width 0.0
         bitmap <- new Drawing.Bitmap(scene.Camera.Width, scene.Camera.Height)
         async { render bitmap scene integrator } |> measure

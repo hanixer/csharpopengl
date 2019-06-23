@@ -57,9 +57,12 @@ type V3 = Vector3d
 
 let localOrthoNormalBasis (a : V3) (u : V3, v : V3, w : V3) =
     a.X * u + a.Y * v + a.Z * w
-let colorToVector (color : Drawing.Color) =
-    Vector3d
-        (float color.R / 255.0, float color.G / 255.0, float color.B / 255.0)
+
+let sphericalDirection sinTheta (cosTheta : float) phi (u : V3, v : V3, w : V3) =
+    let x = sinTheta * Math.Cos(phi) * u
+    let y = sinTheta * Math.Sin(phi) * v
+    let z = cosTheta * w
+    x + y + z
 
 let loadTexture (bitmap : System.Drawing.Bitmap) =
     let id = GL.GenTexture()

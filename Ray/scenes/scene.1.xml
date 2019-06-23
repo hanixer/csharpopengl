@@ -6,19 +6,13 @@
 
     <!-- Objects -->
     <object type="sphere" name="sphere2" material="wall">
-      <!-- <translate x="0" y="1" z="1" /> -->
     </object>
 
-    <!-- <object type="plane" name="WallBottom" material="wall">
-      <side value="10" />
+    <object type="plane" material="wall">
+      <side value="10." />
       <rotate x="1" angle="-90" />
-    </object> -->
-
-    <!-- <object type="triangle" name="triangle1" material="wall">
-      <p0 x="-1" y="1" z="0"/>
-      <p1 x="-1" y="-1" z="0"/>
-      <p2 x="1" y="0" z="0"/>
-    </object> -->
+      <translate y="-2" />
+    </object>
 
     <!-- Materials -->
     <material type="blinn" name="wall">
@@ -28,13 +22,11 @@
 
     <!-- Lights -->
     <light2 type="area" name="areaLight1">
+      <radiance value="20" />
       <rotate angle="90" x="1" />
-      <translate y="50" z="-5" />
-      <!-- <object type="disk"> -->
-      <!-- <radius value="5" /> -->
-      <!-- </object> -->
+      <translate y="50" />
       <object type="plane">
-        <side value="50" />
+        <side value="10" />
       </object>
     </light2>
   </scene>
@@ -44,7 +36,7 @@
     <position x="20" y="20" z="20"/>
     <target x="0" y="0" z="0"/>
     <up x="0" y="1" z="0"/>
-    <fov value="5"/>
+    <fov value="30"/>
     <width value="400"/>
     <height value="400"/>
   </camera>

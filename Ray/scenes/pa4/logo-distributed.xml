@@ -2,7 +2,7 @@
   <integrator type="whitted" />
 
   <scene>
-    <samples value="1" />
+    <samples value="20" />
 
     <!-- Objects -->
     <!--
@@ -47,7 +47,7 @@
     <position x="2.668" y="1.078" z="6.668"/>
     <target x="-0.841" y="0.85" z="-0.051" />
     <up x="0" y="1" z="0"/>
-    <fov value="70"/>
+    <fov value="30"/>
     <width value="768"/>
     <height value="384"/>
   </camera>

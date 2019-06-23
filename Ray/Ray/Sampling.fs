@@ -76,6 +76,16 @@ let squareToTentPdf (p : Vector2d) =
     let prob (a : float) = 1. - Math.Abs(a)
     prob p.X * prob p.Y
 
+let squareToUnitSphere (sample : Vector2d) =
+    let r1 = sample.X
+    let r2 = sample.Y
+    let phi = 2.0 * Math.PI * r1
+    let theta = Math.Acos(2.0 * r2 - 1.0)
+    let x  = Math.Sin theta * Math.Cos phi
+    let y = Math.Sin theta * Math.Sin phi
+    let z = Math.Cos theta
+    Vector3d(x, z, y)
+
 let squareToCosineHemisphere (sample : Vector2d) =
     let r1 = sample.X
     let r2 = sample.Y
@@ -100,3 +110,6 @@ let squareToCone (sample : Vector2d) cosThetaMax =
     let y = sinTheta * Math.Sin phi
     let z = cosTheta
     Vector3d(x, y, z)
+
+let squareToConePdf cosThetaMax =
+    1. / (2. * Math.PI * (1. - cosThetaMax))

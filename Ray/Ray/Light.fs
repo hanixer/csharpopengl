@@ -71,12 +71,21 @@ let emitted (light : AreaLight2) =
 
 // Returns a point, a normal
 let sample areaLight (sample : Vector2d) =
-    match Object.sample areaLight.Object sample with
-    | Some(p, n) ->
-        let p = Transform.transformPoint areaLight.ObjToWorld p
-        let n = Transform.transformNormal areaLight.ObjToWorld n
-        (p, n)
-    | _-> (Vector3d.Zero, Vector3d.UnitZ)
+    let p, n = Object.sample areaLight.Object sample
+    let p = Transform.transformPoint areaLight.ObjToWorld p
+    let n = Transform.transformNormal areaLight.ObjToWorld n
+    (p, n)
+
+let sampleWithPoint areaLight (sample : Vector2d) pRef =
+    let pRefObj = Transform.transformPointInv areaLight.ObjToWorld pRef
+    let p, n = Object.sampleWithPoint areaLight.Object sample pRefObj
+    let p = Transform.transformPoint areaLight.ObjToWorld p
+    let n = Transform.transformNormal areaLight.ObjToWorld n
+    (p, n)
+
+let sampleWithPointPdf areaLight pRef =
+    let pRefObj = Transform.transformPointInv areaLight.ObjToWorld pRef
+    Object.sampleWithPointPdf areaLight.Object pRefObj
 
 let area areaLight =
     Object.getAreaOfObject areaLight.Object

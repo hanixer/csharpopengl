@@ -223,31 +223,6 @@ let rec intersect ray object =
     | TriangleObj data ->
         intersectTriangleObj ray data
 
-let samplePointRectangle (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) (sample : Vector2d) =
-    let r0, r1 = sample.X, sample.Y
-    let d1 = p1 - p0
-    let d2 = p2 - p0
-    let width = d1.Length
-    let height = d2.Length
-    let v1 = r0 * d1
-    let v2 = r1 * d2
-    let norm = Vector3d.Cross(d1, d2)
-    Some(p0 + v1 + v2, norm.Normalized())
-
-let sample object (sample : Vector2d) =
-    match object with
-    | Disk(radius) ->
-        let norm = Vector3d(0.0, 0.0, 1.0)
-        let p = squareToCircle sample * radius
-        Some(Vector3d(p.X, p.Y, 0.), norm)
-    | Sphere ->
-        let point = randomInHemisphere2()
-        let norm = point.Normalized()
-        Some(randomInHemisphere2(), norm)
-    | Rectangle(p0, p1, p2) ->
-        samplePointRectangle p0 p1 p2 sample
-    | _ -> None
-
 let getAreaOfObject object =
     match object with
     | Disk(radius) -> 2.0 * Math.PI * radius * radius
@@ -257,6 +232,76 @@ let getAreaOfObject object =
         let d2 = p2 - p0
         d1.Length * d2.Length
     | _ -> 0.0
+
+let samplePointRectangle (p0 : Vector3d) (p1 : Vector3d) (p2 : Vector3d) (sample : Vector2d) =
+    let r0, r1 = sample.X, sample.Y
+    let d1 = p1 - p0
+    let d2 = p2 - p0
+    let v1 = r0 * d1
+    let v2 = r1 * d2
+    let norm = Vector3d.Cross(d1, d2)
+    p0 + v1 + v2, norm.Normalized()
+
+let sampleSphere radius (sample : Vector2d) =
+    let point = squareToUnitSphere sample
+    let norm = point.Normalized()
+    point, norm
+
+let sample object (sample : Vector2d) =
+    match object with
+    | Disk(radius) ->
+        let norm = Vector3d(0.0, 0.0, 1.0)
+        let p = squareToCircle sample * radius
+        Vector3d(p.X, p.Y, 0.), norm
+    | Sphere -> sampleSphere 1. sample
+    | Rectangle(p0, p1, p2) -> samplePointRectangle p0 p1 p2 sample
+    | _ -> failwithf "not implemented for %A" object
+
+let samplePdf object =
+    1. / getAreaOfObject object
+
+let sampleSphereWithPoint radius (sample : Vector2d) (pRef : Vector3d) =
+    let dc = pRef.Length // distance from point to sphere center
+    if dc * dc <= radius * radius then
+        let p, n = sampleSphere radius sample
+        p * radius, n
+    else
+        let sinThetaMax = radius / dc
+        let cosThetaMax = Math.Sqrt(1. - sinThetaMax * sinThetaMax)
+        let cosTheta = 1. - sample.[0] + sample.[0] * cosThetaMax
+        let sinTheta = Math.Sqrt(1. - cosTheta * cosTheta)
+        let phi = 2. * Math.PI * sample.[1]
+        let ds = dc * cosTheta - Math.Sqrt(Math.Max(0., radius * radius - dc * sinTheta * dc * sinTheta))
+        let sinAlpha = sinTheta * ds / radius
+        let cosAlpha = Math.Sqrt(1. - sinAlpha * sinAlpha)
+        // let cosAlpha = (dc * dc + radius * radius - ds * ds) / (2. * dc * radius)
+        // let sinAlpha = Math.Sqrt(1. - cosAlpha * cosAlpha)
+        let u, v, w = buildOrthoNormalBasis -pRef
+        let dir = sphericalDirection sinAlpha cosAlpha phi (-u, -v, -w)
+        // let dir = Vector3d(cosAlpha * Math.Sin(phi), sinAlpha * Math.Sin(phi), Math.Cos(phi))
+        let tmp = radius * radius - dc * sinTheta * dc * sinTheta
+        // printfn "dc = %A tmp = %A sinTheta = %A" dc tmp sinTheta
+        dir * radius, dir
+
+let sampleSphereWithPointPdf object radius (pRef : Vector3d) =
+    let dc = pRef.Length // distance from point to sphere center
+    if dc * dc <= radius * radius then
+        1. / getAreaOfObject Sphere
+    else
+        let sinThetaMax = radius / dc
+        let cosThetaMax = Math.Sqrt(1. - sinThetaMax * sinThetaMax)
+        printfn "%A" cosThetaMax
+        squareToConePdf cosThetaMax
+
+let sampleWithPoint object (sample2D : Vector2d) (pRef : Vector3d) =
+    match object with
+    | Sphere -> sampleSphereWithPoint 1. sample2D pRef
+    | _ -> sample object sample2D
+
+let sampleWithPointPdf object (pRef : Vector3d) =
+    match object with
+    | Sphere -> sampleSphereWithPointPdf object 1. pRef
+    | _ -> samplePdf object
 
 let worldBounds object =
     match object with
