@@ -2,11 +2,10 @@
   <integrator type="whitted" />
 
   <scene>
-    <samples value="1" />
+    <samples value="100" />
 
     <!-- Objects -->
     <object type="sphere" name="sphere2" material="wall">
-      <radius value="0.2" />
     </object>
 
     <object type="plane" material="wall">
@@ -22,12 +21,20 @@
     </material>
 
     <!-- Lights -->
-    <light2 type="area" name="areaLight1">
-      <radiance value="20" />
+    <light2 type="area">
+      <radiance value="0" />
       <rotate angle="90" x="1" />
       <translate y="50" />
       <object type="plane">
         <side value="10" />
+        <radius value="10" />
+      </object>
+    </light2>
+    <light2 type="area">
+      <radiance value="100" />
+      <!-- <rotate angle="90" x="1" /> -->
+      <translate x="2" y="5" />
+      <object type="sphere">
       </object>
     </light2>
   </scene>

@@ -38,25 +38,29 @@ let whitted (scene : Scene.Scene) ray =
         // let lightPdf = 0.05
         let emitted = light.Radiance
         let wi = lightPoint - hit.Point
-        let distanceSq = wi.LengthSquared
-        wi.Normalize()
-        let cosHit = Math.Max(0., Vector3d.Dot(hit.Normal, wi))
-        let cosLight = Math.Max(0., Vector3d.Dot(lightNorm, -wi))
-        let visibility = if isVisible scene hit.Point lightPoint wi lightNorm then 1. else 0.
-        let geoTerm = visibility * cosHit * cosLight / distanceSq
-        let material = Node.getMaterial hit.Prim.Value
-        let bsdf = Material.computeBsdf material
-        let attenuation = Material.evaluate bsdf -ray.Direction wi
-        let reflected = attenuation * geoTerm * emitted / lightPdf
-        let res = direct + reflected
-        assert (res.X >= 0.)
-        res
-        // (wi + Vector3d.One) * 0.5
-        // (hit.Normal + Vector3d.One) * 0.5
-        // (lightNorm + Vector3d.One) * 0.5
-        // (Vector3d(cosHit) + Vector3d.One) * 0.5
-        // (Vector3d(geoTerm) + Vector3d.One) * 0.5
-        // Vector3d(visibility)
+        if wi = Vector3d.Zero then
+            direct
+        else
+            let distanceSq = wi.LengthSquared
+            wi.Normalize()
+            let cosHit = Math.Max(0., Vector3d.Dot(hit.Normal, wi))
+            let cosLight = Math.Max(0., Vector3d.Dot(lightNorm, -wi))
+            let visibility = if isVisible scene hit.Point lightPoint wi lightNorm then 1. else 0.
+            let geoTerm = visibility * cosHit * cosLight / distanceSq
+            let material = Node.getMaterial hit.Prim.Value
+            let bsdf = Material.computeBsdf material
+            let attenuation = Material.evaluate bsdf -ray.Direction wi
+            let reflected = attenuation * geoTerm * emitted / lightPdf
+            let res = direct + reflected
+            // printfn "%A" lightPdf
+            assert (res.X >= 0.)
+            res
+            // (wi + Vector3d.One) * 0.5
+            // (hit.Normal + Vector3d.One) * 0.5
+            // (lightNorm + Vector3d.One) * 0.5
+            // (Vector3d(cosHit) + Vector3d.One) * 0.5
+            // (Vector3d(geoTerm) + Vector3d.One) * 0.5
+            // Vector3d(visibility)
     | _ -> Vector3d.Zero
 
 // Li = (F/4pi^2) * max(0, cos(theta)) / |x - p| ^ 2 * visibility

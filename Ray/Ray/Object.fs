@@ -280,7 +280,6 @@ let sampleSphereWithPoint radius (sample : Vector2d) (pRef : Vector3d) =
         let dir = sphericalDirection sinAlpha cosAlpha phi (-u, -v, -w)
         // let dir = Vector3d(cosAlpha * Math.Sin(phi), sinAlpha * Math.Sin(phi), Math.Cos(phi))
         let tmp = radius * radius - dc * sinTheta * dc * sinTheta
-        // printfn "dc = %A tmp = %A sinTheta = %A" dc tmp sinTheta
         dir * radius, dir
 
 let sampleSphereWithPointPdf object radius (pRef : Vector3d) =
@@ -290,7 +289,6 @@ let sampleSphereWithPointPdf object radius (pRef : Vector3d) =
     else
         let sinThetaMax = radius / dc
         let cosThetaMax = Math.Sqrt(1. - sinThetaMax * sinThetaMax)
-        printfn "%A" cosThetaMax
         squareToConePdf cosThetaMax
 
 let sampleWithPoint object (sample2D : Vector2d) (pRef : Vector3d) =
@@ -300,7 +298,7 @@ let sampleWithPoint object (sample2D : Vector2d) (pRef : Vector3d) =
 
 let sampleWithPointPdf object (pRef : Vector3d) =
     match object with
-    | Sphere(radius) -> sampleSphereWithPointPdf object radius pRef
+    // | Sphere(radius) -> sampleSphereWithPointPdf object radius pRef
     | _ -> samplePdf object
 
 let worldBounds object =
