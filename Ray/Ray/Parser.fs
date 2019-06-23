@@ -187,7 +187,8 @@ let getObjectFromType (xml : XmlElement) =
         match typeAttr.InnerText with
         | "sphere" ->
             printf " - Sphere"
-            Some Object.Sphere
+            let radius = select xml "./radius" (fun elem -> readFloating elem "value" 1.) 1.
+            Some(Object.Sphere(radius))
         | "plane" ->
             printf " - Plane"
             let side = select xml "./side" (fun elem -> readFloating elem "value" 1.) 1.
@@ -249,7 +250,7 @@ let loadLight2 primitives (xml : XmlNode) =
         let object =
             match trySelect xml "./object" getObjectFromType with
             | Some(Some(o)) -> o
-            | _ -> Sphere
+            | _ -> Sphere(1.)
         let transform = loadTransform xml 0
         let radiance = readColor (xml.SelectSingleNode "./radiance") Vector3d.One
         let light =

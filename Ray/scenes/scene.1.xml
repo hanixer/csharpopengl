@@ -6,6 +6,7 @@
 
     <!-- Objects -->
     <object type="sphere" name="sphere2" material="wall">
+      <radius value="0.2" />
     </object>
 
     <object type="plane" material="wall">

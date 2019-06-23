@@ -20,7 +20,7 @@ let file = @"scenes\scene.1.xml"
 
 let makeSphere m x y z =
     let off = Vector3d(float x,float y,float z)
-    makeTransformedPrimitive (makeGeometricPrimitive Object.Sphere m) (Transform.translate off)
+    makeTransformedPrimitive (makeGeometricPrimitive (Object.Sphere(1.)) m) (Transform.translate off)
 
 let makeSpheres m =
     makeSphere m 1 1 1 ::
@@ -34,7 +34,7 @@ let makeScene (scene : Scene) =
     let mname = m.Key
     let numSamples = 10000
     let sampler = Sampling.makeSampler 1
-    let sphere = makeGeometricPrimitive Object.Sphere (Blinn {Material.defaultBlinn with DiffuseColor = Vector3d.UnitX * 0.3})
+    let sphere = makeGeometricPrimitive (Object.Sphere(1.)) (Blinn {Material.defaultBlinn with DiffuseColor = Vector3d.UnitX * 0.3})
     let spheres =
         Seq.init numSamples (fun i ->
             let sample = Sampling.next2D sampler

@@ -175,11 +175,11 @@ let rec intersect ray object =
         intersectTriangle ray a b c
     | TriangleObjPart(face, data) ->
         intersectTriangleObjPart ray face data
-    | Sphere ->
+    | Sphere(radius) ->
         let offset = ray.Origin
         let a = Vector3d.Dot(ray.Direction, ray.Direction)
         let b = 2.0 * Vector3d.Dot(ray.Direction, offset)
-        let c = Vector3d.Dot(offset, offset) - 1.0
+        let c = Vector3d.Dot(offset, offset) - radius * radius
         match quadratic a b c with
         | Some(t0, _) when t0 > ray.TMin ->
             computeHit t0
@@ -226,7 +226,7 @@ let rec intersect ray object =
 let getAreaOfObject object =
     match object with
     | Disk(radius) -> 2.0 * Math.PI * radius * radius
-    | Sphere -> 4.0 * Math.PI
+    | Sphere(radius) -> 4.0 * Math.PI * radius * radius
     | Rectangle(p0, p1, p2) ->
         let d1 = p1 - p0
         let d2 = p2 - p0
@@ -253,7 +253,7 @@ let sample object (sample : Vector2d) =
         let norm = Vector3d(0.0, 0.0, 1.0)
         let p = squareToCircle sample * radius
         Vector3d(p.X, p.Y, 0.), norm
-    | Sphere -> sampleSphere 1. sample
+    | Sphere(radius) -> sampleSphere radius sample
     | Rectangle(p0, p1, p2) -> samplePointRectangle p0 p1 p2 sample
     | _ -> failwithf "not implemented for %A" object
 
@@ -286,7 +286,7 @@ let sampleSphereWithPoint radius (sample : Vector2d) (pRef : Vector3d) =
 let sampleSphereWithPointPdf object radius (pRef : Vector3d) =
     let dc = pRef.Length // distance from point to sphere center
     if dc * dc <= radius * radius then
-        1. / getAreaOfObject Sphere
+        1. / getAreaOfObject object
     else
         let sinThetaMax = radius / dc
         let cosThetaMax = Math.Sqrt(1. - sinThetaMax * sinThetaMax)
@@ -295,12 +295,12 @@ let sampleSphereWithPointPdf object radius (pRef : Vector3d) =
 
 let sampleWithPoint object (sample2D : Vector2d) (pRef : Vector3d) =
     match object with
-    | Sphere -> sampleSphereWithPoint 1. sample2D pRef
+    | Sphere(radius) -> sampleSphereWithPoint radius sample2D pRef
     | _ -> sample object sample2D
 
 let sampleWithPointPdf object (pRef : Vector3d) =
     match object with
-    | Sphere -> sampleSphereWithPointPdf object 1. pRef
+    | Sphere(radius) -> sampleSphereWithPointPdf object radius pRef
     | _ -> samplePdf object
 
 let worldBounds object =
@@ -318,6 +318,8 @@ let worldBounds object =
         Bounds.unionManyP [ p0; p1; p2 ]
     | Disk(radius) ->
         Bounds.unionManyP [ Vector3d(-radius, -radius, 0.); Vector3d(radius, radius, 0.) ]
+    | Sphere(radius) ->
+        Bounds.unionManyP [ Vector3d(-radius, -radius, -radius); Vector3d(radius, radius, radius) ]
     | _ ->
         Bounds.makeBounds (Vector3d.One * -1.) Vector3d.One
 
