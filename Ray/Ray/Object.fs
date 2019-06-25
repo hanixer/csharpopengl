@@ -288,8 +288,8 @@ let sampleSphereWithPointPdf object radius (pRef : Vector3d) =
         1. / getAreaOfObject object
     else
         let sinThetaMax = radius / dc
-        let cosThetaMax = Math.Sqrt(1. - sinThetaMax * sinThetaMax)
-        squareToConePdf cosThetaMax
+        let cosThetaMax = Math.Sqrt(1. - sinThetaMax * sinThetaMax)        
+        squareToConePdf cosThetaMax / pRef.LengthSquared
 
 let sampleWithPoint object (sample2D : Vector2d) (pRef : Vector3d) =
     match object with
@@ -298,7 +298,7 @@ let sampleWithPoint object (sample2D : Vector2d) (pRef : Vector3d) =
 
 let sampleWithPointPdf object (pRef : Vector3d) =
     match object with
-    // | Sphere(radius) -> sampleSphereWithPointPdf object radius pRef
+    | Sphere(radius) -> sampleSphereWithPointPdf object radius pRef
     | _ -> samplePdf object
 
 let worldBounds object =

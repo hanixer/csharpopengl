@@ -2,7 +2,7 @@
   <integrator type="whitted" />
 
   <scene>
-    <samples value="20" />
+    <samples value="512" />
 
     <!-- Objects -->
     <!--
@@ -21,6 +21,11 @@
     </object>
     <object type="obj" name="meshes/sphere2.obj" material="white">
     </object> -->
+      <object type="obj" name="meshes/floor.obj" material="logo">
+        <scale value="6" />
+        <!-- <side value="20" /> -->
+        <!-- <translate z="-20" /> -->
+      </object>
 
     <!-- Materials -->
     <material type="blinn" name="logo">
