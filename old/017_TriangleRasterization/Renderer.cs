@@ -41,9 +41,7 @@ namespace _014_DrawTriangle
     {
         static void Swap(ref int a, ref int b)
         {
-            int temp = a;
-            a = b;
-            b = temp;
+            (b, a) = (a, b);
         }
 
         public static void Line(int x0, int y0, int x1, int y1, Color color, Bitmap bitmap)
